@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>What's Around You?</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #fde2f3 0%, #e0d9ff 50%, #f3e8ff 100%);
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      background-size: cover;
+      position: relative;
+      min-height: 100vh;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+    .wave1 {
+      position: fixed;
+      width: 200%;
+      height: 100%;
+      left: 50%;
+      top: 0;
+      transform: translateX(-50%);
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23f8bbd0" fill-opacity="1" d="M0,32L40,37.3C80,43,160,53,240,80C320,107,400,149,480,165.3C560,181,640,171,720,165.3C800,160,880,160,960,170.7C1040,181,1120,203,1200,197.3C1280,192,1360,160,1400,144L1440,128L1440,0L1400,0C1360,0,1280,0,1200,0C1120,0,1040,0,960,0C880,0,800,0,720,0C640,0,560,0,480,0C400,0,320,0,240,0C160,0,80,0,40,0L0,0Z"></path></svg>') no-repeat center center;
+      background-size: cover;
+      opacity: 0.4;
+      z-index: 1;
+      animation: waveMove 12s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes waveMove {
+      0% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-48%) translateY(10px); }
+      100% { transform: translateX(-50%) translateY(0); }
+    }
+    .content {
+      position: relative;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center pt-6 pb-28">
+  <div class="wave1"></div>
+  <div class="content max-w-md w-full px-6 text-center">
+    <div class="flex justify-between items-center mb-2">
+      <a href="apt-feed.html" class="text-purple-600 hover:text-purple-800 text-lg font-bold">← Back</a>
+    </div>
+    <h1 class="text-2xl font-semibold text-gray-900 mb-2">
+      What's Around You?
+    </h1>
+    <p class="text-gray-500 mb-6">
+      Discover places and services near your current location
+    </p>
+    <div class="mb-4 flex gap-2 justify-center">
+      <input id="location-input" type="text" placeholder="Enter address or city..." class="w-2/3 border border-gray-300 px-4 py-2 rounded-full focus:outline-none focus:border-purple-700" />
+      <button id="search-btn" class="bg-purple-800 hover:bg-purple-900 text-white px-4 py-2 rounded-full font-semibold">Search</button>
+      <button id="geo-btn" class="bg-purple-200 hover:bg-purple-300 text-purple-900 px-4 py-2 rounded-full font-semibold" title="Use my location">📍</button>
+    </div>
+    <div id="loading" class="hidden text-purple-700 font-semibold mt-6">Loading nearby places...</div>
+    <div id="places-list" class="mt-6 text-left"></div>
+  </div>
+  <script>
+    async function fetchPlaces(lat, lon) {
+      document.getElementById('loading').classList.remove('hidden');
+      document.getElementById('places-list').innerHTML = '';
+      // Use OpenStreetMap Nominatim to get nearby amenities
+      const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      // Use Overpass API to get nearby amenities
+      const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:1000,${lat},${lon})[amenity];out;`;
+      const overRes = await fetch(overpassUrl);
+      const overData = await overRes.json();
+      const places = overData.elements.map(e => ({
+        name: e.tags.name || e.tags.amenity,
+        type: e.tags.amenity,
+        lat: e.lat,
+        lon: e.lon
+      }));
+      renderPlaces(places, data.display_name);
+      document.getElementById('loading').classList.add('hidden');
+    }
+
+    function renderPlaces(places, address) {
+      const list = document.getElementById('places-list');
+      if (!places.length) {
+        list.innerHTML = `<div class="text-center text-gray-500">😕 No places found nearby. Try another location or search again.</div>`;
+        return;
+      }
+      list.innerHTML = `<div class="mb-2 text-purple-800 font-bold">Area: ${address}</div>` +
+        places.slice(0, 12).map(p => `
+          <div class="bg-white rounded-xl shadow p-3 mb-2 flex flex-col">
+            <span class="font-semibold text-purple-900">${p.name || p.type}</span>
+            <span class="text-xs text-gray-500">${p.type}</span>
+            <a href="https://www.openstreetmap.org/?mlat=${p.lat}&mlon=${p.lon}" target="_blank" class="text-xs text-purple-600 hover:underline">View on map</a>
+          </div>
+        `).join('');
+    }
+
+    document.getElementById('search-btn').onclick = async function() {
+      const query = document.getElementById('location-input').value.trim();
+      if (!query) return;
+      // Geocode the address
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.length) {
+        fetchPlaces(data[0].lat, data[0].lon);
+      } else {
+        document.getElementById('places-list').innerHTML = '<div class="text-center text-gray-500">Location not found.</div>';
+      }
+    };
+
+    document.getElementById('geo-btn').onclick = function() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+          fetchPlaces(pos.coords.latitude, pos.coords.longitude);
+        }, () => {
+          alert('Could not get your location.');
+        });
+      } else {
+        alert('Geolocation is not supported by your browser.');
+      }
+    };
+  </script>
+</body>
+</html> 

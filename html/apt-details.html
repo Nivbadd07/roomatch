@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Apartment Details</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      min-height: 100vh;
+      background: linear-gradient(to bottom, #f7d5ea 0%, #e3dafb 60%, #e3dafb 100%);
+      overflow-y: auto;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      background: linear-gradient(135deg, #f7d5ea 0%, #e3dafb 100%);
+      clip-path: ellipse(70% 100% at 50% 0%);
+      z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      background: linear-gradient(135deg, #e3dafb 0%, #f7d5ea 100%);
+      clip-path: ellipse(70% 100% at 50% 100%);
+      z-index: 0;
+    }
+    .apt-card {
+      position: relative;
+      z-index: 10;
+      max-width: 28rem;
+      width: 100%;
+      background: white;
+      border-radius: 1.5rem;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+      border: 1px solid #e5e7eb;
+      padding: 2.5rem 2rem;
+      margin: 2rem 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .close-btn {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.25rem;
+      background: white;
+      border-radius: 9999px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 0.5rem 0.7rem;
+      z-index: 20;
+      cursor: pointer;
+      border: none;
+      transition: background 0.2s;
+    }
+    .close-btn:hover {
+      background: #f3e8ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="apt-card">
+    <a href="apt-feed.html" class="close-btn" title="Back to feed">
+      <i class="fas fa-times text-gray-700 text-xl"></i>
+    </a>
+    <!-- Apartment Details Content Start -->
+    <div class="w-full">
+      <!-- תמונה ראשית -->
+      <div class="header-img rounded-2xl overflow-hidden mb-4 relative">
+        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c" alt="Apartment" class="w-full h-48 object-cover rounded-2xl" />
+        <div class="top-icons flex justify-end items-center absolute top-4 left-4 right-4 pointer-events-none">
+          <i class="fas fa-heart text-pink-400 pointer-events-auto"></i>
+        </div>
+        <div class="price-bubble absolute bottom-4 left-4 bg-purple-800 text-white px-4 py-2 rounded-full font-bold shadow">$1,200 / mo</div>
+      </div>
+
+      <div class="content" id="aptContent">
+        <!-- Dynamic apartment details will be rendered here by JS -->
+      </div>
+
+      <!-- כפתור מתוזמן -->
+      <button id="scheduleBtn" class="chat-btn w-full bg-purple-800 hover:bg-purple-900 text-white py-3 rounded-xl text-lg font-semibold shadow mb-2">SCHEDULE WITH</button>
+      
+      <!-- Schedule Modal -->
+      <div id="scheduleModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl p-6 shadow-lg w-80 relative">
+          <button id="closeModal" class="absolute top-2 right-2 text-gray-400 hover:text-purple-700 text-xl">&times;</button>
+          <div class="font-bold text-lg mb-2">Schedule a meeting</div>
+          <label class="block mb-2 text-sm font-medium">Pick a date and time:</label>
+          <input id="meetingDateTime" type="datetime-local" class="w-full border border-purple-200 rounded-lg px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-purple-300" />
+          <button id="addToGoogleCal" class="w-full bg-purple-800 hover:bg-purple-900 text-white py-2 rounded-lg font-semibold">Add to Google Calendar</button>
+        </div>
+      </div>
+    </div>
+    <!-- Apartment Details Content End -->
+  </div>
+  <script>
+    // Example: fetch apartment data (replace with real API call in the future)
+    // In a real app, you would get the apartment ID from the URL (e.g., ?id=123)
+    // and fetch the data from your backend.
+    const apartment = {
+      title: 'Hamacabi 7 Tel Aviv',
+      price: '$1,200 / mo',
+      mainImg: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c',
+      features: [
+        { icon: 'fa-ruler-combined', label: '70㎡' },
+        { icon: 'fa-bath', label: '2 baths' },
+        { icon: 'fa-bed', label: '2 beds' }
+      ],
+      description: "Feel at home wherever you choose to live with Blueground. You'll love the sophisticated Midtown furnished one-bedroom apartment with its modern decor, fully equipped kitchen, and cheery living room with great balcony views.",
+      amenities: [
+        { icon: 'fa-wifi', label: 'WiFi' },
+        { icon: 'fa-snowflake', label: 'AC' },
+        { icon: 'fa-tv', label: 'TV' },
+        { icon: 'fa-dog', label: 'Pets' }
+      ],
+      photos: [
+        'https://images.unsplash.com/photo-1588854337221-c0c0a7a1f9ce',
+        'https://images.unsplash.com/photo-1600585154206-9324c1b168cd',
+        'https://images.unsplash.com/photo-1598928506311-c55ded93c1f3'
+      ],
+      roommate: {
+        name: 'David',
+        age: 25,
+        img: 'https://randomuser.me/api/portraits/men/75.jpg',
+        role: 'Software developer at Blueground',
+        about: 'Loves music, hiking, and good coffee.'
+      }
+    };
+
+    function renderApartmentDetails(apt) {
+      document.getElementById('aptContent').innerHTML = `
+        <div class="location-title text-xl font-bold mb-2">${apt.title}</div>
+        <div class="features flex gap-6 text-gray-700 mb-4">
+          ${apt.features.map(f => `<div class='flex items-center gap-1'><i class='fas ${f.icon}'></i> ${f.label}</div>`).join('')}
+        </div>
+        <div class="section-title font-bold mb-1">Room description</div>
+        <div class="description text-sm mb-4">${apt.description}</div>
+        <div class="section-title font-bold mb-1">Amenities</div>
+        <div class="see-all text-purple-600 text-right text-xs mb-1 cursor-pointer">See all</div>
+        <div class="amenities flex gap-8 justify-start mb-6">
+          ${apt.amenities.map(a => `<div class='flex flex-col items-center text-purple-800'><i class='fas ${a.icon} fa-2x mb-1'></i><span class='text-xs'>${a.label}</span></div>`).join('')}
+        </div>
+        <div class="section-title font-bold mb-1">More photos</div>
+        <div class="see-all text-purple-600 text-right text-xs mb-1 cursor-pointer">See all</div>
+        <div class="photos flex gap-3 mb-6">
+          ${apt.photos.map(p => `<img src='${p}' alt='photo' class='w-20 h-20 rounded-lg object-cover'/>`).join('')}
+        </div>
+        <div class="section-title font-bold mb-1">About roommate</div>
+        <div class="bg-purple-50 border border-purple-200 rounded-xl flex items-center gap-4 p-4 mb-4">
+          <img src="${apt.roommate.img}" alt="${apt.roommate.name}" class="w-14 h-14 rounded-full object-cover border-2 border-purple-200" />
+          <div class="roommate-info">
+            <div class="name font-bold text-purple-900 text-lg">${apt.roommate.name}, ${apt.roommate.age}</div>
+            <div class="role text-xs text-gray-600">${apt.roommate.role}</div>
+          </div>
+        </div>
+        <div class="description text-sm mb-6">${apt.roommate.about}</div>
+      `;
+    }
+
+    // On page load, render the details (replace with real fetch in the future)
+    renderApartmentDetails(apartment);
+
+    // --- Schedule Modal Logic ---
+    const scheduleBtn = document.getElementById('scheduleBtn');
+    const scheduleModal = document.getElementById('scheduleModal');
+    const closeModal = document.getElementById('closeModal');
+    const addToGoogleCal = document.getElementById('addToGoogleCal');
+    const meetingDateTime = document.getElementById('meetingDateTime');
+
+    scheduleBtn.addEventListener('click', () => {
+      scheduleModal.classList.remove('hidden');
+    });
+    closeModal.addEventListener('click', () => {
+      scheduleModal.classList.add('hidden');
+    });
+    scheduleModal.addEventListener('click', (e) => {
+      if (e.target === scheduleModal) scheduleModal.classList.add('hidden');
+    });
+
+    addToGoogleCal.addEventListener('click', () => {
+      const dt = meetingDateTime.value;
+      if (!dt) {
+        alert('Please select a date and time.');
+        return;
+      }
+      // Format date/time for Google Calendar (YYYYMMDDTHHMMSSZ)
+      const start = new Date(dt);
+      const end = new Date(start.getTime() + 60 * 60 * 1000); // 1 hour meeting
+      function toGCalFormat(date) {
+        return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+      }
+      const startStr = toGCalFormat(start);
+      const endStr = toGCalFormat(end);
+      const title = encodeURIComponent(`Meet with ${apartment.roommate.name} at ${apartment.title}`);
+      const details = encodeURIComponent(`Apartment: ${apartment.title}\nRoommate: ${apartment.roommate.name}, ${apartment.roommate.role}\n${apartment.roommate.about}`);
+      const location = encodeURIComponent(apartment.title);
+      const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startStr}/${endStr}&details=${details}&location=${location}`;
+      window.open(url, '_blank');
+      scheduleModal.classList.add('hidden');
+    });
+  </script>
+</body>
+</html>
