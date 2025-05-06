@@ -1,0 +1,24 @@
+# Ignore ZIPs and build artifacts
+*.zip
+*.log
+*.env
+*.env.local
+
+# macOS / Windows system files
+.DS_Store
+Thumbs.db
+
+# Node.js
+node_modules/
+dist/
+build/
+
+# VS Code / Cursor
+.vscode/
+
+# GCP credentials
+*.json
+.gcloud/
+
+# Git folder inside nested folders
+**/.git/
