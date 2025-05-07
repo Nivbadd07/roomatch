@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ROOMATCH - Looking For</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <style>
     body {
       background: linear-gradient(135deg, #fde2f3 0%, #e0d9ff 50%, #f3e8ff 100%);
@@ -215,6 +216,45 @@
     </a>
     <a href="onboarding.html" class="back-link"><span style="font-size:1.2em;">&#8592;</span> Back</a>
   </div>
+
+  <script>
+    const SUPABASE_URL = 'https://vgkvkmpckneceqfggzes.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZna3ZrbXBja25lY2VxZmdnemVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1NDA0NjAsImV4cCI6MjA2MjExNjQ2MH0.1ZEMsUleNaBrePUuagdZAKL2gYA-9-vM9wrTIW8-tdU';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function setUserTypeAndNavigate(type, url) {
+      const userId = localStorage.getItem('user_id');
+      localStorage.setItem('user_type', type);
+      if (userId) {
+        const { error } = await supabaseClient
+          .from('users')
+          .update({ user_type: type })
+          .eq('id', userId);
+        if (error) {
+          alert('Error updating user type: ' + error.message);
+          return;
+        }
+      }
+      window.location.href = url;
+    }
+
+    window.addEventListener('DOMContentLoaded', function() {
+      const aptBtn = document.querySelector('.modern-btn:not(.roommates)');
+      const roommatesBtn = document.querySelector('.modern-btn.roommates');
+      if (aptBtn) {
+        aptBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          setUserTypeAndNavigate('Looking for Apt', 'apt-pref.html');
+        });
+      }
+      if (roommatesBtn) {
+        roommatesBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          setUserTypeAndNavigate('Looking for Roomate', 'upload-apt.html');
+        });
+      }
+    });
+  </script>
 
 </body>
 
