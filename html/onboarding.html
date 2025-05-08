@@ -325,6 +325,32 @@
       font-weight: bold;
       transform: scale(1.08);
     }
+    .gender-btn {
+      background: #f8f6fc;
+      border: 2px solid #a23bb1;
+      color: #a23bb1;
+      border-radius: 1.5rem;
+      font-size: 1.3rem;
+      font-weight: 600;
+      padding: 1.1rem 2.2rem;
+      margin-bottom: 0.5rem;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px #e0d9ff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+    .gender-btn.selected {
+      background: linear-gradient(90deg, #a23bb1 60%, #fde2f3 100%);
+      color: #fff !important;
+      border-color: #a23bb1;
+      box-shadow: 0 2px 12px #a23bb1;
+      transform: scale(1.06);
+    }
+    .gender-btn i {
+      font-size: 1.5em;
+    }
     @media (max-width: 900px) {
       .onboard-card {
         max-width: 99vw;
@@ -405,6 +431,42 @@
         },
         save: () => {
           localStorage.setItem('user_password', document.getElementById('passwordInput').value.trim());
+        }
+      },
+      {
+        title: "About You",
+        subtitle: "Select your gender and write a short bio",
+        render: () => `
+          <div class='mb-4'>
+            <label class='block mb-2 font-semibold'>Gender</label>
+            <div class='flex gap-6 mb-6'>
+              <button type='button' class='gender-btn' data-gender='male'>
+                <i class='fas fa-mars mr-2'></i> Male
+              </button>
+              <button type='button' class='gender-btn' data-gender='female'>
+                <i class='fas fa-venus mr-2'></i> Female
+              </button>
+              <button type='button' class='gender-btn' data-gender='other'>
+                <i class='fas fa-genderless mr-2'></i> Other
+              </button>
+            </div>
+            <label class='block mb-2 font-semibold'>Bio</label>
+            <textarea id='bioInput' class='onboard-input' placeholder='Tell us about yourself...' maxlength='300' rows='7' style='min-height:120px;font-size:1.2rem;'></textarea>
+          </div>
+        `,
+        validate: () => {
+          const gender = document.querySelector('.gender-btn.selected');
+          const bio = document.getElementById('bioInput').value.trim();
+          if (!gender) return 'Please select your gender!';
+          if (!bio) return 'Please write a short bio!';
+          return null;
+        },
+        save: () => {
+          const genderBtn = document.querySelector('.gender-btn.selected');
+          const gender = genderBtn ? genderBtn.getAttribute('data-gender') : '';
+          const bio = document.getElementById('bioInput').value.trim();
+          localStorage.setItem('user_gender', gender);
+          localStorage.setItem('user_bio', bio);
         }
       },
       {
@@ -557,7 +619,7 @@
           <label for='photo-upload' class='photo-upload-box'>
             <div class='plus-circle'>+</div>
           </label>
-          <div class='photo-preview' id='photo-preview'></div>
+          <img class='photo-preview' id='photo-preview' style='display:none;'/>
         `,
         validate: () => {
           const photoInput = document.getElementById('photo-upload');
@@ -571,8 +633,10 @@
             const reader = new FileReader();
             reader.onload = function(e) {
               const photoPreview = document.getElementById('photo-preview');
-              photoPreview.src = e.target.result;
-              photoPreview.style.display = 'block';
+              if (photoPreview) {
+                photoPreview.src = e.target.result;
+                photoPreview.style.display = 'block';
+              }
               localStorage.setItem('user_photo', e.target.result);
             };
             reader.readAsDataURL(file);
@@ -622,6 +686,8 @@
           const password = localStorage.getItem('user_password');
           const age = localStorage.getItem('user_age');
           const interests = JSON.parse(localStorage.getItem('user_interests') || '[]');
+          const gender = localStorage.getItem('user_gender') || null;
+          const bio = localStorage.getItem('user_bio') || null;
           // Insert into Supabase users
           const { data, error } = await supabaseClient
             .from('users')
@@ -631,7 +697,9 @@
               email: email,
               password_hash: password,
               age: age ? parseInt(age) : null,
-              interests: interests
+              interests: interests,
+              gender: gender,
+              bio: bio
             }]);
           if (error) {
             alert('Error saving to database: ' + error.message);
@@ -704,7 +772,7 @@
       `;
       errorMsg.textContent = '';
       // Special step logic
-      if (currentStep === 3) { // Age
+      if (currentStep === 4) { // Age
         document.querySelectorAll('.age-option').forEach(opt => {
           opt.addEventListener('click', () => {
             document.querySelectorAll('.age-option').forEach(o => o.classList.remove('selected'));
@@ -721,34 +789,28 @@
           }
         }
       }
-      if (currentStep === 4) { // Interests
+      if (currentStep === 5) { // Interests
         document.querySelectorAll('.interest-btn').forEach(btn => {
           btn.addEventListener('click', () => btn.classList.toggle('selected'));
         });
       }
-      if (currentStep === 5) { // Roommate Quiz Yes/No
-        try {
-          const stored = localStorage.getItem('roommate_quiz_yn');
-          if (stored) quizAnswers = JSON.parse(stored);
-        } catch (e) { quizAnswers = {}; }
+      if (currentStep === 6) { // Roommate Quiz Yes/No
+        window.quizAnswers = {};
         document.querySelectorAll('.quiz-yn-btn').forEach(btn => {
+          btn.classList.remove('selected');
           btn.addEventListener('click', () => {
             const q = btn.getAttribute('data-q');
             const a = btn.getAttribute('data-a');
             document.querySelectorAll(`.quiz-yn-btn[data-q='${q}']`).forEach(b => b.classList.remove('selected'));
             btn.classList.add('selected');
-            quizAnswers[q] = a;
+            window.quizAnswers[q] = a;
           });
-          const q = btn.getAttribute('data-q');
-          const a = btn.getAttribute('data-a');
-          if (quizAnswers[q] === a) btn.classList.add('selected');
         });
-        window.quizAnswers = quizAnswers;
       }
-      if (currentStep === 6) {
+      if (currentStep === 7) {
         // Radios work natively
       }
-      if (currentStep === 7) { // Photo Upload
+      if (currentStep === 8) { // Photo Upload
         window.onboardPhotoDataUrl = window.onboardPhotoDataUrl || null;
         const photoInput = document.getElementById('photo-upload');
         const photoPreview = document.getElementById('photo-preview');
@@ -819,6 +881,14 @@
       if (e.key === 'Enter' && document.activeElement.tagName !== 'BUTTON') {
         e.preventDefault();
         nextBtn.click();
+      }
+    });
+
+    // Gender button selection logic
+    document.addEventListener('click', function(e) {
+      if (e.target.closest('.gender-btn')) {
+        document.querySelectorAll('.gender-btn').forEach(btn => btn.classList.remove('selected'));
+        e.target.closest('.gender-btn').classList.add('selected');
       }
     });
 
