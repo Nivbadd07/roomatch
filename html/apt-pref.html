@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Apartment Preferences</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <style>
     body {
       background: linear-gradient(135deg, #fde2f3 0%, #e0d9ff 50%, #f3e8ff 100%);
@@ -304,6 +305,10 @@
   </div>
 
   <script>
+    const SUPABASE_URL = 'https://vgkvkmpckneceqfggzes.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZna3ZrbXBja25lY2VxZmdnemVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1NDA0NjAsImV4cCI6MjA2MjExNjQ2MH0.1ZEMsUleNaBrePUuagdZAKL2gYA-9-vM9wrTIW8-tdU';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     document.querySelectorAll('.feature-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         btn.classList.toggle('selected-feature');
@@ -326,7 +331,7 @@
       this.value = this.value.replace(/[^\d]/g, '');
     });
 
-    document.getElementById('continueBtn').addEventListener('click', function() {
+    document.getElementById('continueBtn').addEventListener('click', async function() {
       // Validate city
       const city = document.querySelector('select[name="city"]').value;
       if (!city) {
@@ -370,33 +375,34 @@
         alert('Please select a date of entry.');
         return;
       }
+      // Remove emojis from features and rooms
+      function stripEmojis(str) {
+        return str.replace(/^[^a-zA-Z0-9]+/, '').trim();
+      }
+      const featuresArray = Array.from(features).map(f => stripEmojis(f.textContent));
+      const numRoomsArray = Array.from(rooms).map(r => stripEmojis(r.textContent));
+      // Save to Supabase
+      const userId = parseInt(localStorage.getItem('user_id'));
+      const { error } = await supabaseClient
+        .from('user_apartment_search_preferences')
+        .insert([{
+          user_id: userId,
+          preferred_city: city,
+          preferred_area: area,
+          preferred_contract_type: contract,
+          preferred_features: featuresArray,
+          preferred_num_rooms: numRoomsArray,
+          preferred_price_min: minPrice ? parseInt(minPrice) : null,
+          preferred_price_max: maxPrice ? parseInt(maxPrice) : null,
+          preferred_date_of_entry: date
+        }]);
+      if (error) {
+        alert('Error saving preferences: ' + error.message);
+        return;
+      }
       // If all valid, show popup and continue
       const popup = document.getElementById('successPopup');
       popup.classList.remove('hidden');
-      // --- Save roommate seeker to localStorage ---
-      // Only if user_apartment is NOT set (i.e., not an apartment uploader)
-      if (!localStorage.getItem('user_apartment')) {
-        const roommateSeeker = {
-          name: localStorage.getItem('user_name'),
-          email: localStorage.getItem('user_email'),
-          age: localStorage.getItem('user_age'),
-          interests: JSON.parse(localStorage.getItem('user_interests') || '[]'),
-          preferences: {
-            city,
-            area,
-            contract,
-            features: Array.from(features).map(f => f.textContent.trim()),
-            rooms: rooms[0].textContent.trim(),
-            minPrice,
-            maxPrice,
-            date
-          }
-        };
-        let roommateSeekers = JSON.parse(localStorage.getItem('roommate_seekers') || '[]');
-        roommateSeekers = roommateSeekers.filter(u => u.email !== roommateSeeker.email);
-        roommateSeekers.push(roommateSeeker);
-        localStorage.setItem('roommate_seekers', JSON.stringify(roommateSeekers));
-      }
       setTimeout(() => {
         popup.classList.add('hidden');
         window.location.href = 'apt-feed.html';
