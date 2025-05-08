@@ -6,6 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ROOMATCH - Log In</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Add Supabase Client Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Initialize Supabase Client
+    const supabaseUrl = 'https://vgkvkmpckneceqfggzes.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZna3ZrbXBja25lY2VxZmdnemVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1NDA0NjAsImV4cCI6MjA2MjExNjQ2MH0.1ZEMsUleNaBrePUuagdZAKL2gYA-9-vM9wrTIW8-tdU';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+  </script>
   <style>
     body {
       background: linear-gradient(135deg, #fde2f3 0%, #e0d9ff 50%, #f3e8ff 100%);
@@ -67,6 +75,13 @@
       position: relative;
       z-index: 10;
     }
+
+    .error-message {
+      color: #dc2626;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+      text-align: left;
+    }
   </style>
 </head>
 
@@ -99,6 +114,9 @@
             class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500" required />
         </div>
 
+        <!-- Error Message -->
+        <div id="errorMessage" class="error-message hidden"></div>
+
         <!-- Submit Button -->
         <button type="submit"
           class="w-full bg-gradient-to-r from-purple-500 via-pink-400 to-purple-700 hover:from-purple-700 hover:to-pink-500 text-white py-3 rounded-xl text-base font-semibold transform transition duration-200 hover:scale-105 hover:shadow-2xl shadow">
@@ -119,16 +137,38 @@
   </div>
 
   <script>
-    document.getElementById('loginForm').addEventListener('submit', function (e) {
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
       e.preventDefault();
+      
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
-      const validEmail = 'user@example.com';
-      const validPassword = 'password123';
-      if (email === validEmail && password === validPassword) {
-        window.location.href = 'apt-feed.html';
-      } else {
-        alert('Invalid email or password.');
+      const errorMessage = document.getElementById('errorMessage');
+
+      try {
+        // Query the users table for the email
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('email', email)
+          .single();
+
+        if (userError) {
+          throw new Error('User not found');
+        }
+
+        // Check if password matches
+        if (userData && userData.password === password) {
+          // Successful login
+          window.location.href = 'apt-feed.html';
+        } else {
+          // Invalid password
+          errorMessage.textContent = 'Invalid email or password';
+          errorMessage.classList.remove('hidden');
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        errorMessage.textContent = 'Invalid email or password';
+        errorMessage.classList.remove('hidden');
       }
     });
   </script>
