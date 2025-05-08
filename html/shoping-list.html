@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grocery Shopping List</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center">
+  <div class="w-full max-w-md bg-white shadow-lg pb-32">
+
+    <!-- Header -->
+    <div class="text-purple-800 p-6 rounded-b-3xl text-center">
+      <h2 class="text-lg font-semibold">Grocery Shopping List</h2>
+    </div>
+
+    <!-- Main Content -->
+    <div class="bg-purple-800 text-white text-center py-8 px-4 rounded-b-3xl">
+      <div class="mb-2">
+        <div class="w-12 h-12 bg-white text-purple-800 mx-auto rounded-full flex items-center justify-center">
+          <i class="fas fa-shopping-cart text-purple-800 text-xl"></i>
+        </div>
+      </div>
+      <p class="text-sm" id="completedCount">List 0/7 Completed</p>
+      <div class="flex justify-center gap-4 mt-4">
+        <button id="delete-checked-btn" class="bg-white text-purple-800 py-2 px-4 rounded-full">Delete Checked</button>
+      </div>
+      <div class="flex justify-center gap-6 text-white text-2xl mt-6">
+        <a href="bills.html"><i class="fas fa-money-bill text-white"></i></a>
+        <a href="todo-list.html"><i class="fas fa-list text-white"></i></a>
+      </div>
+    </div>
+
+    <!-- Shopping List -->
+    <div class="p-4" id="shoppingList">
+      <!-- Items will be added here -->
+    </div>
+
+    <!-- Add Item Button -->
+    <div class="p-4">
+      <button onclick="openModal()" class="w-full bg-purple-800 hover:bg-purple-900 text-white py-2 rounded flex items-center justify-center gap-2">
+        &#10010; Add new Item
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL -->
+  <div id="modal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center hidden z-10">
+    <div class="bg-white rounded-lg shadow-xl w-80 p-6 relative">
+      <button onclick="closeModal()" class="absolute top-2 right-2 text-xl text-gray-500 hover:text-gray-700">&times;</button>
+      <h3 class="text-2xl font-extrabold uppercase tracking-wide mb-4">Add New Item</h3>
+      <label class="block text-sm font-medium mb-1">Item name</label>
+      <input type="text" id="new-item-input" placeholder="–" class="w-full border rounded px-3 py-2 mb-4 outline-none focus:ring-2 focus:ring-purple-400" />
+      <button onclick="saveItem()" class="w-full bg-purple-800 hover:bg-purple-900 text-white py-2 rounded">Save</button>
+    </div>
+  </div>
+
+  <script>
+    const shoppingList = document.getElementById('shoppingList');
+    const counter = document.getElementById('completedCount');
+    const modal = document.getElementById('modal');
+    const input = document.getElementById('new-item-input');
+    const deleteCheckedBtn = document.getElementById('delete-checked-btn');
+
+    // Initial items
+    const initialItems = ['Milk', 'Eggs', 'Butter', 'Cheese', 'Tofu', 'Onions', 'Yoghurt'];
+    initialItems.forEach(name => createItem(name));
+
+    function updateCount() {
+      const checkboxes = shoppingList.querySelectorAll('input[type="checkbox"]');
+      const completed = [...checkboxes].filter(cb => cb.checked).length;
+      counter.textContent = `List ${completed}/${checkboxes.length} Completed`;
+    }
+
+    function createItem(name, checked = false) {
+      const itemDiv = document.createElement('div');
+      itemDiv.className = "bg-gray-100 p-3 rounded-lg flex justify-between items-center mb-2";
+
+      itemDiv.innerHTML = `
+        <div class="flex items-center gap-2">
+          <input type="checkbox" class="w-5 h-5" ${checked ? "checked" : ""}>
+          <label class="${checked ? 'line-through text-purple-800 font-semibold' : ''}">${name}</label>
+        </div>
+      `;
+
+      const checkbox = itemDiv.querySelector('input[type="checkbox"]');
+      const label = itemDiv.querySelector('label');
+      checkbox.addEventListener('change', () => {
+        if (checkbox.checked) {
+          label.classList.add('line-through', 'text-purple-800', 'font-semibold');
+        } else {
+          label.classList.remove('line-through', 'text-purple-800', 'font-semibold');
+        }
+        updateCount();
+      });
+
+      shoppingList.appendChild(itemDiv);
+      updateCount();
+    }
+
+    function deleteCheckedItems() {
+      const checkedItems = shoppingList.querySelectorAll('input[type="checkbox"]:checked');
+      checkedItems.forEach(checkbox => {
+        const itemDiv = checkbox.closest('div.bg-gray-100');
+        itemDiv.style.transition = 'opacity 0.5s ease-out';
+        itemDiv.style.opacity = '0';
+        setTimeout(() => {
+          itemDiv.remove();
+          updateCount();
+        }, 500);
+      });
+    }
+
+    deleteCheckedBtn.addEventListener('click', deleteCheckedItems);
+
+    function openModal() {
+      modal.classList.remove('hidden');
+      input.value = "";
+      setTimeout(() => input.focus(), 100);
+    }
+
+    function closeModal() {
+      modal.classList.add('hidden');
+    }
+
+    function saveItem() {
+      const name = input.value.trim();
+      if (name) {
+        createItem(name);
+        closeModal();
+      } else {
+        input.focus();
+      }
+    }
+  </script>
+</body>
+</html>

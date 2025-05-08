@@ -75,8 +75,8 @@
         <button id="balance-btn" class="bg-white text-purple-800 py-2 px-4 rounded-full">Balances</button>
       </div>
       <div class="flex justify-center gap-6 text-white text-2xl mt-6">
-        <a href="todo-list.html"><i class="fas fa-list text-white"></i></a>
-        <a href="shoping-list.html"><i class="fas fa-shopping-cart text-white"></i></a>
+        <span id="todoListIcon" style="cursor:pointer;"><i class="fas fa-list text-white"></i></span>
+        <span id="shoppingListIcon" style="cursor:pointer;"><i class="fas fa-shopping-cart text-white"></i></span>
       </div>
     </div>
 
@@ -210,6 +210,13 @@
       balances = [];
       renderBalances();
     });
+  
+    document.getElementById('todoListIcon').onclick = function() {
+      window.location.href = 'todo-list.html';
+    };
+    document.getElementById('shoppingListIcon').onclick = function() {
+      window.location.href = 'shoping-list.html';
+    };
   
     renderBalances();
   </script>
