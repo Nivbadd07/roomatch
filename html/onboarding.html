@@ -6,6 +6,7 @@
   <title>ROOMATCH - Onboarding</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <style>
     body {
       min-height: 100vh;
@@ -347,21 +348,35 @@
     </div>
   </div>
   <script>
+    // Initialize Supabase (replace with your real values)
+    const SUPABASE_URL = 'https://vgkvkmpckneceqfggzes.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZna3ZrbXBja25lY2VxZmdnemVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1NDA0NjAsImV4cCI6MjA2MjExNjQ2MH0.1ZEMsUleNaBrePUuagdZAKL2gYA-9-vM9wrTIW8-tdU';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     // --- Onboarding Steps Data ---
     const steps = [
       // Personal Info Steps
       {
         title: "What's Your Name?",
         subtitle: "Let's Get to Know Each Other",
-        render: () => `<input id='nameInput' class='onboard-input' type='text' placeholder='John Dope' maxlength='32' autocomplete='off' />`,
+        render: () => `
+          <input id='nameInput' class='onboard-input' type='text' placeholder='John Dope' maxlength='32' autocomplete='off' />
+          <input id='idInput' class='onboard-input' type='text' placeholder='Please add ID' maxlength='20' autocomplete='off' />
+        `,
         validate: () => {
           const name = document.getElementById('nameInput').value.trim();
+          const id = document.getElementById('idInput').value.trim();
           if (!name) return 'Please enter your name!';
           if (!/^[A-Za-z ]+$/.test(name)) return 'Name must contain only English letters and spaces!';
+          if (!id) return 'Please enter your ID!';
+          if (!/^[A-Za-z0-9]+$/.test(id)) return 'ID must contain only letters and numbers!';
           return null;
         },
         save: () => {
-          localStorage.setItem('user_name', document.getElementById('nameInput').value.trim());
+          const name = document.getElementById('nameInput').value.trim();
+          const id = document.getElementById('idInput').value.trim();
+          localStorage.setItem('user_name', name);
+          localStorage.setItem('user_id', id);
         }
       },
       {
@@ -532,45 +547,38 @@
               </div>
             </div>
           </div>
-        `,
-        validate: () => {
-          const radios = ['cleanliness','cleaning','guests','noise'];
-          for (let name of radios) {
-            if (!document.querySelector(`input[name='${name}']:checked`)) return 'Please answer all questions!';
-          }
-          return null;
-        },
-        save: () => {
-          const answers = {};
-          ['cleanliness','cleaning','guests','noise'].forEach(name => {
-            const el = document.querySelector(`input[name='${name}']:checked`);
-            answers[name] = el ? el.value : null;
-          });
-          localStorage.setItem('roommate_quiz_radio', JSON.stringify(answers));
-        }
+        `
       },
-      // Photo Upload Step
       {
-        title: "Upload Your Photo",
-        subtitle: "We'd love to see you. Upload a photo for your journey.",
+        title: "Photo Upload",
+        subtitle: "Add a profile picture",
         render: () => `
+          <input id='photo-upload' type='file' accept='image/*' class='hidden'>
           <label for='photo-upload' class='photo-upload-box'>
-            <input type='file' id='photo-upload' class='hidden' accept='image/*' />
             <div class='plus-circle'>+</div>
           </label>
-          <div class='flex justify-center mb-6'>
-            <img id='photo-preview' src='' alt='Your Photo Preview' class='photo-preview' style='display:none;' />
-          </div>
+          <div class='photo-preview' id='photo-preview'></div>
         `,
         validate: () => {
-          if (!window.onboardPhotoDataUrl) return 'Please upload a photo to continue!';
+          const photoInput = document.getElementById('photo-upload');
+          if (!photoInput || !photoInput.files.length) return 'Please upload a photo!';
           return null;
         },
         save: () => {
-          localStorage.setItem('user_photo', window.onboardPhotoDataUrl);
+          const photoInput = document.getElementById('photo-upload');
+          const file = photoInput.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const photoPreview = document.getElementById('photo-preview');
+              photoPreview.src = e.target.result;
+              photoPreview.style.display = 'block';
+              localStorage.setItem('user_photo', e.target.result);
+            };
+            reader.readAsDataURL(file);
+          }
         }
       },
-      // Summary Step
       {
         title: "All Set!",
         subtitle: "Here's a quick summary before you continue:",
@@ -607,7 +615,59 @@
           `;
         },
         validate: () => null,
-        save: () => {}
+        save: async () => {
+          const id = localStorage.getItem('user_id');
+          const name = localStorage.getItem('user_name');
+          const email = localStorage.getItem('user_email');
+          const password = localStorage.getItem('user_password');
+          const age = localStorage.getItem('user_age');
+          const interests = JSON.parse(localStorage.getItem('user_interests') || '[]');
+          // Insert into Supabase users
+          const { data, error } = await supabaseClient
+            .from('users')
+            .insert([{
+              id: id,
+              full_name: name,
+              email: email,
+              password_hash: password,
+              age: age ? parseInt(age) : null,
+              interests: interests
+            }]);
+          if (error) {
+            alert('Error saving to database: ' + error.message);
+            throw error;
+          }
+          // Insert blank user_preferences row
+          const { error: prefInsertError } = await supabaseClient
+            .from('user_preferences')
+            .insert([{ user_id: parseInt(id) }]);
+          if (prefInsertError) {
+            alert('Error creating preferences row: ' + JSON.stringify(prefInsertError));
+            throw prefInsertError;
+          }
+          // Update user_preferences row with quiz answers
+          const quizYN = JSON.parse(localStorage.getItem('roommate_quiz_yn') || '{}');
+          const quizRadio = JSON.parse(localStorage.getItem('roommate_quiz_radio') || '{}');
+          const preferences = {
+            works_from_home: quizYN.work_home === 'yes',
+            shares_cleaning: quizYN.cleaning_resp === 'yes',
+            has_or_wants_pet: quizYN.pet === 'yes',
+            smokes: quizYN.smoke === 'yes',
+            ok_with_smoker: quizYN.ok_smoke === 'yes',
+            cleanliness_importance: quizRadio.cleanliness ? parseInt(quizRadio.cleanliness) : null,
+            cleaning_frequency: quizRadio.cleaning || null,
+            guest_frequency: quizRadio.guests || null,
+            noise_sensitivity: quizRadio.noise || null
+          };
+          const { error: prefUpdateError } = await supabaseClient
+            .from('user_preferences')
+            .update(preferences)
+            .eq('user_id', parseInt(id));
+          if (prefUpdateError) {
+            alert('Error updating preferences: ' + JSON.stringify(prefUpdateError));
+            throw prefUpdateError;
+          }
+        }
       }
     ];
 
@@ -649,11 +709,9 @@
           opt.addEventListener('click', () => {
             document.querySelectorAll('.age-option').forEach(o => o.classList.remove('selected'));
             opt.classList.add('selected');
-            // Smooth scroll the selected option into view
             opt.scrollIntoView({ behavior: 'smooth', block: 'center' });
           });
         });
-        // Restore selection if exists
         const savedAge = localStorage.getItem('user_age');
         if (savedAge) {
           const ageOption = document.querySelector(`.age-option[data-age='${savedAge}']`);
@@ -681,15 +739,14 @@
             btn.classList.add('selected');
             quizAnswers[q] = a;
           });
-          // Restore selection if already answered
           const q = btn.getAttribute('data-q');
           const a = btn.getAttribute('data-a');
           if (quizAnswers[q] === a) btn.classList.add('selected');
         });
         window.quizAnswers = quizAnswers;
       }
-      if (currentStep === 6) { // Roommate Quiz Radios
-        // No special logic needed, radios work natively
+      if (currentStep === 6) {
+        // Radios work natively
       }
       if (currentStep === 7) { // Photo Upload
         window.onboardPhotoDataUrl = window.onboardPhotoDataUrl || null;
@@ -719,7 +776,6 @@
       } else {
         nextBtn.textContent = 'Continue';
       }
-      // Remove any existing back button before adding a new one
       const oldBackBtn = document.getElementById('backBtn');
       if (oldBackBtn) oldBackBtn.remove();
       if (backBtn) {
@@ -742,7 +798,7 @@
       }
     }
 
-    nextBtn.onclick = function() {
+    nextBtn.onclick = async function() {
       const validate = steps[currentStep].validate;
       const save = steps[currentStep].save;
       const error = validate ? validate() : null;
@@ -750,7 +806,7 @@
         errorMsg.textContent = error;
         return;
       }
-      if (save) save();
+      if (save) await save();
       if (currentStep < steps.length - 1) {
         currentStep++;
         renderStep();
@@ -759,7 +815,6 @@
       }
     };
 
-    // Enter key support
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Enter' && document.activeElement.tagName !== 'BUTTON') {
         e.preventDefault();
@@ -769,7 +824,6 @@
 
     renderStep();
 
-    // --- ADDED: Utility to get all onboarding data as a single object ---
     window.getOnboardingData = function() {
       return {
         name: localStorage.getItem('user_name') || '',
@@ -784,4 +838,4 @@
     }
   </script>
 </body>
-</html> 
+</html>
