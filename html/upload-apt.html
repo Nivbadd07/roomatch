@@ -269,6 +269,9 @@
       <option>Haifa</option>
     </select>
 
+    <div class="section-title">Address</div>
+    <input type="text" id="address" placeholder="Enter address" style="width:100%;padding:12px;margin-bottom:16px;border:1px solid #e5e7eb;border-radius:12px;font-size:15px;background:#f8f6fc;color:#541257;transition:border 0.2s;outline:none;" />
+
     <div class="section-title">Area</div>
     <select id="area">
       <option disabled selected value="">Area</option>
@@ -358,7 +361,12 @@
     Now let's find you a roommate.
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script>
+    const SUPABASE_URL = 'https://vgkvkmpckneceqfggzes.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZna3ZrbXBja25lY2VxZmdnemVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1NDA0NjAsImV4cCI6MjA2MjExNjQ2MH0.1ZEMsUleNaBrePUuagdZAKL2gYA-9-vM9wrTIW8-tdU';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     // --- Data Service Abstraction ---
     async function getApartments() {
       return JSON.parse(localStorage.getItem('apartments') || '[]');
@@ -425,6 +433,9 @@
         // Validate city
         const city = document.getElementById('city').value;
         if (!city) throw new Error('Please select a city.');
+        // Validate address
+        const address = document.getElementById('address').value.trim();
+        if (!address) throw new Error('Please enter an address.');
         // Validate area
         const area = document.getElementById('area').value;
         if (!area) throw new Error('Please select an area.');
@@ -451,60 +462,34 @@
         const mainPhoto = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
         const additionalPhotos = [];
 
-        // Save apartment details to localStorage
-        const aptData = {
-          city,
-          area,
-          contract,
-          features: Array.from(features).map(f => f.textContent.trim()),
-          rooms: rooms[0].textContent.trim(),
-          price,
-          furniture,
-          date,
-          mainPhoto,
-          additionalPhotos
-        };
+        // Get user id for roommate_id
+        const userId = parseInt(localStorage.getItem('user_id'));
+        if (!userId) throw new Error('User not found. Please log in again.');
 
-        // Save to localStorage
-        localStorage.setItem('user_apartment', JSON.stringify(aptData));
-
-        // Also save to apartments array
-        let apartments = JSON.parse(localStorage.getItem('apartments') || '[]');
-        if (!Array.isArray(apartments)) apartments = [];
-        // Check if apartment already exists
-        const exists = apartments.some(a => 
-          a.city === city && 
-          a.rooms === rooms[0].textContent.trim() && 
-          a.price === price && 
-          a.date === date
-        );
-        if (!exists) {
-          apartments.push(aptData);
-          localStorage.setItem('apartments', JSON.stringify(apartments));
+        function stripEmojis(str) {
+          return str.replace(/^[^a-zA-Z0-9]+/, '').trim();
         }
-
-        // Update roommate seekers array
-        const userEmail = localStorage.getItem('user_email') || '';
-        let roommateSeekers = JSON.parse(localStorage.getItem('roommate_seekers') || '[]');
-        
-        const seekerData = {
-          name: localStorage.getItem('user_name') || '',
-          email: userEmail,
-          age: localStorage.getItem('user_age') || '',
-          interests: JSON.parse(localStorage.getItem('user_interests') || '[]'),
-          preferences: aptData,
-          photo: 'https://cdn-icons-png.flaticon.com/512/149/149071.png'
-        };
-
-        // Remove any existing entries for this user
-        roommateSeekers = roommateSeekers.filter(s => s.email !== userEmail);
-        roommateSeekers.push(seekerData);
-        localStorage.setItem('roommate_seekers', JSON.stringify(roommateSeekers));
+        const featuresArray = Array.from(features).map(f => stripEmojis(f.textContent.trim()));
+        const { error } = await supabaseClient
+          .from('apartments')
+          .insert([{
+            address: address,
+            city: city,
+            area: area,
+            contract_type: contract,
+            features: featuresArray,
+            num_rooms: parseFloat(rooms[0].textContent.trim()),
+            price_per_month: parseInt(price),
+            description: furniture,
+            date_of_entry: date,
+            image_urls: [mainPhoto, ...additionalPhotos],
+            roommate_id: [userId]
+          }]);
+        if (error) throw new Error(error.message);
 
         // Show success popup and redirect
         const popup = document.getElementById('successPopup');
         popup.style.display = 'block';
-        
         setTimeout(() => {
           window.location.href = 'roomate.html';
         }, 2000);

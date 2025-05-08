@@ -386,6 +386,7 @@
       const { error } = await supabaseClient
         .from('user_apartment_search_preferences')
         .insert([{
+          id: userId,
           user_id: userId,
           preferred_city: city,
           preferred_area: area,
