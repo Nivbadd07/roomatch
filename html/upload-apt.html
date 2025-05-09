@@ -367,6 +367,27 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZna3ZrbXBja25lY2VxZmdnemVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1NDA0NjAsImV4cCI6MjA2MjExNjQ2MH0.1ZEMsUleNaBrePUuagdZAKL2gYA-9-vM9wrTIW8-tdU';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    // GCP upload function for Apt_Pics
+    async function uploadAptImageToGCP(file) {
+      try {
+        const timestamp = new Date().getTime();
+        const filename = `Apt_Pics/${timestamp}_${file.name}`;
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('filename', filename);
+        const response = await fetch('/api/upload-to-gcp', {
+          method: 'POST',
+          body: formData
+        });
+        if (!response.ok) throw new Error('Upload failed');
+        const data = await response.json();
+        return data.publicUrl;
+      } catch (error) {
+        console.error('Error uploading to GCP:', error);
+        throw error;
+      }
+    }
+
     // --- Data Service Abstraction ---
     async function getApartments() {
       return JSON.parse(localStorage.getItem('apartments') || '[]');
@@ -423,6 +444,17 @@
       }
     }
 
+    // Collect selected files for upload
+    function getSelectedAptFiles() {
+      const files = [];
+      document.querySelectorAll('.photo-upload input[type="file"]').forEach(input => {
+        if (input.files && input.files[0]) {
+          files.push(input.files[0]);
+        }
+      });
+      return files;
+    }
+
     // ✅ Show popup on submit with validation
     document.getElementById('submitBtn').addEventListener('click', async function() {
       const btn = this;
@@ -458,9 +490,23 @@
         const date = document.querySelector('input[type="date"]').value;
         if (!date) throw new Error('Please select a date of entry.');
 
-        // For testing: always use a placeholder image to avoid quota errors
-        const mainPhoto = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-        const additionalPhotos = [];
+        // Upload all selected images to GCP
+        const aptFiles = getSelectedAptFiles();
+        let imageUrls = [];
+        if (aptFiles.length > 0) {
+          // Optionally show a progress bar or spinner here
+          for (let i = 0; i < aptFiles.length; i++) {
+            try {
+              imageUrls.push(await uploadAptImageToGCP(aptFiles[i]));
+            } catch (err) {
+              alert('Failed to upload image #' + (i+1) + ': ' + err.message);
+              // Optionally: break or continue
+            }
+          }
+        }
+        if (imageUrls.length === 0) {
+          throw new Error('Please upload at least one apartment photo.');
+        }
 
         // Get user id for roommate_id
         const userId = parseInt(localStorage.getItem('user_id'));
@@ -482,7 +528,7 @@
             price_per_month: parseInt(price),
             description: furniture,
             date_of_entry: date,
-            image_urls: [mainPhoto, ...additionalPhotos],
+            image_urls: imageUrls,
             roommate_id: [userId]
           }]);
         if (error) throw new Error(error.message);
