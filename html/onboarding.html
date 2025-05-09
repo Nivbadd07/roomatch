@@ -374,10 +374,44 @@
     </div>
   </div>
   <script>
-    // Initialize Supabase (replace with your real values)
+    // Initialize Supabase
     const SUPABASE_URL = 'https://vgkvkmpckneceqfggzes.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZna3ZrbXBja25lY2VxZmdnemVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1NDA0NjAsImV4cCI6MjA2MjExNjQ2MH0.1ZEMsUleNaBrePUuagdZAKL2gYA-9-vM9wrTIW8-tdU';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // GCP Configuration
+    const GCP_BUCKET_NAME = 'roomatch-prod-static-site';
+    const GCP_PROJECT_ID = 'roomatch-prod';
+
+    // Function to upload image to GCP
+    async function uploadImageToGCP(file) {
+        try {
+            // Create a unique filename
+            const timestamp = new Date().getTime();
+            const filename = `User_Pics/${timestamp}_${file.name}`;
+            
+            // Create form data
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('filename', filename);
+            
+            // Send to backend endpoint
+            const response = await fetch('/api/upload-to-gcp', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) {
+                throw new Error('Upload failed');
+            }
+            
+            const data = await response.json();
+            return data.publicUrl;
+        } catch (error) {
+            console.error('Error uploading to GCP:', error);
+            throw error;
+        }
+    }
 
     // --- Onboarding Steps Data ---
     const steps = [
@@ -620,26 +654,43 @@
             <div class='plus-circle'>+</div>
           </label>
           <img class='photo-preview' id='photo-preview' style='display:none;'/>
+          <div id='upload-progress' style='display:none;' class='mt-4 text-center'>
+            <p class='text-gray-600 mb-2'>Uploading...</p>
+            <div class='w-full bg-gray-200 rounded-full h-2.5'>
+              <div class='bg-purple-600 h-2.5 rounded-full' style='width: 0%' id='progress-bar'></div>
+            </div>
+          </div>
         `,
         validate: () => {
           const photoInput = document.getElementById('photo-upload');
           if (!photoInput || !photoInput.files.length) return 'Please upload a photo!';
           return null;
         },
-        save: () => {
+        save: async () => {
           const photoInput = document.getElementById('photo-upload');
           const file = photoInput.files[0];
           if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
+            try {
+              // Show progress
+              const progressDiv = document.getElementById('upload-progress');
+              const progressBar = document.getElementById('progress-bar');
+              progressDiv.style.display = 'block';
+              
+              // Upload to GCP
+              const publicUrl = await uploadImageToGCP(file);
+              
+              // Update preview and store URL
               const photoPreview = document.getElementById('photo-preview');
-              if (photoPreview) {
-                photoPreview.src = e.target.result;
-                photoPreview.style.display = 'block';
-              }
-              localStorage.setItem('user_photo', e.target.result);
-            };
-            reader.readAsDataURL(file);
+              photoPreview.src = publicUrl;
+              photoPreview.style.display = 'block';
+              localStorage.setItem('user_photo_url', publicUrl);
+              
+              // Hide progress
+              progressDiv.style.display = 'none';
+            } catch (error) {
+              alert('Error uploading photo: ' + error.message);
+              throw error;
+            }
           }
         }
       },
@@ -653,7 +704,7 @@
           const interests = JSON.parse(localStorage.getItem('user_interests') || '[]');
           const quizYN = JSON.parse(localStorage.getItem('roommate_quiz_yn') || '{}');
           const quizRadio = JSON.parse(localStorage.getItem('roommate_quiz_radio') || '{}');
-          const photo = localStorage.getItem('user_photo');
+          const photo = localStorage.getItem('user_photo_url');
           return `
             <div class='onboard-summary'>
               <div><b>Name:</b> ${name}</div>
@@ -688,6 +739,8 @@
           const interests = JSON.parse(localStorage.getItem('user_interests') || '[]');
           const gender = localStorage.getItem('user_gender') || null;
           const bio = localStorage.getItem('user_bio') || null;
+          const photo_url = localStorage.getItem('user_photo_url');
+          
           // Insert into Supabase users
           const { data, error } = await supabaseClient
             .from('users')
@@ -699,7 +752,8 @@
               age: age ? parseInt(age) : null,
               interests: interests,
               gender: gender,
-              bio: bio
+              bio: bio,
+              profile_image_url: localStorage.getItem('user_photo_url') || null
             }]);
           if (error) {
             alert('Error saving to database: ' + error.message);
@@ -903,7 +957,7 @@
         interests: JSON.parse(localStorage.getItem('user_interests') || '[]'),
         quiz_yn: JSON.parse(localStorage.getItem('roommate_quiz_yn') || '{}'),
         quiz_radio: JSON.parse(localStorage.getItem('roommate_quiz_radio') || '{}'),
-        photo: localStorage.getItem('user_photo') || ''
+        photo: localStorage.getItem('user_photo_url') || ''
       };
     }
   </script>
