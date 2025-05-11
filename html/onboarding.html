@@ -396,7 +396,7 @@
             formData.append('filename', filename);
             
             // Send to backend endpoint
-            const response = await fetch('https://roomatch-backend-euaxovukxa-ew.a.run.app', {
+            const response = await fetch('https://roomatch-backend-euaxovukxa-ew.a.run.app/api/upload-to-gcp', {
                 method: 'POST',
                 body: formData
             });
