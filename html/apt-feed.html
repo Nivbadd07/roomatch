@@ -111,68 +111,62 @@
   </nav>
 
   <script>
-    // Example dynamic data array
-    const apartments = [
-      {
-        match: '86% Match!',
-        matchStars: '★★★★★',
-        image: 'https://www.israelsir.co.il/wp-content/uploads/2021/11/%D7%9C%D7%92%D7%95%D7%A8-%D7%91%D7%9E%D7%92%D7%93%D7%9C-%D7%99%D7%95%D7%A7%D7%A8%D7%94-%D7%91%D7%A6%D7%A4%D7%95%D7%9F-%D7%94%D7%99%D7%A9%D7%9F-%D7%91%D7%AA%D7%9C-%D7%90%D7%91%D7%99%D7%91.-%D7%A6%D7%99%D7%9C%D7%95%D7%9D-%D7%A1%D7%95%D7%AA%D7%91%D7%99%D7%A1-%D7%99%D7%A9%D7%A8%D7%90%D7%9C-%D7%A0%D7%93%D7%9C%D7%9F-1024x683.jpg',
-        price: '$1,200 / mo',
-        address: 'Hamacabi 7 Tel Aviv',
-        size: '70㎡',
-        baths: '2 baths',
-        beds: '2 beds',
-        roommateImg: 'https://randomuser.me/api/portraits/men/75.jpg',
-        roommate: 'Amit, 25',
-      },
-      {
-        match: '72% Match!',
-        matchStars: '★★★★★',
-        image: 'https://cdn-amgog.nitrocdn.com/HdQZeSilYgMgiXwntjVmFPoQAKkGSgqH/assets/images/optimized/rev-8570349/yeshnadlan.co.il/wp-content/uploads/2025/01/1DSC7172_HDR-592x444.jpeg',
-        price: '$950 / mo',
-        address: 'Dizengoff 12 Tel Aviv',
-        size: '55㎡',
-        baths: '1 bath',
-        beds: '1 bed',
-        roommateImg: 'https://randomuser.me/api/portraits/women/65.jpg',
-        roommate: 'Dana, 27',
+    // Fetch and render matched apartments from backend
+    async function fetchMatchedApartments() {
+      const userId = localStorage.getItem('user_id');
+      if (!userId) {
+        return { results: [], error: 'User not logged in' };
       }
-    ];
+      try {
+        const res = await fetch(`https://roomatch-backend-109620478954.europe-west1.run.app/api/match/apartments/${userId}`);
+        if (!res.ok) throw new Error('Failed to fetch matches');
+        return await res.json();
+      } catch (err) {
+        return { results: [], error: err.message };
+      }
+    }
 
-    function renderApartments() {
+    async function renderApartments() {
       const container = document.getElementById('apartment-feed');
-      let apartments = JSON.parse(localStorage.getItem('apartments') || '[]');
-      if (!Array.isArray(apartments)) apartments = [];
-      if (apartments.length === 0) {
-        container.innerHTML = '<div class="text-center text-gray-500 mt-10">No apartments found. Upload your first apartment!</div>';
+      container.innerHTML = '<div class="text-center text-gray-400 mt-10">Loading matches...</div>';
+      const { results, error } = await fetchMatchedApartments();
+      if (error) {
+        container.innerHTML = `<div class='text-center text-red-500 mt-10'>${error}</div>`;
+        return;
+      }
+      if (!Array.isArray(results) || results.length === 0) {
+        container.innerHTML = '<div class="text-center text-gray-500 mt-10">No matched apartments found.</div>';
         return;
       }
       container.innerHTML = '';
-      apartments.forEach((apt, idx) => {
+      results.forEach((apt, idx) => {
+        const d = apt.details || {};
         const card = document.createElement('div');
         card.className = 'relative max-w-[400px] mx-auto my-4 p-0 rounded-3xl shadow-xl overflow-hidden border border-purple-200';
         card.style.background = 'linear-gradient(135deg, #e0d9ff 0%, #c3aee7 100%)';
         card.innerHTML = `
-          <button class="absolute top-4 right-4 text-gray-400 hover:text-red-500 delete-apt-btn text-xl z-10" title="Delete Listing" data-idx="${idx}"><i class="fas fa-times"></i></button>
-          <img class="w-full h-[220px] object-cover bg-purple-100" src="${(apt.photos && apt.photos.length) ? apt.photos[0] : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" alt="Apartment" />
-          <div class="text-lg font-bold m-4 text-purple-900">${apt.price} <span class="font-normal text-gray-500">/ mo</span></div>
-          <div class="px-4 text-sm text-gray-700">
-            <div><strong>
-              ${apt.city ? `<a href='location.html' class='text-purple-800 hover:underline cursor-pointer'>${apt.city}</a>` : ''}
-            </strong></div>
-            <div class="flex justify-between mt-2 mb-3">
-              <div class="flex items-center gap-1"><i class="fas fa-ruler-combined"></i> ${apt.size || ''}</div>
-              <div class="flex items-center gap-1"><i class="fas fa-bath"></i> ${apt.baths || ''}</div>
-              <div class="flex items-center gap-1"><i class="fas fa-bed"></i> ${apt.rooms ? apt.rooms + ' rooms' : ''}</div>
+          <div class="absolute top-4 left-4 bg-purple-100 px-4 py-2 rounded-full font-bold text-sm z-10 text-purple-900">
+            ${apt.match_score}% Match
+          </div>
+          <div class="px-4 pt-6 pb-2">
+            <div class="text-lg font-bold text-purple-900 mb-2">${d.price ? '$' + d.price : ''} <span class="font-normal text-gray-500">/ mo</span></div>
+            <div class="text-sm text-gray-700 mb-1">
+              <strong>${d.city ? `<a href='location.html' class='text-purple-800 hover:underline cursor-pointer'>${d.city}</a>` : ''}</strong>
+              ${d.area ? ', ' + d.area : ''}
             </div>
-          </div>
-          <div class="flex flex-wrap gap-2 px-4 mb-2">
-            ${(apt.features || []).map(f => `<span class='px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs'>${f}</span>`).join(' ')}
-          </div>
-          <div class="px-4 text-xs text-gray-600 mb-2">
-            ${apt.contract ? '<i class=\'fas fa-file-signature\'></i> Contract: ' + apt.contract + ' | ' : ''}
-            ${apt.furniture ? '<i class=\'fas fa-couch\'></i> Furniture: ' + apt.furniture + ' | ' : ''}
-            ${apt.date ? '<i class=\'fas fa-calendar-alt\'></i> Entry: ' + apt.date : ''}
+            <div class="flex justify-between mt-2 mb-3 text-xs text-gray-700">
+              <div class="flex items-center gap-1"><i class="fas fa-ruler-combined"></i> ${d.size || ''}</div>
+              <div class="flex items-center gap-1"><i class="fas fa-bath"></i> ${d.baths || ''}</div>
+              <div class="flex items-center gap-1"><i class="fas fa-bed"></i> ${d.rooms ? d.rooms + ' rooms' : ''}</div>
+            </div>
+            <div class="flex flex-wrap gap-2 mb-2">
+              ${(d.features || []).map(f => `<span class='px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs'>${f}</span>`).join(' ')}
+            </div>
+            <div class="text-xs text-gray-600 mb-2">
+              ${d.contract ? '<i class=\'fas fa-file-signature\'></i> Contract: ' + d.contract + ' | ' : ''}
+              ${d.furniture ? '<i class=\'fas fa-couch\'></i> Furniture: ' + d.furniture + ' | ' : ''}
+              ${d.date_of_entry ? '<i class=\'fas fa-calendar-alt\'></i> Entry: ' + d.date_of_entry : ''}
+            </div>
           </div>
           <button class="block mt-4 bg-gradient-to-r from-purple-700 to-pink-500 hover:from-purple-800 hover:to-pink-600 text-white text-center py-3 rounded-xl font-bold mx-4 mb-5 w-full schedule-tour-btn text-lg shadow-lg transition" data-apt="${idx}">Schedule Tour</button>
         `;
@@ -180,22 +174,6 @@
       });
     }
     renderApartments();
-
-    // Delete button logic for apartments
-    document.addEventListener('click', function(e) {
-      if (e.target.closest('.delete-apt-btn')) {
-        const idx = e.target.closest('.delete-apt-btn').getAttribute('data-idx');
-        let apartments = JSON.parse(localStorage.getItem('apartments') || '[]');
-        apartments.splice(idx, 1);
-        localStorage.setItem('apartments', JSON.stringify(apartments));
-        // If user_apartment is the one deleted, remove it too
-        const userApt = JSON.parse(localStorage.getItem('user_apartment') || 'null');
-        if (userApt && JSON.stringify(userApt) === JSON.stringify(apartments[idx])) {
-          localStorage.removeItem('user_apartment');
-        }
-        renderApartments();
-      }
-    });
 
     // Geolocation for location at the top
     function setLocationText(text) {
@@ -259,7 +237,7 @@
         apt.address = (apt.city ? apt.city : '') + (apt.area ? ', ' + apt.area : '');
         apt.roommate = '';
       } else {
-        apt = apartments[selectedAptIdx];
+        apt = results[selectedAptIdx];
       }
       // Format date/time for Google Calendar (YYYYMMDDTHHMMSSZ)
       const start = new Date(dt);
