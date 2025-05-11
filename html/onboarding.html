@@ -643,7 +643,24 @@
               </div>
             </div>
           </div>
-        `
+        `,
+        validate: () => {
+          // All radio groups must have a checked value
+          const requiredRadios = ['cleanliness','cleaning','guests','noise'];
+          for (let name of requiredRadios) {
+            if (!document.querySelector(`input[name='${name}']:checked`)) {
+              return 'Please answer all the questions!';
+            }
+          }
+          return null;
+        },
+        save: () => {
+          const quizRadio = {};
+          document.querySelectorAll('input.quiz-radio:checked').forEach(input => {
+            quizRadio[input.name] = input.value;
+          });
+          localStorage.setItem('roommate_quiz_radio', JSON.stringify(quizRadio));
+        }
       },
       {
         title: "Photo Upload",
@@ -705,26 +722,27 @@
           const quizYN = JSON.parse(localStorage.getItem('roommate_quiz_yn') || '{}');
           const quizRadio = JSON.parse(localStorage.getItem('roommate_quiz_radio') || '{}');
           const photo = localStorage.getItem('user_photo_url');
+          function show(val) { return val ? val : '<span style="color:#b0a4c0">Not answered</span>'; }
           return `
             <div class='onboard-summary'>
-              <div><b>Name:</b> ${name}</div>
-              <div><b>Email:</b> ${email}</div>
-              <div><b>Age:</b> ${age}</div>
-              <div><b>Interests:</b> ${interests.map(i => `<span>${i}</span>`).join('')}</div>
+              <div><b>Name:</b> ${show(name)}</div>
+              <div><b>Email:</b> ${show(email)}</div>
+              <div><b>Age:</b> ${show(age)}</div>
+              <div><b>Interests:</b> ${interests.length ? interests.map(i => `<span>${i}</span>`).join('') : show('')}</div>
               <div><b>Roommate Quiz:</b><br>
                 <ul style='margin-left:1em;'>
-                  <li>Work/study from home: <b>${quizYN.work_home || '-'}</b></li>
-                  <li>Share cleaning: <b>${quizYN.cleaning_resp || '-'}</b></li>
-                  <li>Pet: <b>${quizYN.pet || '-'}</b></li>
-                  <li>Smoke: <b>${quizYN.smoke || '-'}</b></li>
-                  <li>OK with smoking roommate: <b>${quizYN.ok_smoke || '-'}</b></li>
-                  <li>Cleanliness (1-5): <b>${quizRadio.cleanliness || '-'}</b></li>
-                  <li>Cleaning frequency: <b>${quizRadio.cleaning || '-'}</b></li>
-                  <li>Guests: <b>${quizRadio.guests || '-'}</b></li>
-                  <li>Noise sensitivity: <b>${quizRadio.noise || '-'}</b></li>
+                  <li>Work/study from home: <b>${show(quizYN.work_home)}</b></li>
+                  <li>Share cleaning: <b>${show(quizYN.cleaning_resp)}</b></li>
+                  <li>Pet: <b>${show(quizYN.pet)}</b></li>
+                  <li>Smoke: <b>${show(quizYN.smoke)}</b></li>
+                  <li>OK with smoking roommate: <b>${show(quizYN.ok_smoke)}</b></li>
+                  <li>Cleanliness (1-5): <b>${show(quizRadio.cleanliness)}</b></li>
+                  <li>Cleaning frequency: <b>${show(quizRadio.cleaning)}</b></li>
+                  <li>Guests: <b>${show(quizRadio.guests)}</b></li>
+                  <li>Noise sensitivity: <b>${show(quizRadio.noise)}</b></li>
                 </ul>
               </div>
-              <div><b>Photo:</b><br>${photo ? `<img src='${photo}' style='max-width:120px;max-height:120px;border-radius:1rem;margin-top:0.5em;'/>` : 'No photo uploaded.'}</div>
+              <div><b>Photo:</b><br>${photo ? `<img src='${photo}' style='max-width:120px;max-height:120px;border-radius:1rem;margin-top:0.5em;'/>` : show('')}</div>
             </div>
             <div class='onboard-subtitle'>Ready to start your Roomatch journey?</div>
           `;
