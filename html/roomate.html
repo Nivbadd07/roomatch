@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Discover Roommates</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+  <style>
+    body {
+      background: linear-gradient(135deg, #fde2f3 0%, #e0d9ff 50%, #f3e8ff 100%);
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      background-size: cover;
+      position: relative;
+      min-height: 100vh;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    .wave1 {
+      position: fixed;
+      width: 200%;
+      height: 100%;
+      left: 50%;
+      top: 0;
+      transform: translateX(-50%);
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23f8bbd0" fill-opacity="1" d="M0,32L40,37.3C80,43,160,53,240,80C320,107,400,149,480,165.3C560,181,640,171,720,165.3C800,160,880,160,960,170.7C1040,181,1120,203,1200,197.3C1280,192,1360,160,1400,144L1440,128L1440,0L1400,0C1360,0,1280,0,1200,0C1120,0,1040,0,960,0C880,0,800,0,720,0C640,0,560,0,480,0C400,0,320,0,240,0C160,0,80,0,40,0L0,0Z"></path></svg>') no-repeat center center;
+      background-size: cover;
+      opacity: 0.4;
+      z-index: 1;
+      animation: waveMove 12s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes waveMove {
+      0% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-48%) translateY(10px); }
+      100% { transform: translateX(-50%) translateY(0); }
+    }
+
+    .content {
+      position: relative;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center pt-6 pb-28">
+  <div class="wave1"></div>
+
+  <div class="w-full max-w-md px-4 relative">
+    <!-- Location and Bills Bar -->
+    <div class="flex justify-between items-center text-sm mb-4">
+      <div>
+        <a href="location.html" id="location-link" class="hover:underline cursor-pointer">📍 <span id="user-location">Detecting location...</span></a>
+      </div>
+      <a href="bills.html" title="Split Bills">
+        <i class="fas fa-money-bill-wave text-purple-800 text-xl"></i>
+      </a>
+    </div>
+
+    <!-- Title -->
+    <h1 class="text-[22px] mb-8 font-semibold text-center">Discover Roommates</h1>
+  </div>
+
+  <!-- All Roommate Cards Container (including user's card) -->
+  <div class="max-w-md w-full mx-auto px-4 pb-28">
+    <!-- User Profile Card -->
+    <div id="user-profile-card" class="relative flex flex-col items-center mb-10 roommate-card bg-white rounded-[20px] overflow-hidden shadow-md w-full max-w-[370px] mx-auto" style="display:none;">
+      <div class="w-full flex justify-center z-20">
+        <div class="relative" style="width: 100%; max-width: 370px;">
+          <img id="user-photo" src="" alt="User Photo" class="w-full h-64 object-cover rounded-t-2xl shadow-lg" style="position: relative; z-index: 2; background:#f3e8ff;" />
+        </div>
+      </div>
+      <div class="bg-white rounded-b-2xl shadow-md w-full max-w-[370px] -mt-8 pt-10 pb-6 px-4 z-10 relative">
+        <h2 class="text-lg font-bold" id="user-name"></h2>
+        <p class="text-sm text-gray-600 mt-1 mb-2" id="user-interests-label">Your interests</p>
+        <div class="flex items-center text-purple-800 gap-4 text-sm mb-2" id="user-interests"></div>
+        <div class="flex justify-between text-sm text-gray-600 mt-2">
+          <div class="flex items-center gap-1">
+            <i class="fas fa-map-marker-alt text-purple-800"></i>
+            <span id="user-apt-city"></span>
+          </div>
+          <div class="flex items-center gap-1 text-purple-800 font-semibold">
+            <i class="fas fa-dollar-sign"></i>
+            <span id="user-apt-price"></span>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-2 mt-2 text-xs text-gray-700" id="user-apt-features"></div>
+        <div class="flex flex-wrap gap-2 mt-2 text-xs text-gray-700">
+          <span id="user-age"></span>
+          <span id="user-email"></span>
+          <span id="user-apt-area"></span>
+          <span id="user-apt-contract"></span>
+          <span id="user-apt-rooms"></span>
+          <span id="user-apt-furniture"></span>
+          <span id="user-apt-date"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Other Roommate Cards -->
+    <div id="roommate-list" class="w-full"></div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-md z-50">
+    <div class="max-w-md mx-auto px-6 py-2 flex justify-between items-center text-center">
+      <!-- Chat Icon -->
+      <a href="#" onclick="return false;">
+        <svg width="24" height="24" viewBox="0 0 16 16" fill="#E48DCE" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 12.234V16L4.515 15.091L9.277 12.234H14C15.103 12.234 16 11.337 16 10.234V2.23401C16 1.13101 15.103 0.234009 14 0.234009H2C0.897 0.234009 0 1.13101 0 2.23401V10.234C0 11.337 0.897 12.234 2 12.234H3ZM2 2.23401H14V10.234H8.723L5 12.468V10.234H2V2.23401Z" />
+        </svg>
+      </a>
+
+      <!-- Home Icon -->
+      <a href="apt-feed.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#541257" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1v-6H9v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" />
+        </svg>
+      </a>
+
+      <!-- Plus Icon -->
+      <a href="upload-apt.html">
+        <svg width="50" height="50" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="14" cy="14" r="14" fill="#A23BB1" />
+          <path d="M14 8V20" stroke="white" stroke-width="2" stroke-linecap="round" />
+          <path d="M8 14H20" stroke="white" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      </a>
+
+      <!-- People Icon -->
+      <a href="roomate.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E48DCE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M7 21v-2a4 4 0 0 1 3-3.87" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+      </a>
+
+      <!-- Settings Icon -->
+      <a href="#" onclick="return false;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 15.5C13.933 15.5 15.5 13.933 15.5 12C15.5 10.067 13.933 8.5 12 8.5C10.067 8.5 8.5 10.067 8.5 12C8.5 13.933 10.067 15.5 12 15.5Z" fill="#E48DCE" />
+          <path d="M19.43 12.98C19.47 12.66 19.5 12.33 19.5 12C19.5 11.67 19.47 11.34 19.43 11.02L21.54 9.37C21.73 9.22 21.78 8.94 21.66 8.72L19.66 5.27C19.54 5.05 19.28 4.97 19.06 5.05L16.56 6.05C16.04 5.66 15.47 5.34 14.86 5.1L14.5 2.5H9.5L9.14 5.1C8.53 5.34 7.96 5.66 7.44 6.05L4.94 5.05C4.72 4.97 4.46 5.05 4.34 5.27L2.34 8.72C2.22 8.94 2.27 9.22 2.46 9.37L4.57 11.02C4.53 11.34 4.5 11.67 4.5 12C4.5 12.33 4.53 12.66 4.57 12.98L2.46 14.63C2.27 14.78 2.22 15.06 2.34 15.28L4.34 18.73C4.46 18.95 4.72 19.03 4.94 18.95L7.44 17.95C7.96 18.34 8.53 18.66 9.14 18.9L9.5 21.5H14.5L14.86 18.9C15.47 18.66 16.04 18.34 16.56 17.95L19.06 18.95C19.28 19.03 19.54 18.95 19.66 18.73L21.66 15.28C21.78 15.06 21.73 14.78 21.54 14.63L19.43 12.98Z" fill="#E48DCE" />
+        </svg>
+      </a>
+    </div>
+  </nav>
+
+  <script>
+    // Clear all roommates (as requested)
+    localStorage.setItem('roommate_seekers', '[]');
+
+    // Show user's actual location at the top left
+    function setLocationText(text) {
+      document.getElementById('user-location').textContent = text;
+    }
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(async pos => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`);
+          const data = await res.json();
+          if (data.address && (data.address.city || data.address.town || data.address.village)) {
+            setLocationText(data.address.city || data.address.town || data.address.village);
+          } else if (data.display_name) {
+            setLocationText(data.display_name.split(',')[0]);
+          } else {
+            setLocationText('Location found');
+          }
+        } catch {
+          setLocationText('Location found');
+        }
+      }, () => setLocationText('Location unavailable'));
+    } else {
+      setLocationText('Location unavailable');
+    }
+
+    // --- Dynamic User Profile Card ---
+    function renderUserProfile() {
+      // Use onboarding/roommate-seeker data only
+      const name = localStorage.getItem('user_name') || '';
+      const email = localStorage.getItem('user_email') || '';
+      const age = localStorage.getItem('user_age') || '';
+      const interests = JSON.parse(localStorage.getItem('user_interests') || '[]');
+      // Use user_apartment as preferences if present, else apt_preferences
+      let preferences = {};
+      if (localStorage.getItem('user_apartment')) {
+        preferences = JSON.parse(localStorage.getItem('user_apartment'));
+      } else if (localStorage.getItem('apt_preferences')) {
+        preferences = JSON.parse(localStorage.getItem('apt_preferences'));
+      }
+      const photo = localStorage.getItem('user_photo') || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+      const card = document.getElementById('user-profile-card');
+      let hasData = false;
+      // Only show if all required data is present
+      if (name && email && age && interests.length && preferences.city) {
+        hasData = true;
+      }
+      document.getElementById('user-photo').src = photo;
+      document.getElementById('user-name').textContent = name ? `${name}${age ? ', ' + age : ''}` : '';
+      // Interests
+      const interestsDiv = document.getElementById('user-interests');
+      interestsDiv.innerHTML = '';
+      if (interests.length) {
+        interests.forEach(i => {
+          let icon = '';
+          if (/read/i.test(i)) icon = '<i class="fas fa-book"></i>';
+          else if (/music/i.test(i)) icon = '<i class="fas fa-music"></i>';
+          else if (/cook/i.test(i)) icon = '<i class="fas fa-utensils"></i>';
+          else if (/pet/i.test(i)) icon = '<i class="fas fa-paw"></i>';
+          else if (/sport/i.test(i)) icon = '<i class="fas fa-basketball-ball"></i>';
+          else if (/game/i.test(i)) icon = '<i class="fas fa-gamepad"></i>';
+          else if (/photo/i.test(i)) icon = '<i class="fas fa-camera"></i>';
+          else if (/travel/i.test(i)) icon = '<i class="fas fa-plane"></i>';
+          else if (/paint/i.test(i)) icon = '<i class="fas fa-paint-brush"></i>';
+          else if (/politic/i.test(i)) icon = '<i class="fas fa-scale-balanced"></i>';
+          else if (/charity/i.test(i)) icon = '<i class="fas fa-hands-helping"></i>';
+          else if (/fashion/i.test(i)) icon = '<i class="fas fa-tshirt"></i>';
+          else icon = '<i class="fas fa-star"></i>';
+          interestsDiv.innerHTML += `<span class='flex items-center gap-1'>${icon} ${i}</span>`;
+        });
+      } else {
+        interestsDiv.innerHTML = '<span class="text-purple-600">No interests listed</span>';
+      }
+      // City, price, etc. from preferences
+      const citySpan = document.getElementById('user-apt-city');
+      citySpan.innerHTML = preferences.city ? `<a href="location.html" class="text-purple-800 hover:underline cursor-pointer">${preferences.city}</a>` : '';
+      document.getElementById('user-apt-price').textContent = preferences.minPrice ? '$' + preferences.minPrice : preferences.price ? '$' + preferences.price : '';
+      // Features (area, contract, rooms, etc.)
+      const featuresDiv = document.getElementById('user-apt-features');
+      featuresDiv.innerHTML = '';
+      if (preferences.features && preferences.features.length) {
+        preferences.features.forEach(f => {
+          featuresDiv.innerHTML += `<span class='px-2 py-1 bg-purple-100 text-purple-800 rounded-full'>${f}</span>`;
+        });
+      }
+      document.getElementById('user-age').textContent = age ? `Age: ${age}` : '';
+      document.getElementById('user-email').textContent = email;
+      document.getElementById('user-apt-area').textContent = preferences.area ? `Area: ${preferences.area}` : '';
+      document.getElementById('user-apt-contract').textContent = preferences.contract ? `Contract: ${preferences.contract}` : '';
+      document.getElementById('user-apt-rooms').textContent = preferences.rooms ? `Rooms: ${preferences.rooms}` : '';
+      document.getElementById('user-apt-furniture').textContent = preferences.furniture ? `Furniture: ${preferences.furniture}` : '';
+      document.getElementById('user-apt-date').textContent = preferences.date ? `Entry Date: ${preferences.date}` : '';
+      card.style.display = hasData ? '' : 'none';
+      // Add border to differentiate user card
+      card.style.boxShadow = hasData ? '0 0 0 4px #e0d9ff, 0 2px 8px rgba(0,0,0,0.08)' : '';
+      card.style.background = hasData ? 'linear-gradient(135deg, #f3e8ff 0%, #fff 100%)' : '';
+    }
+    renderUserProfile();
+
+    // --- Dynamic Roommate Seekers List ---
+    function renderRoommateSeekers() {
+      const container = document.getElementById('roommate-list');
+      let roommateSeekers = JSON.parse(localStorage.getItem('roommate_seekers') || '[]');
+      const userEmail = localStorage.getItem('user_email') || '';
+      // Filter out the current user from the roommate list
+      const otherSeekers = roommateSeekers.filter(user => user.email !== userEmail);
+      if (!Array.isArray(otherSeekers) || otherSeekers.length === 0) {
+        container.innerHTML = '<div class="text-center text-gray-500 mt-10">No roommates found yet. Be the first to set your preferences!</div>';
+        return;
+      }
+      // Remove duplicates by email
+      const uniqueSeekers = [];
+      const emails = new Set();
+      otherSeekers.forEach(user => {
+        if (!emails.has(user.email)) {
+          uniqueSeekers.push(user);
+          emails.add(user.email);
+        }
+      });
+      container.innerHTML = ''; // Clear container
+      uniqueSeekers.forEach((user, idx) => {
+        const card = document.createElement('div');
+        card.className = 'relative flex flex-col items-center mb-10 roommate-card bg-white rounded-[20px] overflow-hidden shadow-md w-full max-w-[370px] mx-auto';
+        
+        // Generate interests HTML
+        let interestsHTML = '';
+        if (user.interests && user.interests.length) {
+          user.interests.forEach(i => {
+            let icon = '';
+            if (/read/i.test(i)) icon = '<i class="fas fa-book"></i>';
+            else if (/music/i.test(i)) icon = '<i class="fas fa-music"></i>';
+            else if (/cook/i.test(i)) icon = '<i class="fas fa-utensils"></i>';
+            else if (/pet/i.test(i)) icon = '<i class="fas fa-paw"></i>';
+            else if (/sport/i.test(i)) icon = '<i class="fas fa-basketball-ball"></i>';
+            else if (/game/i.test(i)) icon = '<i class="fas fa-gamepad"></i>';
+            else if (/photo/i.test(i)) icon = '<i class="fas fa-camera"></i>';
+            else if (/travel/i.test(i)) icon = '<i class="fas fa-plane"></i>';
+            else if (/paint/i.test(i)) icon = '<i class="fas fa-paint-brush"></i>';
+            else if (/politic/i.test(i)) icon = '<i class="fas fa-scale-balanced"></i>';
+            else if (/charity/i.test(i)) icon = '<i class="fas fa-hands-helping"></i>';
+            else if (/fashion/i.test(i)) icon = '<i class="fas fa-tshirt"></i>';
+            else icon = '<i class="fas fa-star"></i>';
+            interestsHTML += `<span class='flex items-center gap-1'>${icon} ${i}</span>`;
+          });
+        } else {
+          interestsHTML = '<span class="text-purple-600">No interests listed</span>';
+        }
+
+        const roommatePhoto = user.photo || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+        
+        card.innerHTML = `
+          <button class="absolute top-4 right-4 text-gray-400 hover:text-red-500 delete-roommate-btn text-xl z-10" title="Remove Roommate" data-idx="${idx}">
+            <i class="fas fa-times"></i>
+          </button>
+          <div class="absolute top-4 left-4 bg-[#e0d9ff] px-4 py-2 rounded-[16px] font-bold text-sm z-10 text-purple-900">
+            <span>Looking for Apartment</span>
+          </div>
+          <div class="w-full flex justify-center z-20">
+            <div class="relative" style="width: 100%; max-width: 370px;">
+              <img src="${roommatePhoto}" alt="${user.name}" class="w-full h-64 object-cover rounded-t-2xl shadow-lg" style="position: relative; z-index: 2; background:#f3e8ff;" />
+            </div>
+          </div>
+          <div class="bg-white rounded-b-2xl shadow-md w-full max-w-[370px] -mt-8 pt-10 pb-6 px-4 z-10 relative">
+            <h2 class="text-lg font-bold">${user.name}${user.age ? ', ' + user.age : ''}</h2>
+            <p class="text-sm text-gray-600 mt-1 mb-2">Interests</p>
+            <div class="flex items-center text-purple-800 gap-4 text-sm mb-2">
+              ${interestsHTML}
+            </div>
+            <div class="flex flex-wrap gap-2 mt-2 text-xs text-gray-700">
+              <span>${user.preferences?.city ? `<a href='location.html' class='text-purple-800 hover:underline cursor-pointer'>${user.preferences.city}</a>` : ''}</span>
+              <span>${user.preferences?.area ? `Area: ${user.preferences.area}` : ''}</span>
+              <span>${user.preferences?.contract ? `Contract: ${user.preferences.contract}` : ''}</span>
+              <span>${user.preferences?.rooms ? `Rooms: ${user.preferences.rooms}` : ''}</span>
+              <span>${user.preferences?.price ? `$${user.preferences.price}` : ''}</span>
+              <span>${user.preferences?.date ? `Entry Date: ${user.preferences.date}` : ''}</span>
+            </div>
+          </div>
+        `;
+        
+        container.appendChild(card);
+      });
+    }
+
+    // Initialize the page
+    renderUserProfile();
+    renderRoommateSeekers();
+
+    // Delete button handler
+    document.addEventListener('click', function(e) {
+      if (e.target.closest('.delete-roommate-btn')) {
+        const idx = e.target.closest('.delete-roommate-btn').getAttribute('data-idx');
+        let roommateSeekers = JSON.parse(localStorage.getItem('roommate_seekers') || '[]');
+        roommateSeekers.splice(idx, 1);
+        localStorage.setItem('roommate_seekers', JSON.stringify(roommateSeekers));
+        renderRoommateSeekers();
+      }
+    });
+  </script>
+
+</body>
+</html>

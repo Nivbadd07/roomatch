@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Apartment Preferences</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #fde2f3 0%, #e0d9ff 50%, #f3e8ff 100%);
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      background-size: cover;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding: 0;
+      margin: 0;
+    }
+    .svg-bg {
+      position: absolute;
+      top: 40vh;
+      left: 50vw;
+      transform: translate(-50%, -50%) scale(1.2);
+      z-index: 0;
+      opacity: 0.10;
+      pointer-events: none;
+    }
+    .glass-card {
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+      border-radius: 2rem;
+      border: 1.5px solid rgba(162, 59, 177, 0.13);
+      padding: 3rem 2.5rem 2.5rem 2.5rem;
+      max-width: 480px;
+      width: 100%;
+      margin: 4rem auto 2rem auto;
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeInUp 0.8s cubic-bezier(.4,1.7,.6,.97);
+    }
+    @keyframes fadeInUp {
+      0% { opacity: 0; transform: translateY(40px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .border-gradient-anim {
+      pointer-events: none;
+      border-radius: 2rem;
+      background: linear-gradient(120deg, #fde2f3, #a23bb1 60%, #e0d9ff 100%);
+      opacity: 0.5;
+      filter: blur(10px);
+      animation: borderAnim 6s linear infinite alternate;
+      position: absolute;
+      top: -8px; left: -8px; right: -8px; bottom: -8px;
+      z-index: 0;
+    }
+    @keyframes borderAnim {
+      0% { opacity: 0.5; filter: blur(10px); }
+      100% { opacity: 0.8; filter: blur(18px); }
+    }
+    .main-title {
+      font-size: 2.2rem;
+      font-weight: bold;
+      color: #2d1b4d;
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 2;
+    }
+    .subtitle {
+      color: #a23bb1;
+      font-size: 1.1rem;
+      font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+      margin-bottom: 2.2rem;
+      z-index: 2;
+    }
+    .glass-select, .glass-input {
+      background: #ffffff;
+      border: 2px solid #a23bb1;
+      border-radius: 1rem;
+      padding: 0.9rem 1.2rem;
+      font-size: 1rem;
+      color: #2d1b4d;
+      margin-bottom: 0.7rem;
+      width: 100%;
+      box-shadow: 0 4px 12px rgba(162, 59, 177, 0.25);
+      outline: none;
+      transition: border 0.2s, box-shadow 0.2s;
+    }
+    .glass-select:focus, .glass-input:focus {
+      border: 2px solid #541257;
+      box-shadow: 0 0 0 3px rgba(162, 59, 177, 0.2), 0 4px 12px rgba(162, 59, 177, 0.3);
+      background: white;
+    }
+    .glass-select::placeholder, .glass-input::placeholder {
+      color: #a23bb1;
+      opacity: 0.8;
+      font-weight: 500;
+    }
+    .feature-btn, .room-btn {
+      background: rgba(255,255,255,0.7);
+      border: 2px solid #a23bb1;
+      color: #a23bb1;
+      border-radius: 9999px;
+      font-weight: 500;
+      font-size: 1rem;
+      padding: 0.7rem 1.3rem;
+      margin: 0.2rem 0.2rem 0.5rem 0.2rem;
+      transition: all 0.2s cubic-bezier(.4,1.7,.6,.97);
+      box-shadow: 0 2px 8px 0 rgba(162, 59, 177, 0.06);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      outline: none;
+      position: relative;
+    }
+    .feature-btn.selected-feature, .room-btn.selected-room {
+      background: linear-gradient(45deg, #a23bb1, #fde2f3);
+      color: #fff !important;
+      border-color: #a23bb1;
+      box-shadow: 0 0 18px #a23bb1;
+      animation: popSelected 0.4s cubic-bezier(.4,1.7,.6,.97);
+    }
+    @keyframes popSelected {
+      0% { transform: scale(0.95); }
+      100% { transform: scale(1); }
+    }
+    .feature-btn:focus, .room-btn:focus {
+      box-shadow: 0 0 0 2px #fde2f3, 0 0 18px #a23bb1;
+    }
+    .feature-btn:hover, .room-btn:hover {
+      filter: brightness(1.08);
+      transform: translateY(-2px) scale(1.04);
+    }
+    .continue-btn {
+      background: linear-gradient(45deg, #a23bb1, #fde2f3);
+      border: none;
+      color: #fff;
+      font-weight: bold;
+      box-shadow: 0 0 20px rgba(162, 59, 177, 0.13);
+      transition: all 0.3s ease;
+      font-size: 1.2rem;
+      padding: 1.2rem 0;
+      border-radius: 1.2rem;
+      width: 100%;
+      margin-top: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.7rem;
+      outline: none;
+    }
+    .continue-btn:hover {
+      background: linear-gradient(45deg, #fde2f3, #a23bb1);
+      box-shadow: 0 0 30px rgba(162, 59, 177, 0.18);
+      filter: brightness(1.08);
+    }
+    .continue-btn:active {
+      transform: scale(0.97);
+      box-shadow: 0 0 30px #a23bb1;
+    }
+    .continue-btn:focus {
+      box-shadow: 0 0 0 3px #fde2f3, 0 0 20px #a23bb1;
+    }
+    .back-link {
+      color: #a23bb1;
+      text-decoration: underline;
+      font-weight: 500;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 1.5rem;
+      transition: color 0.2s;
+      z-index: 2;
+    }
+    .back-link:hover {
+      color: #2d1b4d;
+    }
+    @media (max-width: 600px) {
+      .glass-card {
+        padding: 2rem 0.5rem 2rem 0.5rem;
+        max-width: 98vw;
+      }
+      .main-title { font-size: 1.3rem; }
+      .subtitle { font-size: 1rem; }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col items-center relative font-sans">
+
+  <svg class="svg-bg" width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="200" cy="200" rx="180" ry="120" fill="#e0d9ff"/>
+    <ellipse cx="120" cy="120" rx="60" ry="40" fill="#fde2f3"/>
+    <ellipse cx="320" cy="280" rx="70" ry="50" fill="#a23bb1"/>
+  </svg>
+  <div class="glass-card border-gradient relative">
+    <div class="border-gradient-anim"></div>
+    <div class="main-title mb-1">
+      <span>Which Apartment Are You Looking To Move Into?</span> <span style="font-size:1.5em;">🏠</span>
+    </div>
+    <div class="subtitle mb-6">
+      Set your preferences to find your perfect match!
+    </div>
+    <form class="flex flex-col space-y-4 w-full">
+      <div>
+        <label class="block text-gray-700 font-semibold mb-1">City</label>
+        <div style="position:relative;">
+          <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#a23bb1;font-size:1.1em;">
+            <i class="fa-solid fa-city"></i>
+          </span>
+          <select name="city" class="glass-select pl-10">
+            <option disabled selected value="">Select city</option>
+            <option>Tel Aviv</option>
+            <option>Jerusalem</option>
+            <option>Haifa</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="block text-gray-700 font-semibold mb-1">Area</label>
+        <div style="position:relative;">
+          <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#a23bb1;font-size:1.1em;">
+            <i class="fa-solid fa-location-dot"></i>
+          </span>
+          <select name="area" class="glass-select pl-10">
+            <option disabled selected value="">Select area</option>
+            <option>Center</option>
+            <option>North</option>
+            <option>South</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="block text-gray-700 font-semibold mb-1">Contract</label>
+        <div style="position:relative;">
+          <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#a23bb1;font-size:1.1em;">
+            <i class="fa-solid fa-file-signature"></i>
+          </span>
+          <select name="contract" class="glass-select pl-10">
+            <option disabled selected value="">Select contract type</option>
+            <option>Long term</option>
+            <option>Short term</option>
+            <option>Sublet</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="block text-gray-700 font-semibold mb-1">Features</label>
+        <div class="flex flex-wrap justify-center gap-2">
+          <button class="feature-btn" type="button">🏠 Balcony</button>
+          <button class="feature-btn" type="button">🛗 Elevator</button>
+          <button class="feature-btn" type="button">🛡 Mamad</button>
+          <button class="feature-btn" type="button">📶 Wifi</button>
+          <button class="feature-btn" type="button">🚗 Parking</button>
+          <button class="feature-btn" type="button">📦 Storage</button>
+          <button class="feature-btn" type="button">♿ Accessible</button>
+        </div>
+      </div>
+      <div>
+        <label class="block text-gray-700 font-semibold mb-1">Rooms</label>
+        <div class="flex flex-wrap justify-center gap-2">
+          <button class="room-btn" type="button"><i class="fa-solid fa-door-open"></i> 2</button>
+          <button class="room-btn" type="button"><i class="fa-solid fa-door-open"></i> 2.5</button>
+          <button class="room-btn" type="button"><i class="fa-solid fa-door-open"></i> 3</button>
+          <button class="room-btn" type="button"><i class="fa-solid fa-door-open"></i> 4</button>
+          <button class="room-btn" type="button"><i class="fa-solid fa-door-open"></i> 5</button>
+        </div>
+      </div>
+      <div>
+        <label class="block text-gray-900 font-bold mb-2">Price Range</label>
+        <div class="flex gap-2">
+          <input id="minPrice" type="text" placeholder="Min Price" class="glass-input w-1/2 text-center font-semibold" />
+          <span class="flex items-center font-bold text-purple-900">–</span>
+          <input id="maxPrice" type="text" placeholder="Max Price" class="glass-input w-1/2 text-center font-semibold" />
+        </div>
+      </div>
+      <div>
+        <label class="block text-gray-700 font-semibold mb-1">Date of Entry</label>
+        <div style="position:relative;">
+          <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#a23bb1;font-size:1.1em;">
+            <i class="fa-solid fa-calendar-days"></i>
+          </span>
+          <input type="date" value="2024-01-01" class="glass-input pl-10 text-center">
+        </div>
+      </div>
+      <button id="continueBtn" type="button" class="continue-btn"><i class="fa-solid fa-check"></i> Continue</button>
+    </form>
+    <a href="apt-room.html" class="back-link"><span style="font-size:1.2em;">&#8592;</span> Back</a>
+  </div>
+
+  <div id="successPopup" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-lg font-bold hidden z-50">
+    Apartment preferences uploaded successfully!
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://vgkvkmpckneceqfggzes.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZna3ZrbXBja25lY2VxZmdnemVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1NDA0NjAsImV4cCI6MjA2MjExNjQ2MH0.1ZEMsUleNaBrePUuagdZAKL2gYA-9-vM9wrTIW8-tdU';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    document.querySelectorAll('.feature-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('selected-feature');
+      });
+    });
+
+    document.querySelectorAll('.room-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.room-btn').forEach(b => {
+          b.classList.remove('selected-room');
+        });
+        btn.classList.add('selected-room');
+      });
+    });
+
+    document.getElementById('minPrice').addEventListener('input', function () {
+      this.value = this.value.replace(/[^\d]/g, '');
+    });
+    document.getElementById('maxPrice').addEventListener('input', function () {
+      this.value = this.value.replace(/[^\d]/g, '');
+    });
+
+    document.getElementById('continueBtn').addEventListener('click', async function() {
+      // Validate city
+      const city = document.querySelector('select[name="city"]').value;
+      if (!city) {
+        alert('Please select a city.');
+        return;
+      }
+      // Validate area
+      const area = document.querySelector('select[name="area"]').value;
+      if (!area) {
+        alert('Please select an area.');
+        return;
+      }
+      // Validate contract
+      const contract = document.querySelector('select[name="contract"]').value;
+      if (!contract) {
+        alert('Please select a contract type.');
+        return;
+      }
+      // Validate at least one feature
+      const features = document.querySelectorAll('.feature-btn.selected-feature');
+      if (features.length === 0) {
+        alert('Please select at least one feature.');
+        return;
+      }
+      // Validate room selection
+      const rooms = document.querySelectorAll('.room-btn.selected-room');
+      if (rooms.length === 0) {
+        alert('Please select the number of rooms.');
+        return;
+      }
+      // Validate price
+      const minPrice = document.getElementById('minPrice').value.trim();
+      const maxPrice = document.getElementById('maxPrice').value.trim();
+      if (!minPrice || !maxPrice || isNaN(minPrice) || isNaN(maxPrice) || Number(minPrice) > Number(maxPrice)) {
+        alert('Please enter a valid price range.');
+        return;
+      }
+      // Validate date
+      const date = document.querySelector('input[type="date"]').value;
+      if (!date) {
+        alert('Please select a date of entry.');
+        return;
+      }
+      // Remove emojis from features and rooms
+      function stripEmojis(str) {
+        return str.replace(/^[^a-zA-Z0-9]+/, '').trim();
+      }
+      const featuresArray = Array.from(features).map(f => stripEmojis(f.textContent));
+      const numRoomsArray = Array.from(rooms).map(r => stripEmojis(r.textContent));
+      // Save to Supabase
+      const userId = parseInt(localStorage.getItem('user_id'));
+      const { error } = await supabaseClient
+        .from('user_apartment_search_preferences')
+        .insert([{
+          id: userId,
+          user_id: userId,
+          preferred_city: city,
+          preferred_area: area,
+          preferred_contract_type: contract,
+          preferred_features: featuresArray,
+          preferred_num_rooms: numRoomsArray,
+          preferred_price_min: minPrice ? parseInt(minPrice) : null,
+          preferred_price_max: maxPrice ? parseInt(maxPrice) : null,
+          preferred_date_of_entry: date
+        }]);
+      if (error) {
+        alert('Error saving preferences: ' + error.message);
+        return;
+      }
+      // If all valid, show popup and continue
+      const popup = document.getElementById('successPopup');
+      popup.classList.remove('hidden');
+      setTimeout(() => {
+        popup.classList.add('hidden');
+        window.location.href = 'apt-feed.html';
+      }, 2000);
+    });
+  </script>
+
+</body>
+
+</html>

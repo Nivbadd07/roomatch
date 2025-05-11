@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ROOMATCH - Looking For</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #fde2f3 0%, #e0d9ff 50%, #f3e8ff 100%);
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      background-size: cover;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .wave1 {
+      position: fixed;
+      width: 200%;
+      height: 100%;
+      left: 50%;
+      top: 0;
+      transform: translateX(-50%);
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23f8bbd0" fill-opacity="1" d="M0,32L40,37.3C80,43,160,53,240,80C320,107,400,149,480,165.3C560,181,640,171,720,165.3C800,160,880,160,960,170.7C1040,181,1120,203,1200,197.3C1280,192,1360,160,1400,144L1440,128L1440,0L1400,0C1360,0,1280,0,1200,0C1120,0,1040,0,960,0C880,0,800,0,720,0C640,0,560,0,480,0C400,0,320,0,240,0C160,0,80,0,40,0L0,0Z"></path></svg>') no-repeat center center;
+      background-size: cover;
+      opacity: 0.4;
+      z-index: 1;
+      animation: waveMove 12s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes waveMove {
+      0% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-48%) translateY(10px); }
+      100% { transform: translateX(-50%) translateY(0); }
+    }
+
+    .svg-bg {
+      position: absolute;
+      top: 40vh;
+      left: 50vw;
+      transform: translate(-50%, -50%) scale(1.2);
+      z-index: 0;
+      opacity: 0.10;
+      pointer-events: none;
+    }
+
+    .glass-card {
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+      border-radius: 2rem;
+      border: 1.5px solid rgba(162, 59, 177, 0.13);
+      padding: 2rem 2rem 2rem 2rem;
+      max-width: 420px;
+      width: 100%;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .border-gradient-anim {
+      pointer-events: none;
+      border-radius: 2rem;
+      background: linear-gradient(120deg, #fde2f3, #a23bb1 60%, #e0d9ff 100%);
+      opacity: 0.5;
+      filter: blur(10px);
+      animation: borderAnim 6s linear infinite alternate;
+      position: absolute;
+      top: -8px; left: -8px; right: -8px; bottom: -8px;
+      z-index: 0;
+    }
+
+    @keyframes borderAnim {
+      0% { opacity: 0.5; filter: blur(10px); }
+      100% { opacity: 0.8; filter: blur(18px); }
+    }
+
+    .main-title {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #2d1b4d;
+      margin-bottom: 0.3rem;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 2;
+    }
+
+    .subtitle {
+      color: #a23bb1;
+      font-size: 1rem;
+      font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+      margin-bottom: 1.5rem;
+      z-index: 2;
+    }
+
+    .modern-btn, .modern-btn.roommates {
+      background: #fff;
+      color: #a23bb1;
+      border: 2px solid #e0d9ff;
+      font-weight: bold;
+      box-shadow: 0 2px 12px rgba(162, 59, 177, 0.10);
+      font-size: 1.18rem;
+      padding: 1.1rem 0;
+      border-radius: 1.2rem;
+      width: 100%;
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.9rem;
+      position: relative;
+      outline: none;
+      transition: all 0.18s cubic-bezier(.4,1.7,.6,.97), box-shadow 0.18s;
+      letter-spacing: 0.03em;
+      font-family: inherit;
+    }
+    .modern-btn i, .modern-btn.roommates i {
+      font-size: 1.5em;
+      color: #a23bb1;
+      margin-right: 0.3em;
+      transition: color 0.18s;
+    }
+    .modern-btn:hover, .modern-btn.roommates:hover {
+      background: linear-gradient(90deg, #fde2f3 60%, #fff 100%);
+      color: #541257;
+      border-color: #a23bb1;
+      box-shadow: 0 4px 24px 0 #e0d9ff;
+      transform: translateY(-2px) scale(1.04);
+    }
+    .modern-btn:active, .modern-btn.roommates:active {
+      background: #f3e8ff;
+      color: #a23bb1;
+      border-color: #a23bb1;
+      box-shadow: 0 0 0 2px #a23bb1;
+      transform: scale(0.98);
+    }
+    .modern-btn:focus, .modern-btn.roommates:focus {
+      box-shadow: 0 0 0 3px #fde2f3, 0 0 20px #a23bb1;
+      outline: none;
+    }
+
+    .divider {
+      color: #a23bb1;
+      font-weight: bold;
+      margin: 0.3rem 0 0.8rem 0;
+      font-size: 1.1rem;
+      opacity: 0.7;
+      letter-spacing: 0.2em;
+      z-index: 2;
+    }
+
+    .back-link {
+      color: #a23bb1;
+      text-decoration: underline;
+      font-weight: 500;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 1rem;
+      transition: color 0.2s;
+      z-index: 2;
+    }
+
+    .back-link:hover {
+      color: #2d1b4d;
+    }
+
+    @media (max-width: 600px) {
+      .glass-card {
+        padding: 2rem 0.5rem 2rem 0.5rem;
+        max-width: 98vw;
+      }
+      .main-title { font-size: 1.3rem; }
+      .subtitle { font-size: 1rem; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- גל ברקע -->
+  <div class="wave1"></div>
+  <svg class="svg-bg" width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="200" cy="200" rx="180" ry="120" fill="#e0d9ff"/>
+    <ellipse cx="120" cy="120" rx="60" ry="40" fill="#fde2f3"/>
+    <ellipse cx="320" cy="280" rx="70" ry="50" fill="#a23bb1"/>
+  </svg>
+  <div class="glass-card border-gradient relative">
+    <div class="border-gradient-anim"></div>
+    <div class="main-title mb-1">
+      <span>What Are You Looking For Now?</span> <span style="font-size:1.5em;">🔍</span>
+    </div>
+    <div class="subtitle mb-6">
+      You will be able to change it anytime at <b>Settings</b>
+    </div>
+    <a href="apt-pref.html" style="width:100%">
+      <button class="modern-btn"><i class="fa-solid fa-building"></i> Apartments</button>
+    </a>
+    <div class="divider">or</div>
+    <a href="upload-apt.html" style="width:100%">
+      <button class="modern-btn roommates"><i class="fa-solid fa-user-group"></i> Roommates</button>
+    </a>
+    <a href="onboarding.html" class="back-link"><span style="font-size:1.2em;">&#8592;</span> Back</a>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://vgkvkmpckneceqfggzes.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZna3ZrbXBja25lY2VxZmdnemVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1NDA0NjAsImV4cCI6MjA2MjExNjQ2MH0.1ZEMsUleNaBrePUuagdZAKL2gYA-9-vM9wrTIW8-tdU';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function setUserTypeAndNavigate(type, url) {
+      const userId = localStorage.getItem('user_id');
+      localStorage.setItem('user_type', type);
+      if (userId) {
+        const { error } = await supabaseClient
+          .from('users')
+          .update({ user_type: type })
+          .eq('id', userId);
+        if (error) {
+          alert('Error updating user type: ' + error.message);
+          return;
+        }
+      }
+      window.location.href = url;
+    }
+
+    window.addEventListener('DOMContentLoaded', function() {
+      const aptBtn = document.querySelector('.modern-btn:not(.roommates)');
+      const roommatesBtn = document.querySelector('.modern-btn.roommates');
+      if (aptBtn) {
+        aptBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          setUserTypeAndNavigate('Looking for Apt', 'apt-pref.html');
+        });
+      }
+      if (roommatesBtn) {
+        roommatesBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          setUserTypeAndNavigate('Looking for Roomate', 'upload-apt.html');
+        });
+      }
+    });
+  </script>
+
+</body>
+
+</html>

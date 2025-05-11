@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ROOMATCH - Onboarding</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <style>
+    body {
+      min-height: 100vh;
+      background: linear-gradient(120deg, #f7d5ea 0%, #e3dafb 60%, #e3dafb 100%);
+      background-attachment: fixed;
+      overflow-x: hidden;
+      font-family: 'Inter', Arial, sans-serif;
+      position: relative;
+    }
+    .onboard-bg {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at 70% 20%, #fde2f3 0%, #e0d9ff 60%, #f3e8ff 100%);
+      opacity: 0.7;
+    }
+    .onboard-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+      transform: scale(0.85);
+      transform-origin: center center;
+    }
+    .onboard-card {
+      background: rgba(255,255,255,0.97);
+      box-shadow: 0 12px 48px 0 rgba(162, 59, 177, 0.18);
+      border-radius: 1.5rem;
+      border: 2.5px solid #e0d9ff;
+      padding: 3.5rem 2rem 3.5rem 2rem;
+      max-width: 900px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      min-height: 70vh;
+      transition: box-shadow 0.3s;
+    }
+    .onboard-card::before {
+      content: '';
+      position: absolute;
+      inset: -18px;
+      border-radius: 3rem;
+      background: linear-gradient(120deg, #fde2f3, #a23bb1 60%, #e0d9ff 100%);
+      opacity: 0.18;
+      z-index: 0;
+      filter: blur(12px);
+      pointer-events: none;
+    }
+    .onboard-stepper {
+      display: flex;
+      justify-content: center;
+      gap: 1.2rem;
+      margin-bottom: 2.5rem;
+      z-index: 2;
+      position: relative;
+    }
+    .onboard-step-dot {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #e0d9ff;
+      border: 3px solid #a23bb1;
+      transition: background 0.3s, border 0.3s;
+      box-shadow: 0 2px 8px #a23bb1, 0 0 0 4px #fde2f3;
+    }
+    .onboard-step-dot.active {
+      background: #a23bb1;
+      border-color: #a23bb1;
+      box-shadow: 0 2px 16px #a23bb1, 0 0 0 6px #fde2f3;
+    }
+    .onboard-title {
+      font-size: 3rem;
+      font-weight: 900;
+      color: #2d1b4d;
+      margin-bottom: 0.7rem;
+      letter-spacing: 0.5px;
+      text-align: center;
+      z-index: 2;
+      cursor: pointer;
+    }
+    .onboard-subtitle {
+      color: #a23bb1;
+      font-size: 1.5rem;
+      font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+      margin-bottom: 2.2rem;
+      text-align: center;
+      z-index: 2;
+    }
+    .onboard-input, .onboard-select {
+      width: 100%;
+      padding: 1.3rem;
+      margin-bottom: 1.7rem;
+      border: 2px solid #e0d9ff;
+      border-radius: 1.3rem;
+      font-size: 1.3rem;
+      background: #f8f6fc;
+      color: #541257;
+      transition: border 0.2s;
+      outline: none;
+      box-shadow: 0 2px 8px rgba(162,59,177,0.06);
+    }
+    .onboard-input:focus, .onboard-select:focus {
+      border: 2px solid #a23bb1;
+      background: #f3e8ff;
+    }
+    .onboard-btn {
+      width: 100%;
+      background: linear-gradient(90deg, #a23bb1, #fde2f3 80%);
+      color: white;
+      padding: 1.3rem 0;
+      border: none;
+      border-radius: 1.5rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-align: center;
+      cursor: pointer;
+      margin-top: 2.2rem;
+      margin-bottom: 0.5rem;
+      box-shadow: 0 4px 16px rgba(162,59,177,0.13);
+      transition: background 0.2s, transform 0.2s;
+      letter-spacing: 0.7px;
+    }
+    .back-btn {
+      width: 100%;
+      background: #e0d9ff;
+      color: #a23bb1;
+      padding: 1.3rem 0;
+      border: none;
+      border-radius: 1.5rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-align: center;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+      box-shadow: 0 4px 16px rgba(162,59,177,0.13);
+      transition: background 0.2s, transform 0.2s;
+      letter-spacing: 0.7px;
+    }
+    .back-btn:hover {
+      background: #d4c9ff;
+      transform: translateY(-2px);
+    }
+    .onboard-btn:disabled {
+      background: #e0d9ff;
+      color: #a23bb1;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+    .onboard-btn:hover:not(:disabled) {
+      background: linear-gradient(90deg, #fde2f3, #a23bb1 80%);
+      transform: translateY(-2px) scale(1.04);
+    }
+    .onboard-error {
+      color: #d32f2f;
+      font-size: 1.2rem;
+      margin-bottom: 1.2rem;
+      text-align: center;
+      min-height: 1.5em;
+      z-index: 2;
+    }
+    .interests-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.1rem;
+      justify-content: center;
+      margin-bottom: 2.2rem;
+      z-index: 2;
+    }
+    .interest-btn {
+      padding: 1.1rem 2.1rem;
+      border: 2px solid #a23bb1;
+      border-radius: 2.5rem;
+      font-size: 1.2rem;
+      background-color: #fff;
+      color: #a23bb1;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      box-shadow: 0 1px 6px #e0d9ff;
+    }
+    .interest-btn.selected {
+      background-color: #a23bb1;
+      color: white;
+      border-color: #a23bb1;
+      box-shadow: 0 2px 12px #a23bb1;
+    }
+    .age-scroll {
+      width: 100%;
+      max-width: 320px;
+      margin: 0 auto 1.7rem auto;
+      height: 220px;
+      overflow-y: auto;
+      background: rgba(255,255,255,0.8);
+      border-radius: 1.5rem;
+      box-shadow: 0 2px 12px #e0d9ff;
+      border: 2px solid #e0d9ff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      scrollbar-width: thin;
+      scrollbar-color: #a23bb1 #e0d9ff;
+      padding: 0.5rem 0;
+    }
+    .age-scroll::-webkit-scrollbar {
+      width: 8px;
+      display: block;
+    }
+    .age-scroll::-webkit-scrollbar-track {
+      background: #e0d9ff;
+      border-radius: 4px;
+    }
+    .age-scroll::-webkit-scrollbar-thumb {
+      background: #a23bb1;
+      border-radius: 4px;
+    }
+    .age-option {
+      height: 48px;
+      line-height: 48px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      width: 90%;
+      text-align: center;
+      border-radius: 12px;
+      color: #6b7280;
+      background: none;
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+      transition: all 0.2s;
+      margin: 2px 0;
+      padding: 0 1rem;
+    }
+    .age-option:hover {
+      background: rgba(253,226,243,0.1);
+      color: #a23bb1;
+    }
+    .age-option.selected {
+      color: #a23bb1;
+      font-weight: bold;
+      font-size: 1.8rem;
+      background: rgba(253,226,243,0.18);
+      border-radius: 18px;
+      box-shadow: 0 2px 12px #fde2f3;
+      transform: scale(1.05);
+    }
+    .onboard-summary {
+      font-size: 1.3rem;
+      color: #2d1b4d;
+      background: #f8f6fc;
+      border-radius: 1.5rem;
+      padding: 2rem 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 12px #e0d9ff;
+      z-index: 2;
+    }
+    .onboard-summary span {
+      display: inline-block;
+      background: #e0d9ff;
+      color: #a23bb1;
+      border-radius: 1rem;
+      padding: 0.4rem 1.1rem;
+      margin: 0.2rem 0.3rem 0.2rem 0;
+      font-size: 1.1rem;
+    }
+    .photo-upload-box {
+      width: 120px;
+      height: 120px;
+      border: 2.5px dashed #a23bb1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 18px;
+      cursor: pointer;
+      background-color: rgba(255, 255, 255, 0.8);
+      transition: background-color 0.3s;
+      margin: 0 auto 1.5rem auto;
+      position: relative;
+    }
+    .photo-upload-box:hover {
+      background-color: #f3e8ff;
+    }
+    .plus-circle {
+      background: white;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      color: #a23bb1;
+      font-weight: bold;
+      box-shadow: 0 2px 8px #e0d9ff;
+    }
+    .photo-preview {
+      display: block;
+      margin: 0 auto 1.5rem auto;
+      border-radius: 1.2rem;
+      box-shadow: 0 2px 12px #e0d9ff;
+      max-width: 180px;
+      max-height: 180px;
+      object-fit: cover;
+    }
+    .quiz-yn-btn.selected {
+      background: linear-gradient(90deg, #a23bb1 60%, #fde2f3 100%);
+      color: #fff !important;
+      border-color: #a23bb1;
+      box-shadow: 0 2px 12px #a23bb1;
+      font-weight: bold;
+      transform: scale(1.08);
+    }
+    .gender-btn {
+      background: #f8f6fc;
+      border: 2px solid #a23bb1;
+      color: #a23bb1;
+      border-radius: 1.5rem;
+      font-size: 1.3rem;
+      font-weight: 600;
+      padding: 1.1rem 2.2rem;
+      margin-bottom: 0.5rem;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px #e0d9ff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+    .gender-btn.selected {
+      background: linear-gradient(90deg, #a23bb1 60%, #fde2f3 100%);
+      color: #fff !important;
+      border-color: #a23bb1;
+      box-shadow: 0 2px 12px #a23bb1;
+      transform: scale(1.06);
+    }
+    .gender-btn i {
+      font-size: 1.5em;
+    }
+    @media (max-width: 900px) {
+      .onboard-card {
+        max-width: 99vw;
+        padding: 1.5rem 0.5rem 1.5rem 0.5rem;
+      }
+      .onboard-title { font-size: 2rem; }
+      .onboard-subtitle { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="onboard-bg"></div>
+  <div class="onboard-container">
+    <div class="onboard-card">
+      <div class="onboard-stepper" id="stepIndicator"></div>
+      <form id="onboardForm" autocomplete="off">
+        <div id="stepContent"></div>
+        <div class="onboard-error" id="errorMsg"></div>
+        <button type="button" class="onboard-btn" id="nextBtn">Continue</button>
+      </form>
+    </div>
+  </div>
+  <script>
+    // Initialize Supabase
+    const SUPABASE_URL = 'https://vgkvkmpckneceqfggzes.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZna3ZrbXBja25lY2VxZmdnemVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1NDA0NjAsImV4cCI6MjA2MjExNjQ2MH0.1ZEMsUleNaBrePUuagdZAKL2gYA-9-vM9wrTIW8-tdU';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // GCP Configuration
+    const GCP_BUCKET_NAME = 'roomatch-prod-static-site';
+    const GCP_PROJECT_ID = 'roomatch-prod';
+
+    // Function to upload image to GCP
+    async function uploadImageToGCP(file) {
+        try {
+            // Create a unique filename
+            const timestamp = new Date().getTime();
+            const filename = `User_Pics/${timestamp}_${file.name}`;
+            
+            // Create form data
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('filename', filename);
+            
+            // Send to backend endpoint
+            const response = await fetch('/api/upload-to-gcp', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) {
+                throw new Error('Upload failed');
+            }
+            
+            const data = await response.json();
+            return data.publicUrl;
+        } catch (error) {
+            console.error('Error uploading to GCP:', error);
+            throw error;
+        }
+    }
+
+    // --- Onboarding Steps Data ---
+    const steps = [
+      // Personal Info Steps
+      {
+        title: "What's Your Name?",
+        subtitle: "Let's Get to Know Each Other",
+        render: () => `
+          <input id='nameInput' class='onboard-input' type='text' placeholder='John Dope' maxlength='32' autocomplete='off' />
+          <input id='idInput' class='onboard-input' type='text' placeholder='Please add ID' maxlength='20' autocomplete='off' />
+        `,
+        validate: () => {
+          const name = document.getElementById('nameInput').value.trim();
+          const id = document.getElementById('idInput').value.trim();
+          if (!name) return 'Please enter your name!';
+          if (!/^[A-Za-z ]+$/.test(name)) return 'Name must contain only English letters and spaces!';
+          if (!id) return 'Please enter your ID!';
+          if (!/^[A-Za-z0-9]+$/.test(id)) return 'ID must contain only letters and numbers!';
+          return null;
+        },
+        save: () => {
+          const name = document.getElementById('nameInput').value.trim();
+          const id = document.getElementById('idInput').value.trim();
+          localStorage.setItem('user_name', name);
+          localStorage.setItem('user_id', id);
+        }
+      },
+      {
+        title: "Email Address",
+        subtitle: "We'll need your email to stay in touch",
+        render: () => `<input id='emailInput' class='onboard-input' type='email' placeholder='Email Address' maxlength='40' autocomplete='off' />`,
+        validate: () => {
+          const email = document.getElementById('emailInput').value.trim();
+          if (!email) return 'Please enter your email!';
+          if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email)) return 'Please enter a valid email address!';
+          return null;
+        },
+        save: () => {
+          localStorage.setItem('user_email', document.getElementById('emailInput').value.trim());
+        }
+      },
+      {
+        title: "Create a Password",
+        subtitle: "Set a secure password for your account",
+        render: () => `<input id='passwordInput' class='onboard-input' type='password' placeholder='Password' maxlength='32' autocomplete='new-password' />`,
+        validate: () => {
+          const password = document.getElementById('passwordInput').value.trim();
+          if (!password) return 'Please enter your password!';
+          if (password.length < 6) return 'Password must be at least 6 characters!';
+          return null;
+        },
+        save: () => {
+          localStorage.setItem('user_password', document.getElementById('passwordInput').value.trim());
+        }
+      },
+      {
+        title: "About You",
+        subtitle: "Select your gender and write a short bio",
+        render: () => `
+          <div class='mb-4'>
+            <label class='block mb-2 font-semibold'>Gender</label>
+            <div class='flex gap-6 mb-6'>
+              <button type='button' class='gender-btn' data-gender='male'>
+                <i class='fas fa-mars mr-2'></i> Male
+              </button>
+              <button type='button' class='gender-btn' data-gender='female'>
+                <i class='fas fa-venus mr-2'></i> Female
+              </button>
+              <button type='button' class='gender-btn' data-gender='other'>
+                <i class='fas fa-genderless mr-2'></i> Other
+              </button>
+            </div>
+            <label class='block mb-2 font-semibold'>Bio</label>
+            <textarea id='bioInput' class='onboard-input' placeholder='Tell us about yourself...' maxlength='300' rows='7' style='min-height:120px;font-size:1.2rem;'></textarea>
+          </div>
+        `,
+        validate: () => {
+          const gender = document.querySelector('.gender-btn.selected');
+          const bio = document.getElementById('bioInput').value.trim();
+          if (!gender) return 'Please select your gender!';
+          if (!bio) return 'Please write a short bio!';
+          return null;
+        },
+        save: () => {
+          const genderBtn = document.querySelector('.gender-btn.selected');
+          const gender = genderBtn ? genderBtn.getAttribute('data-gender') : '';
+          const bio = document.getElementById('bioInput').value.trim();
+          localStorage.setItem('user_gender', gender);
+          localStorage.setItem('user_bio', bio);
+        }
+      },
+      {
+        title: "How Old Are You?",
+        subtitle: "Let's find your perfect match ✨",
+        render: () => {
+          let ageOptions = '';
+          for (let i = 21; i <= 60; i++) {
+            ageOptions += `<div class='age-option' data-age='${i}'>${i}</div>`;
+          }
+          return `<div class='age-scroll' id='ageScroll'>${ageOptions}</div>`;
+        },
+        validate: () => {
+          const selected = document.querySelector('.age-option.selected');
+          if (!selected) return 'Please select your age!';
+          return null;
+        },
+        save: () => {
+          const selected = document.querySelector('.age-option.selected');
+          if (selected) localStorage.setItem('user_age', selected.dataset.age);
+        }
+      },
+      {
+        title: "Select Interests",
+        subtitle: "Tell us what piques your curiosity and passions",
+        render: () => `
+          <div class='interests-grid' id='interestsGrid'>
+            <button type='button' class='interest-btn'><i class='fas fa-book'></i> Reading</button>
+            <button type='button' class='interest-btn'><i class='fas fa-camera'></i> Photography</button>
+            <button type='button' class='interest-btn'><i class='fas fa-gamepad'></i> Gaming</button>
+            <button type='button' class='interest-btn'><i class='fas fa-music'></i> Music</button>
+            <button type='button' class='interest-btn'><i class='fas fa-plane'></i> Travel</button>
+            <button type='button' class='interest-btn'><i class='fas fa-paint-brush'></i> Painting</button>
+            <button type='button' class='interest-btn'><i class='fas fa-scale-balanced'></i> Politics</button>
+            <button type='button' class='interest-btn'><i class='fas fa-hands-helping'></i> Charity</button>
+            <button type='button' class='interest-btn'><i class='fas fa-utensils'></i> Cooking</button>
+            <button type='button' class='interest-btn'><i class='fas fa-paw'></i> Pets</button>
+            <button type='button' class='interest-btn'><i class='fas fa-basketball-ball'></i> Sports</button>
+            <button type='button' class='interest-btn'><i class='fas fa-tshirt'></i> Fashion</button>
+          </div>
+        `,
+        validate: () => {
+          const selected = document.querySelectorAll('.interest-btn.selected');
+          if (selected.length === 0) return 'Please select at least one interest!';
+          return null;
+        },
+        save: () => {
+          const selected = document.querySelectorAll('.interest-btn.selected');
+          const interests = Array.from(selected).map(btn => btn.textContent.trim());
+          localStorage.setItem('user_interests', JSON.stringify(interests));
+        }
+      },
+      // Roommate Quiz Steps
+      {
+        title: "Let's Start With Yes And No Questions",
+        subtitle: "Help us understand your lifestyle preferences.",
+        render: () => `
+          <div class='space-y-8'>
+            <div class='text-left'>
+              <p class='text-gray-700 mb-3'>Do you work or study from home?</p>
+              <div class='flex gap-4'>
+                <button type='button' class='quiz-yn-btn px-5 py-2.5 rounded-full border border-purple-800 text-purple-800 hover:bg-purple-100' data-q='work_home' data-a='yes'>YES</button>
+                <button type='button' class='quiz-yn-btn px-5 py-2.5 rounded-full border border-purple-800 text-purple-800 hover:bg-purple-100' data-q='work_home' data-a='no'>NO</button>
+              </div>
+            </div>
+            <div class='text-left'>
+              <p class='text-gray-700 mb-3'>Do you agree to share responsibility for cleaning?</p>
+              <div class='flex gap-4'>
+                <button type='button' class='quiz-yn-btn px-5 py-2.5 rounded-full border border-purple-800 text-purple-800 hover:bg-purple-100' data-q='cleaning_resp' data-a='yes'>YES</button>
+                <button type='button' class='quiz-yn-btn px-5 py-2.5 rounded-full border border-purple-800 text-purple-800 hover:bg-purple-100' data-q='cleaning_resp' data-a='no'>NO</button>
+              </div>
+            </div>
+            <div class='text-left'>
+              <p class='text-gray-700 mb-3'>Do you have a pet or are you planning to get one?</p>
+              <div class='flex gap-4'>
+                <button type='button' class='quiz-yn-btn px-5 py-2.5 rounded-full border border-purple-800 text-purple-800 hover:bg-purple-100' data-q='pet' data-a='yes'>YES</button>
+                <button type='button' class='quiz-yn-btn px-5 py-2.5 rounded-full border border-purple-800 text-purple-800 hover:bg-purple-100' data-q='pet' data-a='no'>NO</button>
+              </div>
+            </div>
+            <div class='text-left'>
+              <p class='text-gray-700 mb-3'>Do you smoke?</p>
+              <div class='flex gap-4'>
+                <button type='button' class='quiz-yn-btn px-5 py-2.5 rounded-full border border-purple-800 text-purple-800 hover:bg-purple-100' data-q='smoke' data-a='yes'>YES</button>
+                <button type='button' class='quiz-yn-btn px-5 py-2.5 rounded-full border border-purple-800 text-purple-800 hover:bg-purple-100' data-q='smoke' data-a='no'>NO</button>
+              </div>
+            </div>
+            <div class='text-left'>
+              <p class='text-gray-700 mb-3'>Are you comfortable with a partner who smokes?</p>
+              <div class='flex gap-4'>
+                <button type='button' class='quiz-yn-btn px-5 py-2.5 rounded-full border border-purple-800 text-purple-800 hover:bg-purple-100' data-q='ok_smoke' data-a='yes'>YES</button>
+                <button type='button' class='quiz-yn-btn px-5 py-2.5 rounded-full border border-purple-800 text-purple-800 hover:bg-purple-100' data-q='ok_smoke' data-a='no'>NO</button>
+              </div>
+            </div>
+          </div>
+        `,
+        validate: () => {
+          const questions = ['work_home','cleaning_resp','pet','smoke','ok_smoke'];
+          for (let q of questions) {
+            if (!window.quizAnswers || !window.quizAnswers[q]) return 'Please answer all yes/no questions!';
+          }
+          return null;
+        },
+        save: () => {
+          localStorage.setItem('roommate_quiz_yn', JSON.stringify(window.quizAnswers));
+        }
+      },
+      {
+        title: "We Are Not Petty, We Just Want To Find You The Perfect Roommate",
+        subtitle: "A few more details about your habits.",
+        render: () => `
+          <div class='space-y-8 text-left'>
+            <div>
+              <p class='text-gray-700 mb-3'>How important is cleanliness at home to you, from 1 to 5?</p>
+              <div class='flex gap-2'>
+                ${[1,2,3,4,5].map(n => `<input type='radio' name='cleanliness' value='${n}' class='w-5 h-5 quiz-radio'>`).join('')}
+              </div>
+            </div>
+            <div>
+              <p class='text-gray-700 mb-3'>How often do you prefer to clean the common areas?</p>
+              <div class='space-y-3'>
+                <label class='block'><input type='radio' name='cleaning' value='Once a week' class='w-5 h-5 quiz-radio'> Once a week</label>
+                <label class='block'><input type='radio' name='cleaning' value='Once every two weeks' class='w-5 h-5 quiz-radio'> Once every two weeks</label>
+                <label class='block'><input type='radio' name='cleaning' value='Once a month' class='w-5 h-5 quiz-radio'> Once a month</label>
+              </div>
+            </div>
+            <div>
+              <p class='text-gray-700 mb-3'>How often do you invite friends or guests home?</p>
+              <div class='space-y-3'>
+                <label class='block'><input type='radio' name='guests' value='Once a week' class='w-5 h-5 quiz-radio'> Once a week</label>
+                <label class='block'><input type='radio' name='guests' value='Once every two weeks' class='w-5 h-5 quiz-radio'> Once every two weeks</label>
+                <label class='block'><input type='radio' name='guests' value='Once a month' class='w-5 h-5 quiz-radio'> Once a month</label>
+              </div>
+            </div>
+            <div>
+              <p class='text-gray-700 mb-3'>How sensitive are you to noise during study or rest hours?</p>
+              <div class='space-y-3'>
+                <label class='block'><input type='radio' name='noise' value='very sensitive' class='w-5 h-5 quiz-radio'> very sensitive</label>
+                <label class='block'><input type='radio' name='noise' value='acceptable to me' class='w-5 h-5 quiz-radio'> acceptable to me</label>
+                <label class='block'><input type='radio' name='noise' value='Not sensitive at all' class='w-5 h-5 quiz-radio'> Not sensitive at all</label>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: "Photo Upload",
+        subtitle: "Add a profile picture",
+        render: () => `
+          <input id='photo-upload' type='file' accept='image/*' class='hidden'>
+          <label for='photo-upload' class='photo-upload-box'>
+            <div class='plus-circle'>+</div>
+          </label>
+          <img class='photo-preview' id='photo-preview' style='display:none;'/>
+          <div id='upload-progress' style='display:none;' class='mt-4 text-center'>
+            <p class='text-gray-600 mb-2'>Uploading...</p>
+            <div class='w-full bg-gray-200 rounded-full h-2.5'>
+              <div class='bg-purple-600 h-2.5 rounded-full' style='width: 0%' id='progress-bar'></div>
+            </div>
+          </div>
+        `,
+        validate: () => {
+          const photoInput = document.getElementById('photo-upload');
+          if (!photoInput || !photoInput.files.length) return 'Please upload a photo!';
+          return null;
+        },
+        save: async () => {
+          const photoInput = document.getElementById('photo-upload');
+          const file = photoInput.files[0];
+          if (file) {
+            try {
+              // Show progress
+              const progressDiv = document.getElementById('upload-progress');
+              const progressBar = document.getElementById('progress-bar');
+              progressDiv.style.display = 'block';
+              
+              // Upload to GCP
+              const publicUrl = await uploadImageToGCP(file);
+              
+              // Update preview and store URL
+              const photoPreview = document.getElementById('photo-preview');
+              photoPreview.src = publicUrl;
+              photoPreview.style.display = 'block';
+              localStorage.setItem('user_photo_url', publicUrl);
+              
+              // Hide progress
+              progressDiv.style.display = 'none';
+            } catch (error) {
+              alert('Error uploading photo: ' + error.message);
+              throw error;
+            }
+          }
+        }
+      },
+      {
+        title: "All Set!",
+        subtitle: "Here's a quick summary before you continue:",
+        render: () => {
+          const name = localStorage.getItem('user_name') || '';
+          const email = localStorage.getItem('user_email') || '';
+          const age = localStorage.getItem('user_age') || '';
+          const interests = JSON.parse(localStorage.getItem('user_interests') || '[]');
+          const quizYN = JSON.parse(localStorage.getItem('roommate_quiz_yn') || '{}');
+          const quizRadio = JSON.parse(localStorage.getItem('roommate_quiz_radio') || '{}');
+          const photo = localStorage.getItem('user_photo_url');
+          return `
+            <div class='onboard-summary'>
+              <div><b>Name:</b> ${name}</div>
+              <div><b>Email:</b> ${email}</div>
+              <div><b>Age:</b> ${age}</div>
+              <div><b>Interests:</b> ${interests.map(i => `<span>${i}</span>`).join('')}</div>
+              <div><b>Roommate Quiz:</b><br>
+                <ul style='margin-left:1em;'>
+                  <li>Work/study from home: <b>${quizYN.work_home || '-'}</b></li>
+                  <li>Share cleaning: <b>${quizYN.cleaning_resp || '-'}</b></li>
+                  <li>Pet: <b>${quizYN.pet || '-'}</b></li>
+                  <li>Smoke: <b>${quizYN.smoke || '-'}</b></li>
+                  <li>OK with smoking roommate: <b>${quizYN.ok_smoke || '-'}</b></li>
+                  <li>Cleanliness (1-5): <b>${quizRadio.cleanliness || '-'}</b></li>
+                  <li>Cleaning frequency: <b>${quizRadio.cleaning || '-'}</b></li>
+                  <li>Guests: <b>${quizRadio.guests || '-'}</b></li>
+                  <li>Noise sensitivity: <b>${quizRadio.noise || '-'}</b></li>
+                </ul>
+              </div>
+              <div><b>Photo:</b><br>${photo ? `<img src='${photo}' style='max-width:120px;max-height:120px;border-radius:1rem;margin-top:0.5em;'/>` : 'No photo uploaded.'}</div>
+            </div>
+            <div class='onboard-subtitle'>Ready to start your Roomatch journey?</div>
+          `;
+        },
+        validate: () => null,
+        save: async () => {
+          const id = localStorage.getItem('user_id');
+          const name = localStorage.getItem('user_name');
+          const email = localStorage.getItem('user_email');
+          const password = localStorage.getItem('user_password');
+          const age = localStorage.getItem('user_age');
+          const interests = JSON.parse(localStorage.getItem('user_interests') || '[]');
+          const gender = localStorage.getItem('user_gender') || null;
+          const bio = localStorage.getItem('user_bio') || null;
+          const photo_url = localStorage.getItem('user_photo_url');
+          
+          // Insert into Supabase users
+          const { data, error } = await supabaseClient
+            .from('users')
+            .insert([{
+              id: id,
+              full_name: name,
+              email: email,
+              password_hash: password,
+              age: age ? parseInt(age) : null,
+              interests: interests,
+              gender: gender,
+              bio: bio,
+              profile_image_url: localStorage.getItem('user_photo_url') || null
+            }]);
+          if (error) {
+            alert('Error saving to database: ' + error.message);
+            throw error;
+          }
+          // Insert blank user_preferences row
+          const { error: prefInsertError } = await supabaseClient
+            .from('user_preferences')
+            .insert([{ user_id: parseInt(id) }]);
+          if (prefInsertError) {
+            alert('Error creating preferences row: ' + JSON.stringify(prefInsertError));
+            throw prefInsertError;
+          }
+          // Update user_preferences row with quiz answers
+          const quizYN = JSON.parse(localStorage.getItem('roommate_quiz_yn') || '{}');
+          const quizRadio = JSON.parse(localStorage.getItem('roommate_quiz_radio') || '{}');
+          const preferences = {
+            works_from_home: quizYN.work_home === 'yes',
+            shares_cleaning: quizYN.cleaning_resp === 'yes',
+            has_or_wants_pet: quizYN.pet === 'yes',
+            smokes: quizYN.smoke === 'yes',
+            ok_with_smoker: quizYN.ok_smoke === 'yes',
+            cleanliness_importance: quizRadio.cleanliness ? parseInt(quizRadio.cleanliness) : null,
+            cleaning_frequency: quizRadio.cleaning || null,
+            guest_frequency: quizRadio.guests || null,
+            noise_sensitivity: quizRadio.noise || null
+          };
+          const { error: prefUpdateError } = await supabaseClient
+            .from('user_preferences')
+            .update(preferences)
+            .eq('user_id', parseInt(id));
+          if (prefUpdateError) {
+            alert('Error updating preferences: ' + JSON.stringify(prefUpdateError));
+            throw prefUpdateError;
+          }
+        }
+      }
+    ];
+
+    let currentStep = 0;
+    let quizAnswers = {};
+    try {
+      const stored = localStorage.getItem('roommate_quiz_yn');
+      if (stored) quizAnswers = JSON.parse(stored);
+    } catch (e) { quizAnswers = {}; }
+    const stepContent = document.getElementById('stepContent');
+    const errorMsg = document.getElementById('errorMsg');
+    const nextBtn = document.getElementById('nextBtn');
+    const stepIndicator = document.getElementById('stepIndicator');
+
+    function renderStep() {
+      // Step dots
+      stepIndicator.innerHTML = '';
+      for (let i = 0; i < steps.length; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'onboard-step-dot' + (i === currentStep ? ' active' : '');
+        stepIndicator.appendChild(dot);
+      }
+      // Content
+      let backBtn = '';
+      if (currentStep === 0) {
+        backBtn = `<button type='button' id='backBtn' class='back-btn'>Back</button>`;
+      } else if (currentStep > 0) {
+        backBtn = `<button type='button' id='backBtn' class='back-btn'>Back</button>`;
+      }
+      stepContent.innerHTML = `
+        <div class='onboard-title' ${currentStep === 0 ? 'onclick="window.location.href=\'index.html\'"' : ''}>${steps[currentStep].title}</div>
+        <div class='onboard-subtitle'>${steps[currentStep].subtitle}</div>
+        ${steps[currentStep].render()}
+      `;
+      errorMsg.textContent = '';
+      // Special step logic
+      if (currentStep === 4) { // Age
+        document.querySelectorAll('.age-option').forEach(opt => {
+          opt.addEventListener('click', () => {
+            document.querySelectorAll('.age-option').forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+            opt.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          });
+        });
+        const savedAge = localStorage.getItem('user_age');
+        if (savedAge) {
+          const ageOption = document.querySelector(`.age-option[data-age='${savedAge}']`);
+          if (ageOption) {
+            ageOption.classList.add('selected');
+            ageOption.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+      }
+      if (currentStep === 5) { // Interests
+        document.querySelectorAll('.interest-btn').forEach(btn => {
+          btn.addEventListener('click', () => btn.classList.toggle('selected'));
+        });
+      }
+      if (currentStep === 6) { // Roommate Quiz Yes/No
+        window.quizAnswers = {};
+        document.querySelectorAll('.quiz-yn-btn').forEach(btn => {
+          btn.classList.remove('selected');
+          btn.addEventListener('click', () => {
+            const q = btn.getAttribute('data-q');
+            const a = btn.getAttribute('data-a');
+            document.querySelectorAll(`.quiz-yn-btn[data-q='${q}']`).forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            window.quizAnswers[q] = a;
+          });
+        });
+      }
+      if (currentStep === 7) {
+        // Radios work natively
+      }
+      if (currentStep === 8) { // Photo Upload
+        window.onboardPhotoDataUrl = window.onboardPhotoDataUrl || null;
+        const photoInput = document.getElementById('photo-upload');
+        const photoPreview = document.getElementById('photo-preview');
+        if (photoInput) {
+          photoInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                photoPreview.src = e.target.result;
+                photoPreview.style.display = 'block';
+                window.onboardPhotoDataUrl = e.target.result;
+              };
+              reader.readAsDataURL(file);
+            } else {
+              photoPreview.src = '';
+              photoPreview.style.display = 'none';
+              window.onboardPhotoDataUrl = null;
+            }
+          });
+        }
+      }
+      if (currentStep === steps.length - 1) {
+        nextBtn.textContent = 'Finish';
+      } else {
+        nextBtn.textContent = 'Continue';
+      }
+      const oldBackBtn = document.getElementById('backBtn');
+      if (oldBackBtn) oldBackBtn.remove();
+      if (backBtn) {
+        nextBtn.insertAdjacentHTML('afterend', backBtn);
+        const backBtnEl = document.getElementById('backBtn');
+        if (backBtnEl) {
+          if (currentStep === 0) {
+            backBtnEl.onclick = function() {
+              window.location.href = 'index.html';
+            };
+          } else {
+            backBtnEl.onclick = function() {
+              if (currentStep > 0) {
+                currentStep--;
+                renderStep();
+              }
+            };
+          }
+        }
+      }
+    }
+
+    nextBtn.onclick = async function() {
+      const validate = steps[currentStep].validate;
+      const save = steps[currentStep].save;
+      const error = validate ? validate() : null;
+      if (error) {
+        errorMsg.textContent = error;
+        return;
+      }
+      if (save) await save();
+      if (currentStep < steps.length - 1) {
+        currentStep++;
+        renderStep();
+      } else {
+        window.location.href = 'apt-room.html';
+      }
+    };
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && document.activeElement.tagName !== 'BUTTON') {
+        e.preventDefault();
+        nextBtn.click();
+      }
+    });
+
+    // Gender button selection logic
+    document.addEventListener('click', function(e) {
+      if (e.target.closest('.gender-btn')) {
+        document.querySelectorAll('.gender-btn').forEach(btn => btn.classList.remove('selected'));
+        e.target.closest('.gender-btn').classList.add('selected');
+      }
+    });
+
+    renderStep();
+
+    window.getOnboardingData = function() {
+      return {
+        name: localStorage.getItem('user_name') || '',
+        email: localStorage.getItem('user_email') || '',
+        password: localStorage.getItem('user_password') || '',
+        age: localStorage.getItem('user_age') || '',
+        interests: JSON.parse(localStorage.getItem('user_interests') || '[]'),
+        quiz_yn: JSON.parse(localStorage.getItem('roommate_quiz_yn') || '{}'),
+        quiz_radio: JSON.parse(localStorage.getItem('roommate_quiz_radio') || '{}'),
+        photo: localStorage.getItem('user_photo_url') || ''
+      };
+    }
+  </script>
+</body>
+</html>

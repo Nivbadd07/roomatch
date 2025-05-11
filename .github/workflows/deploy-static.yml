@@ -1,0 +1,27 @@
+name: Deploy Frontend to GCP
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: Prod
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Upload HTML to GCS bucket
+        uses: google-github-actions/upload-cloud-storage@v1
+        with:
+          path: ./html
+          destination: roomatch-prod-static-site
+          parent: false

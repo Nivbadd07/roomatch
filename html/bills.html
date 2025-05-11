@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Split The Bills</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: linear-gradient(to bottom, #f7d5ea 0%, #e3dafb 60%, #e3dafb 100%);
+      overflow-y: auto;
+      position: relative;
+      padding-bottom: 20px; /* Reduced padding since we removed the navbar */
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      background: linear-gradient(135deg, #f7d5ea 0%, #e3dafb 100%);
+      clip-path: ellipse(70% 100% at 50% 0%);
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      background: linear-gradient(135deg, #e3dafb 0%, #f7d5ea 100%);
+      clip-path: ellipse(70% 100% at 50% 100%);
+      z-index: 0;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 500px;
+      margin: 20px auto;
+      padding-bottom: 20px; /* Reduced padding since we removed the navbar */
+    }
+  </style>
+</head>
+<body>
+  <div class="content w-full max-w-md bg-white shadow-lg rounded-3xl my-10 pb-32">
+
+    <!-- Header -->
+    <div class="text-purple-800 p-6 rounded-b-3xl text-center relative">
+      <a href="roomate.html" class="absolute left-4 top-4 text-purple-800 text-2xl">&larr;</a>
+      <h2 class="text-lg font-semibold">Split The Bills</h2>
+      <button class="absolute right-4 top-4 text-purple-800 text-2xl">&#x22EF;</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="bg-purple-800 text-white text-center py-8 px-4 rounded-b-3xl">
+      <div class="mb-2">
+        <div class="w-12 h-12 bg-white text-purple-800 mx-auto rounded-full flex items-center justify-center">
+          <i class="fas fa-home text-purple-800 text-xl"></i>
+        </div>
+      </div>
+      <p id="overall-balance" class="text-sm">No debts yet</p>
+      <p class="text-2xl font-bold" id="total-amount">0$</p>
+      <div class="flex justify-center gap-4 mt-4">
+        <button id="settle-btn" class="bg-white text-purple-800 py-2 px-4 rounded-full">Settle Up</button>
+        <button id="balance-btn" class="bg-white text-purple-800 py-2 px-4 rounded-full">Balances</button>
+      </div>
+      <div class="flex justify-center gap-6 text-white text-2xl mt-6">
+        <span id="todoListIcon" style="cursor:pointer;"><i class="fas fa-list text-white"></i></span>
+        <span id="shoppingListIcon" style="cursor:pointer;"><i class="fas fa-shopping-cart text-white"></i></span>
+      </div>
+    </div>
+
+    <!-- Balance Form -->
+    <div id="balance-form" class="p-4 hidden">
+      <form class="bg-white p-4 rounded-lg shadow">
+        <h3 class="text-lg font-semibold mb-2 text-purple-800">Add New Balance</h3>
+        <input type="text" id="from-user" placeholder="Who Owes?" class="border p-2 mb-2 w-full rounded" required>
+        <input type="text" id="to-user" placeholder="To Who?" class="border p-2 mb-2 w-full rounded" required>
+        <input type="text" id="description" placeholder="What for?" class="border p-2 mb-2 w-full rounded" required>
+        <input type="number" id="amount" placeholder="Amount $" class="border p-2 mb-2 w-full rounded" required>
+        <button type="submit" class="w-full bg-purple-800 text-white p-2 rounded mt-2">Add Balance</button>
+      </form>
+    </div>
+
+    <!-- Balances List -->
+    <div id="balances-list" class="p-4"></div>
+
+    <!-- Totals List -->
+    <div id="totals-list" class="p-4"></div>
+
+  </div>
+
+  <script>
+    let balances = [];
+  
+    function renderBalances() {
+      const balancesList = document.getElementById('balances-list');
+      const totalsList = document.getElementById('totals-list');
+      const totalAmount = document.getElementById('total-amount');
+      const overallBalance = document.getElementById('overall-balance');
+  
+      balancesList.innerHTML = '';
+      totalsList.innerHTML = '';
+      let total = 0;
+      const netOwes = {};
+  
+      balances.forEach(balance => {
+        balancesList.innerHTML += `
+          <div class="bg-white p-4 rounded-lg shadow mb-4">
+            <p class="text-gray-600 text-sm">${balance.from} owes ${balance.to}</p>
+            <p class="text-gray-500 text-sm mb-2">Reason: ${balance.description}</p>
+            <p class="text-xl font-bold text-right">${balance.amount}$</p>
+          </div>
+        `;
+  
+        total += parseFloat(balance.amount);
+  
+        const key = `${balance.from}->${balance.to}`;
+        if (!netOwes[key]) {
+          netOwes[key] = 0;
+        }
+        netOwes[key] += parseFloat(balance.amount);
+      });
+  
+      totalAmount.textContent = total + '$';
+      overallBalance.textContent = balances.length ? 'Active debts' : 'No debts yet';
+  
+      const netBetween = {};
+  
+      Object.keys(netOwes).forEach(key => {
+        const [fromUser, toUser] = key.split('->');
+        const reverseKey = `${toUser}->${fromUser}`;
+  
+        if (netOwes[reverseKey]) {
+          const diff = netOwes[key] - netOwes[reverseKey];
+          if (diff > 0) {
+            netBetween[`${fromUser}->${toUser}`] = diff;
+          } else if (diff < 0) {
+            netBetween[`${toUser}->${fromUser}`] = -diff;
+          }
+          delete netOwes[reverseKey];
+        } else {
+          netBetween[key] = netOwes[key];
+        }
+      });
+  
+      for (const pair in netBetween) {
+        const [from, to] = pair.split('->');
+        totalsList.innerHTML += `
+          <div class="bg-white p-4 rounded-lg shadow mb-2">
+            <p class="text-purple-800 font-semibold">${from} needs to pay ${netBetween[pair]}$ to ${to}</p>
+          </div>
+        `;
+      }
+    }
+  
+    document.getElementById('balance-btn').addEventListener('click', () => {
+      const form = document.getElementById('balance-form');
+      form.classList.toggle('hidden');
+      document.getElementById('success-message')?.remove();
+    });
+  
+    document.getElementById('balance-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+  
+      const fromInput = document.getElementById('from-user');
+      const toInput = document.getElementById('to-user');
+      const descriptionInput = document.getElementById('description');
+      const amountInput = document.getElementById('amount');
+  
+      const from = fromInput.value.trim();
+      const to = toInput.value.trim();
+      const description = descriptionInput.value.trim();
+      const amount = amountInput.value.trim();
+  
+      if (from && to && description && amount) {
+        balances.push({ from, to, description, amount });
+        renderBalances();
+  
+        fromInput.value = '';
+        toInput.value = '';
+        descriptionInput.value = '';
+        amountInput.value = '';
+  
+        this.classList.add('hidden');
+  
+        const successMsg = document.createElement('div');
+        successMsg.id = 'success-message';
+        successMsg.className = 'bg-green-100 text-green-800 p-2 mt-2 rounded text-center text-sm animate-fadeIn';
+        successMsg.innerText = 'Balance added successfully!';
+        document.querySelector('.p-4').prepend(successMsg);
+  
+        setTimeout(() => {
+          successMsg.remove();
+        }, 3000);
+      }
+    });
+  
+    document.getElementById('settle-btn').addEventListener('click', () => {
+      balances = [];
+      renderBalances();
+    });
+  
+    document.getElementById('todoListIcon').onclick = function() {
+      window.location.href = 'todo-list.html';
+    };
+    document.getElementById('shoppingListIcon').onclick = function() {
+      window.location.href = 'shoping-list.html';
+    };
+  
+    renderBalances();
+  </script>
+  
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+</style>
+
+</body>
+</html>

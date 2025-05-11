@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Discover Apartments</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #fde2f3 0%, #e0d9ff 50%, #f3e8ff 100%);
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      background-size: cover;
+      position: relative;
+      min-height: 100vh;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    .wave1 {
+      position: fixed;
+      width: 200%;
+      height: 100%;
+      left: 50%;
+      top: 0;
+      transform: translateX(-50%);
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23f8bbd0" fill-opacity="1" d="M0,32L40,37.3C80,43,160,53,240,80C320,107,400,149,480,165.3C560,181,640,171,720,165.3C800,160,880,160,960,170.7C1040,181,1120,203,1200,197.3C1280,192,1360,160,1400,144L1440,128L1440,0L1400,0C1360,0,1280,0,1200,0C1120,0,1040,0,960,0C880,0,800,0,720,0C640,0,560,0,480,0C400,0,320,0,240,0C160,0,80,0,40,0L0,0Z"></path></svg>') no-repeat center center;
+      background-size: cover;
+      opacity: 0.4;
+      z-index: 1;
+      animation: waveMove 12s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes waveMove {
+      0% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-48%) translateY(10px); }
+      100% { transform: translateX(-50%) translateY(0); }
+    }
+
+    .content {
+      position: relative;
+      z-index: 10;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-purple-100 to-pink-100">
+
+  <!-- גל ברקע -->
+  <div class="wave1"></div>
+
+  <!-- Main container -->
+  <div class="max-w-2xl mx-auto pt-6">
+    <div class="flex justify-between items-center mb-6">
+      <div class="flex items-center gap-2 text-sm text-purple-800">
+        <i class="fas fa-map-marker-alt"></i>
+        <a id="user-location" href="location.html" class="hover:underline cursor-pointer text-purple-800">Detecting location...</a>
+      </div>
+    </div>
+    <h1 class="text-2xl font-bold text-center text-purple-900 mb-8">Discover apartments</h1>
+    <div id="apartment-feed" class="flex flex-col gap-8"></div>
+  </div>
+
+  <!-- Schedule Tour Modal -->
+  <div id="scheduleModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl p-6 shadow-lg w-80 relative">
+      <button id="closeModal" class="absolute top-2 right-2 text-gray-400 hover:text-purple-700 text-xl">&times;</button>
+      <div class="font-bold text-lg mb-2">Schedule a Tour</div>
+      <label class="block mb-2 text-sm font-medium">Pick a date and time:</label>
+      <input id="tourDateTime" type="datetime-local" class="w-full border border-purple-200 rounded-lg px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-purple-300" />
+      <button id="addToGoogleCal" class="w-full bg-purple-800 hover:bg-purple-900 text-white py-2 rounded-lg font-semibold">Add to Google Calendar</button>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-md z-50">
+    <div class="max-w-md mx-auto px-6 py-2 flex justify-between items-center text-center">
+      <a href="roomate.html">
+        <svg width="24" height="24" viewBox="0 0 16 16" fill="#E48DCE" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 12.234V16L4.515 15.091L9.277 12.234H14C15.103 12.234 16 11.337 16 10.234V2.23401C16 1.13101 15.103 0.234009 14 0.234009H2C0.897 0.234009 0 1.13101 0 2.23401V10.234C0 11.337 0.897 12.234 2 12.234H3ZM2 2.23401H14V10.234H8.723L5 12.468V10.234H2V2.23401Z" />
+        </svg>
+      </a>
+      <a href="apt-feed.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#541257" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1v-6H9v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" />
+        </svg>
+      </a>
+      <a href="upload-apt.html">
+        <svg width="50" height="50" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="14" cy="14" r="14" fill="#A23BB1" />
+          <path d="M14 8V20" stroke="white" stroke-width="2" stroke-linecap="round" />
+          <path d="M8 14H20" stroke="white" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      </a>
+      <a href="roomate.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E48DCE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M7 21v-2a4 4 0 0 1 3-3.87" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+      </a>
+      <a href="#" onclick="return false;">
+        <svg width="24" height="24" viewBox="0 0 16 16" fill="#E48DCE" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 12.234V16L4.515 15.091L9.277 12.234H14C15.103 12.234 16 11.337 16 10.234V2.23401C16 1.13101 15.103 0.234009 14 0.234009H2C0.897 0.234009 0 1.13101 0 2.23401V10.234C0 11.337 0.897 12.234 2 12.234H3ZM2 2.23401H14V10.234H8.723L5 12.468V10.234H2V2.23401Z" />
+        </svg>
+      </a>
+    </div>
+  </nav>
+
+  <script>
+    // Example dynamic data array
+    const apartments = [
+      {
+        match: '86% Match!',
+        matchStars: '★★★★★',
+        image: 'https://www.israelsir.co.il/wp-content/uploads/2021/11/%D7%9C%D7%92%D7%95%D7%A8-%D7%91%D7%9E%D7%92%D7%93%D7%9C-%D7%99%D7%95%D7%A7%D7%A8%D7%94-%D7%91%D7%A6%D7%A4%D7%95%D7%9F-%D7%94%D7%99%D7%A9%D7%9F-%D7%91%D7%AA%D7%9C-%D7%90%D7%91%D7%99%D7%91.-%D7%A6%D7%99%D7%9C%D7%95%D7%9D-%D7%A1%D7%95%D7%AA%D7%91%D7%99%D7%A1-%D7%99%D7%A9%D7%A8%D7%90%D7%9C-%D7%A0%D7%93%D7%9C%D7%9F-1024x683.jpg',
+        price: '$1,200 / mo',
+        address: 'Hamacabi 7 Tel Aviv',
+        size: '70㎡',
+        baths: '2 baths',
+        beds: '2 beds',
+        roommateImg: 'https://randomuser.me/api/portraits/men/75.jpg',
+        roommate: 'Amit, 25',
+      },
+      {
+        match: '72% Match!',
+        matchStars: '★★★★★',
+        image: 'https://cdn-amgog.nitrocdn.com/HdQZeSilYgMgiXwntjVmFPoQAKkGSgqH/assets/images/optimized/rev-8570349/yeshnadlan.co.il/wp-content/uploads/2025/01/1DSC7172_HDR-592x444.jpeg',
+        price: '$950 / mo',
+        address: 'Dizengoff 12 Tel Aviv',
+        size: '55㎡',
+        baths: '1 bath',
+        beds: '1 bed',
+        roommateImg: 'https://randomuser.me/api/portraits/women/65.jpg',
+        roommate: 'Dana, 27',
+      }
+    ];
+
+    function renderApartments() {
+      const container = document.getElementById('apartment-feed');
+      let apartments = JSON.parse(localStorage.getItem('apartments') || '[]');
+      if (!Array.isArray(apartments)) apartments = [];
+      if (apartments.length === 0) {
+        container.innerHTML = '<div class="text-center text-gray-500 mt-10">No apartments found. Upload your first apartment!</div>';
+        return;
+      }
+      container.innerHTML = '';
+      apartments.forEach((apt, idx) => {
+        const card = document.createElement('div');
+        card.className = 'relative max-w-[400px] mx-auto my-4 p-0 rounded-3xl shadow-xl overflow-hidden border border-purple-200';
+        card.style.background = 'linear-gradient(135deg, #e0d9ff 0%, #c3aee7 100%)';
+        card.innerHTML = `
+          <button class="absolute top-4 right-4 text-gray-400 hover:text-red-500 delete-apt-btn text-xl z-10" title="Delete Listing" data-idx="${idx}"><i class="fas fa-times"></i></button>
+          <img class="w-full h-[220px] object-cover bg-purple-100" src="${(apt.photos && apt.photos.length) ? apt.photos[0] : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" alt="Apartment" />
+          <div class="text-lg font-bold m-4 text-purple-900">${apt.price} <span class="font-normal text-gray-500">/ mo</span></div>
+          <div class="px-4 text-sm text-gray-700">
+            <div><strong>
+              ${apt.city ? `<a href='location.html' class='text-purple-800 hover:underline cursor-pointer'>${apt.city}</a>` : ''}
+            </strong></div>
+            <div class="flex justify-between mt-2 mb-3">
+              <div class="flex items-center gap-1"><i class="fas fa-ruler-combined"></i> ${apt.size || ''}</div>
+              <div class="flex items-center gap-1"><i class="fas fa-bath"></i> ${apt.baths || ''}</div>
+              <div class="flex items-center gap-1"><i class="fas fa-bed"></i> ${apt.rooms ? apt.rooms + ' rooms' : ''}</div>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2 px-4 mb-2">
+            ${(apt.features || []).map(f => `<span class='px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs'>${f}</span>`).join(' ')}
+          </div>
+          <div class="px-4 text-xs text-gray-600 mb-2">
+            ${apt.contract ? '<i class=\'fas fa-file-signature\'></i> Contract: ' + apt.contract + ' | ' : ''}
+            ${apt.furniture ? '<i class=\'fas fa-couch\'></i> Furniture: ' + apt.furniture + ' | ' : ''}
+            ${apt.date ? '<i class=\'fas fa-calendar-alt\'></i> Entry: ' + apt.date : ''}
+          </div>
+          <button class="block mt-4 bg-gradient-to-r from-purple-700 to-pink-500 hover:from-purple-800 hover:to-pink-600 text-white text-center py-3 rounded-xl font-bold mx-4 mb-5 w-full schedule-tour-btn text-lg shadow-lg transition" data-apt="${idx}">Schedule Tour</button>
+        `;
+        container.appendChild(card);
+      });
+    }
+    renderApartments();
+
+    // Delete button logic for apartments
+    document.addEventListener('click', function(e) {
+      if (e.target.closest('.delete-apt-btn')) {
+        const idx = e.target.closest('.delete-apt-btn').getAttribute('data-idx');
+        let apartments = JSON.parse(localStorage.getItem('apartments') || '[]');
+        apartments.splice(idx, 1);
+        localStorage.setItem('apartments', JSON.stringify(apartments));
+        // If user_apartment is the one deleted, remove it too
+        const userApt = JSON.parse(localStorage.getItem('user_apartment') || 'null');
+        if (userApt && JSON.stringify(userApt) === JSON.stringify(apartments[idx])) {
+          localStorage.removeItem('user_apartment');
+        }
+        renderApartments();
+      }
+    });
+
+    // Geolocation for location at the top
+    function setLocationText(text) {
+      document.getElementById('user-location').textContent = text;
+    }
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(async pos => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`);
+          const data = await res.json();
+          if (data.address && (data.address.city || data.address.town || data.address.village)) {
+            setLocationText(data.address.city || data.address.town || data.address.village);
+          } else if (data.display_name) {
+            setLocationText(data.display_name.split(',')[0]);
+          } else {
+            setLocationText('Location found');
+          }
+        } catch {
+          setLocationText('Location found');
+        }
+      }, () => setLocationText('Location unavailable'));
+    } else {
+      setLocationText('Location unavailable');
+    }
+
+    // Schedule Tour Modal logic (dynamic)
+    let selectedAptIdx = null;
+    const scheduleModal = document.getElementById('scheduleModal');
+    const closeModal = document.getElementById('closeModal');
+    const addToGoogleCal = document.getElementById('addToGoogleCal');
+    const tourDateTime = document.getElementById('tourDateTime');
+
+    document.addEventListener('click', function(e) {
+      if (e.target.classList.contains('schedule-tour-btn')) {
+        selectedAptIdx = e.target.getAttribute('data-apt');
+        scheduleModal.classList.remove('hidden');
+      }
+    });
+    closeModal.addEventListener('click', () => {
+      scheduleModal.classList.add('hidden');
+    });
+    scheduleModal.addEventListener('click', (e) => {
+      if (e.target === scheduleModal) scheduleModal.classList.add('hidden');
+    });
+    addToGoogleCal.addEventListener('click', () => {
+      const dt = tourDateTime.value;
+      if (!dt) {
+        alert('Please select a date and time.');
+        return;
+      }
+      let apt;
+      if (selectedAptIdx === 'user') {
+        // User's own apartment
+        apt = JSON.parse(localStorage.getItem('user_apartment') || 'null');
+        if (!apt) {
+          alert('No apartment data found.');
+          return;
+        }
+        apt.address = (apt.city ? apt.city : '') + (apt.area ? ', ' + apt.area : '');
+        apt.roommate = '';
+      } else {
+        apt = apartments[selectedAptIdx];
+      }
+      // Format date/time for Google Calendar (YYYYMMDDTHHMMSSZ)
+      const start = new Date(dt);
+      const end = new Date(start.getTime() + 60 * 60 * 1000); // 1 hour meeting
+      function toGCalFormat(date) {
+        return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+      }
+      const startStr = toGCalFormat(start);
+      const endStr = toGCalFormat(end);
+      const title = encodeURIComponent('Apartment Tour: ' + (apt.address || ''));
+      const details = encodeURIComponent('Schedule a tour for the apartment at ' + (apt.address || '') + (apt.roommate ? '. Roommate: ' + apt.roommate : ''));
+      const location = encodeURIComponent(apt.address || '');
+      const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startStr}/${endStr}&details=${details}&location=${location}`;
+      window.open(url, '_blank');
+      scheduleModal.classList.add('hidden');
+    });
+  </script>
+
+</body>
+
+</html>
