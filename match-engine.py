@@ -231,5 +231,10 @@ def get_roommate_matches(user_id):
     finally:
         db.close()
 
+@app.route('/api/test-log')
+def test_log():
+    print("Test log endpoint hit!")
+    return "Logged!", 200
+
 if __name__ == '__main__':
     app.run(debug=True) 
