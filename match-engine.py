@@ -144,29 +144,27 @@ def get_apartment_matches(user_id):
         scored_matches = []
         for apt in matching_apts:
             score = calculate_apartment_match_score(user_prefs, apt)
-            if score > 0:  # Only include matches with positive scores
-                scored_matches.append({
-                    "apartment": {
-                        "id": apt.id,
-                        "address": apt.address,
-                        "city": apt.city,
-                        "area": apt.area,
-                        "contract_type": apt.contract_type,
-                        "features": apt.features,
-                        "num_rooms": apt.num_rooms,
-                        "price_per_month": apt.price_per_month,
-                        "description": apt.description,
-                        "date_of_entry": apt.date_of_entry.isoformat() if apt.date_of_entry else None,
-                        "image_urls": apt.image_urls,
-                        "roommate_id": apt.roommate_id
-                    },
-                    "match_score": score
-                })
-                
+            scored_matches.append({
+                "apartment": {
+                    "id": apt.id,
+                    "address": apt.address,
+                    "city": apt.city,
+                    "area": apt.area,
+                    "contract_type": apt.contract_type,
+                    "features": apt.features,
+                    "num_rooms": apt.num_rooms,
+                    "price_per_month": apt.price_per_month,
+                    "description": apt.description,
+                    "date_of_entry": apt.date_of_entry.isoformat() if apt.date_of_entry else None,
+                    "image_urls": apt.image_urls,
+                    "roommate_id": apt.roommate_id
+                },
+                "match_score": score
+            })
         # Sort by match score
         scored_matches.sort(key=lambda x: x["match_score"], reverse=True)
-        return jsonify({"results": scored_matches})
-        
+        # Always return at least the top 5 matches
+        return jsonify({"results": scored_matches[:5]})
     finally:
         db.close()
 
@@ -210,24 +208,22 @@ def get_roommate_matches(user_id):
                     roommate,
                     roommate_prefs
                 )
-                if score > 0:
-                    scored_matches.append({
-                        "roommate": {
-                            "id": roommate.id,
-                            "name": roommate.name,
-                            "email": roommate.email,
-                            "age": roommate.age,
-                            "interests": roommate.interests,
-                            "photo": roommate.photo,
-                            "user_type": roommate.user_type
-                        },
-                        "match_score": score
-                    })
-                    
+                scored_matches.append({
+                    "roommate": {
+                        "id": roommate.id,
+                        "name": roommate.name,
+                        "email": roommate.email,
+                        "age": roommate.age,
+                        "interests": roommate.interests,
+                        "photo": roommate.photo,
+                        "user_type": roommate.user_type
+                    },
+                    "match_score": score
+                })
         # Sort by match score
         scored_matches.sort(key=lambda x: x["match_score"], reverse=True)
-        return jsonify({"results": scored_matches})
-        
+        # Always return at least the top 5 matches
+        return jsonify({"results": scored_matches[:5]})
     finally:
         db.close()
 
