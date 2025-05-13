@@ -124,7 +124,7 @@ def get_apartment_matches(user_id):
     try:
         # Get user's apartment preferences
         user_prefs = db.query(UserApartmentPref).filter(
-            UserApartmentPref.user_id == user_id
+            UserApartmentPref.id == user_id
         ).first()
         
         if not user_prefs:
@@ -189,8 +189,9 @@ def get_roommate_matches(user_id):
         # Find potential roommates (users looking for apartments)
         potential_roommates = db.query(User).filter(
             and_(
-                User.user_type == "Looking for Apt",
-                User.id != user_id
+                User.id == User.id,  # This line is just to clarify we use 'id' for users
+                User.id != user_id,
+                User.user_type == "Looking for Apt"
             )
         ).all()
         
@@ -198,7 +199,7 @@ def get_roommate_matches(user_id):
         scored_matches = []
         for roommate in potential_roommates:
             roommate_prefs = db.query(UserApartmentPref).filter(
-                UserApartmentPref.user_id == roommate.id
+                UserApartmentPref.id == roommate.id
             ).first()
             
             if roommate_prefs:
