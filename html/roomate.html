@@ -252,31 +252,35 @@
     renderUserProfile();
 
     // --- Dynamic Roommate Seekers List ---
-    function renderRoommateSeekers() {
+    async function fetchMatchedRoommates() {
+      const userId = localStorage.getItem('user_id');
+      if (!userId) {
+        return { results: [], error: 'User not logged in' };
+      }
+      try {
+        const res = await fetch(`https://roomatch-backend-109620478954.europe-west1.run.app/api/match/roommates/${userId}`);
+        if (!res.ok) throw new Error('Failed to fetch matches');
+        return await res.json();
+      } catch (err) {
+        return { results: [], error: err.message };
+      }
+    }
+
+    async function renderRoommateSeekers() {
       const container = document.getElementById('roommate-list');
-      let roommateSeekers = JSON.parse(localStorage.getItem('roommate_seekers') || '[]');
-      const userEmail = localStorage.getItem('user_email') || '';
-      // Filter out the current user from the roommate list
-      const otherSeekers = roommateSeekers.filter(user => user.email !== userEmail);
-      if (!Array.isArray(otherSeekers) || otherSeekers.length === 0) {
+      container.innerHTML = '<div class="text-center text-gray-400 mt-10">Loading matches...</div>';
+      const { results, error } = await fetchMatchedRoommates();
+      if (error) {
+        container.innerHTML = `<div class='text-center text-red-500 mt-10'>${error}</div>`;
+        return;
+      }
+      if (!Array.isArray(results) || results.length === 0) {
         container.innerHTML = '<div class="text-center text-gray-500 mt-10">No roommates found yet. Be the first to set your preferences!</div>';
         return;
       }
-      // Remove duplicates by email
-      const uniqueSeekers = [];
-      const emails = new Set();
-      otherSeekers.forEach(user => {
-        if (!emails.has(user.email)) {
-          uniqueSeekers.push(user);
-          emails.add(user.email);
-        }
-      });
-      container.innerHTML = ''; // Clear container
-      uniqueSeekers.forEach((user, idx) => {
-        const card = document.createElement('div');
-        card.className = 'relative flex flex-col items-center mb-10 roommate-card bg-white rounded-[20px] overflow-hidden shadow-md w-full max-w-[370px] mx-auto';
-        
-        // Generate interests HTML
+      container.innerHTML = '';
+      results.forEach((match, idx) => {
+        const user = match.roommate;
         let interestsHTML = '';
         if (user.interests && user.interests.length) {
           user.interests.forEach(i => {
@@ -299,15 +303,15 @@
         } else {
           interestsHTML = '<span class="text-purple-600">No interests listed</span>';
         }
-
         const roommatePhoto = user.photo || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-        
+        const card = document.createElement('div');
+        card.className = 'relative flex flex-col items-center mb-10 roommate-card bg-white rounded-[20px] overflow-hidden shadow-md w-full max-w-[370px] mx-auto';
         card.innerHTML = `
-          <button class="absolute top-4 right-4 text-gray-400 hover:text-red-500 delete-roommate-btn text-xl z-10" title="Remove Roommate" data-idx="${idx}">
-            <i class="fas fa-times"></i>
-          </button>
           <div class="absolute top-4 left-4 bg-[#e0d9ff] px-4 py-2 rounded-[16px] font-bold text-sm z-10 text-purple-900">
             <span>Looking for Apartment</span>
+          </div>
+          <div class="absolute top-4 right-4 bg-purple-100 px-3 py-1 rounded-full text-xs font-bold text-purple-900 z-10">
+            ${match.match_score}% Match
           </div>
           <div class="w-full flex justify-center z-20">
             <div class="relative" style="width: 100%; max-width: 370px;">
@@ -321,16 +325,10 @@
               ${interestsHTML}
             </div>
             <div class="flex flex-wrap gap-2 mt-2 text-xs text-gray-700">
-              <span>${user.preferences?.city ? `<a href='location.html' class='text-purple-800 hover:underline cursor-pointer'>${user.preferences.city}</a>` : ''}</span>
-              <span>${user.preferences?.area ? `Area: ${user.preferences.area}` : ''}</span>
-              <span>${user.preferences?.contract ? `Contract: ${user.preferences.contract}` : ''}</span>
-              <span>${user.preferences?.rooms ? `Rooms: ${user.preferences.rooms}` : ''}</span>
-              <span>${user.preferences?.price ? `$${user.preferences.price}` : ''}</span>
-              <span>${user.preferences?.date ? `Entry Date: ${user.preferences.date}` : ''}</span>
+              <span>${user.city ? `<a href='location.html' class='text-purple-800 hover:underline cursor-pointer'>${user.city}</a>` : ''}</span>
             </div>
           </div>
         `;
-        
         container.appendChild(card);
       });
     }
