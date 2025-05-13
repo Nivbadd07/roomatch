@@ -120,14 +120,17 @@ def calculate_roommate_match_score(apartment, owner_prefs, roommate, roommate_pr
 @app.route('/api/match/apartments/<int:user_id>')
 def get_apartment_matches(user_id):
     """Get apartment matches for a user looking for an apartment"""
+    print(f"Received user_id: {user_id}")
     db = SessionLocal()
     try:
-        # Get user's apartment preferences
         user_prefs = db.query(UserApartmentPref).filter(
             UserApartmentPref.id == user_id
         ).first()
-        
+        print(f"user_prefs: {user_prefs}")
         if not user_prefs:
+            # Also print all IDs for debugging
+            all_ids = db.query(UserApartmentPref.id).all()
+            print(f"All user_apartment_search_preferences IDs: {all_ids}")
             return jsonify({"results": []})
             
         # Find matching apartments
