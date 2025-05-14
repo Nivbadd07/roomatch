@@ -6,6 +6,7 @@
   <title>Discover Roommates</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <style>
     body {
       background: linear-gradient(135deg, #fde2f3 0%, #e0d9ff 50%, #f3e8ff 100%);
@@ -134,8 +135,14 @@
   </nav>
 
   <script>
-    // Clear all roommates (as requested)
-    localStorage.setItem('roommate_seekers', '[]');
+    const SUPABASE_URL = 'https://vgkvkmpckneceqfggzes.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZna3ZrbXBja25lY2VxZmdnemVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1NDA0NjAsImV4cCI6MjA2MjExNjQ2MH0.1ZEMsUleNaBrePUuagdZAKL2gYA-9-vM9wrTIW8-tdU';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function getUserId() {
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      return user?.id;
+    }
 
     // Show user's actual location at the top left
     function setLocationText(text) {
@@ -237,24 +244,19 @@
     renderUserProfile();
 
     // --- Dynamic Roommate Seekers List ---
-    async function fetchMatchedRoommates() {
-      const userId = localStorage.getItem('user_id');
-      if (!userId) {
-        return { results: [], error: 'User not logged in' };
-      }
-      try {
-        const res = await fetch(`https://roomatch-backend-109620478954.europe-west1.run.app/api/match/roommates/${userId}`);
-        if (!res.ok) throw new Error('Failed to fetch matches');
-        return await res.json();
-      } catch (err) {
-        return { results: [], error: err.message };
-      }
-    }
-
     async function renderRoommateSeekers() {
       const container = document.getElementById('roommate-list');
       container.innerHTML = '<div class="text-center text-gray-400 mt-10">Loading matches...</div>';
-      const res = await fetch(`https://roomatch-backend-109620478954.europe-west1.run.app/api/match/roommates/${localStorage.getItem('user_id')}`);
+      const userId = await getUserId();
+      if (!userId) {
+        container.innerHTML = '<div class="text-center text-red-500 mt-10">User not logged in.</div>';
+        return;
+      }
+      const res = await fetch(`https://roomatch-backend-109620478954.europe-west1.run.app/api/match/roommates/${userId}`);
+      if (!res.ok) {
+        container.innerHTML = '<div class="text-center text-red-500 mt-10">Failed to load matches.</div>';
+        return;
+      }
       const { results = [] } = await res.json();
       if (!results.length) {
         container.innerHTML = '<div class="text-center text-gray-500 mt-10">No roommates found yet.</div>';
