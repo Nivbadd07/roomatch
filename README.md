@@ -1,70 +1,65 @@
 # RooMatch 🏡
 
-**RooMatch** is a cloud-native web application developed as the final capstone project for our B.Sc. in Information Systems. The platform helps users find compatible roommates, manage shared apartments, and enhance the co-living experience through smart tools and real-time collaboration.
+**RooMatch** is a cloud‑native web platform that matches compatible roommates, simplifies shared‑apartment logistics and elevates the co‑living experience, delivered as the capstone project for my B.Sc. in Information Systems.
 
 ---
 
 ## 🚀 Highlights
 
-- Fully responsive, user-friendly web interface
-- Deployed on Google Cloud Platform (GCP)
-- Dockerized infrastructure with GitLab CI/CD
-- Real-time functionality via WebSockets
-- Developed end-to-end by a 4-person student team
+* Fully responsive single‑page interface built with vanilla **HTML / CSS / JavaScript** and Tailwind, optimised for desktop and mobile alike.
+* Backend microservices: a \*\*Node.js\*\* (Express) API **and** a lightweight \*\*Python (Flask) match‑engine\*\* — both containerised and auto‑scaling on \*\*Google Cloud Run\*\*.
+* Static assets and user‑generated media served from **Google Cloud Storage** with signed‑URL uploads for secure, direct‑from‑browser transfers.
+* Persistent data stored in **Supabase (PostgreSQL)**; near‑real‑time collaboration enabled by native Postgres listen/notify via WebSockets.
+* CI/CD pipeline built on **GitHub Actions** → **Cloud Build**, pushing images to Artifact Registry and promoting to staging / prod automatically on merge.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** HTML, CSS, JavaScript  
-- **Backend:** Node.js, MongoDB, Redis *(coming soon)*  
-- **Cloud & DevOps:**  
-  - Google Cloud Platform (Cloud Run, Storage)  
-  - Docker & Docker Compose  
-  - GitLab CI/CD  
-  - Terraform (Infrastructure as Code)
+| Layer          | Technologies                                                                   |
+| -------------- | ------------------------------------------------------------------------------ |
+| Frontend       | HTML, CSS, JavaScript, Tailwind, Vite build                                    |
+| Backend        | Node.js 20 (Express) & Python 3.12 (Flask) microservices, Multer, WebSocket    |
+| Data           | Supabase Postgres (primary), Redis cache (planned)                             |
+| Cloud & DevOps | Google Cloud Run, Cloud Storage, Cloud Build, Artifact Registry, Terraform IaC |
 
 ---
 
-## 📁 Project Structure (Planned)
+## 📁 Project Structure
 
 ```
 roomatch/
-├── frontend/       # Static frontend: HTML, CSS, JS
-├── backend/        # Node.js REST API and business logic
-├── docker/         # Dockerfiles and container configs
-├── infra/          # Terraform IaC for GCP deployment
-└── README.md
+├── frontend/        # Static site source
+├── backend/         # Node.js API & Dockerfile
+├── infra/           # Terraform modules
+└── .github/         # GitHub Actions workflows
 ```
 
 ---
 
 ## 🌐 Live Deployment
 
-Currently hosted on GCP in a demo environment.  
-Production deployment and mobile version coming soon.
+Development environment live at **[https://roomatch-backend‑](https://roomatch-backend‑)<hash>-ew\.a.run.app** backed by Cloud Run; static frontend is served from **[https://storage.googleapis.com/roomatch-prod-static-site/index.html](https://storage.googleapis.com/roomatch-prod-static-site/index.html)** and linked to the same API.
 
 ---
 
 ## 🔮 Roadmap
 
-- Develop mobile app (React Native or Flutter)
-- Implement user authentication and onboarding
-- Add AI-powered roommate-matching algorithm
-- Enable chat, push notifications, and user dashboards
+* Integrate Google OAuth and JWT for full authentication flow.
+* Add AI‑powered roommate‑matching engine using OpenAI embeddings and pgvector.
+* Implement push notifications via Firebase Cloud Messaging.
+* Release mobile companion app with React Native.
 
 ---
 
-## 👨‍💻 Built By
+## 👨‍💻 Built By
 
-Final-year student from The Academic College of Tel-Aviv–Yaffo:
-
-- **Niv Badash** – Full-stack development, cloud infrastructure, CI/CD  
+**Niv Badash** — full‑stack development, cloud architecture, CI/CD.
 
 ---
 
 ## 🤝 Feedback & Collaboration
 
-Got feedback, ideas, or want to collaborate?  
-Feel free to open an issue or reach out. We’d love to hear from you!
+Open an issue or contact me at **nivbadd@gmail.com** with suggestions or collaboration ideas.
+
 
