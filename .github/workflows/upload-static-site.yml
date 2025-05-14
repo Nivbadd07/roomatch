@@ -1,4 +1,4 @@
-name: Upload Static Site to GCS
+ name: Upload Static Site to GCS
 
 on:
   push:
@@ -13,7 +13,7 @@ jobs:
       - name: Upload Static Site to GCS
         uses: google-github-actions/upload-cloud-storage@v1
         with:
-          path: ./roomatch/html
+          path: html
           destination: roomatch-prod-static-site
           parent: false
           gzip: true
@@ -28,4 +28,4 @@ jobs:
           CLOUDSDK_PROJECT: roomatch-prod
           GCLOUD_PROJECT: roomatch-prod
           GCP_PROJECT: roomatch-prod
-          GOOGLE_CLOUD_PROJECT: roomatch-prod 
+          GOOGLE_CLOUD_PROJECT: roomatch-prod
