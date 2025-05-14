@@ -1,4 +1,4 @@
-name: Upload Static Site to GCS
+name: Deploy Frontend to GCP
 
 on:
   push:
@@ -6,26 +6,22 @@ on:
       - main
 
 jobs:
-  upload:
+  deploy:
     runs-on: ubuntu-latest
+    environment: Prod
+
     steps:
-      - uses: actions/checkout@v2
-      - name: Upload Static Site to GCS
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Upload HTML to GCS bucket
         uses: google-github-actions/upload-cloud-storage@v1
         with:
-          path: html
+          path: ./html
           destination: roomatch-prod-static-site
           parent: false
-          gzip: true
-          resumable: true
-          concurrency: 100
-          process_gcloudignore: true
-        env:
-          CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE: ${{ secrets.GCP_CREDENTIALS_PATH }}
-          GOOGLE_APPLICATION_CREDENTIAL_FILE_OVERRIDE: ${{ secrets.GCP_CREDENTIALS_PATH }}
-          GOOGLE_GHA_CREDS_PATH: ${{ secrets.GCP_CREDENTIALS_PATH }}
-          CLOUDSDK_CORE_PROJECT: roomatch-prod
-          CLOUDSDK_PROJECT: roomatch-prod
-          GCLOUD_PROJECT: roomatch-prod
-          GCP_PROJECT: roomatch-prod
-          GOOGLE_CLOUD_PROJECT: roomatch-prod 
