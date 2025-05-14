@@ -129,46 +129,35 @@
     async function renderApartments() {
       const container = document.getElementById('apartment-feed');
       container.innerHTML = '<div class="text-center text-gray-400 mt-10">Loading matches...</div>';
-      const { results, error } = await fetchMatchedApartments();
-      if (error) {
-        container.innerHTML = `<div class='text-center text-red-500 mt-10'>${error}</div>`;
-        return;
-      }
-      if (!Array.isArray(results) || results.length === 0) {
+      const res = await fetch(`https://roomatch-backend-109620478954.europe-west1.run.app/api/match/apartments/${localStorage.getItem('user_id')}`);
+      const { results = [] } = await res.json();
+      if (!results.length) {
         container.innerHTML = '<div class="text-center text-gray-500 mt-10">No matched apartments found.</div>';
         return;
       }
       container.innerHTML = '';
-      results.forEach((apt, idx) => {
-        const d = apt.details || {};
+      results.forEach(({ apartment, owner }) => {
         const card = document.createElement('div');
         card.className = 'relative max-w-[400px] mx-auto my-4 p-0 rounded-3xl shadow-xl overflow-hidden border border-purple-200';
-        card.style.background = 'linear-gradient(135deg, #e0d9ff 0%, #c3aee7 100%)';
         card.innerHTML = `
-          <div class="absolute top-4 left-4 bg-purple-100 px-4 py-2 rounded-full font-bold text-sm z-10 text-purple-900">
-            ${apt.match_score}% Match
-          </div>
           <div class="px-4 pt-6 pb-2">
-            <div class="text-lg font-bold text-purple-900 mb-2">${d.price ? '$' + d.price : ''} <span class="font-normal text-gray-500">/ mo</span></div>
+            <div class="text-lg font-bold text-purple-900 mb-2">${apartment.price_per_month ? '$' + apartment.price_per_month : ''} <span class="font-normal text-gray-500">/ mo</span></div>
             <div class="text-sm text-gray-700 mb-1">
-              <strong>${d.city ? `<a href='location.html' class='text-purple-800 hover:underline cursor-pointer'>${d.city}</a>` : ''}</strong>
-              ${d.area ? ', ' + d.area : ''}
+              <strong>${apartment.city ? `<a href='location.html' class='text-purple-800 hover:underline cursor-pointer'>${apartment.city}</a>` : ''}</strong>
+              ${apartment.area ? ', ' + apartment.area : ''}
             </div>
-            <div class="flex justify-between mt-2 mb-3 text-xs text-gray-700">
-              <div class="flex items-center gap-1"><i class="fas fa-ruler-combined"></i> ${d.size || ''}</div>
-              <div class="flex items-center gap-1"><i class="fas fa-bath"></i> ${d.baths || ''}</div>
-              <div class="flex items-center gap-1"><i class="fas fa-bed"></i> ${d.rooms ? d.rooms + ' rooms' : ''}</div>
+            <div class="flex items-center gap-2 mt-2">
+              <img src="${owner.profile_img || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="w-8 h-8 rounded-full" />
+              <span>${owner.full_name || ''} ${owner.age ? '(' + owner.age + ')' : ''}</span>
             </div>
             <div class="flex flex-wrap gap-2 mb-2">
-              ${(d.features || []).map(f => `<span class='px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs'>${f}</span>`).join(' ')}
+              ${(apartment.features || []).map(f => `<span class='px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs'>${f}</span>`).join(' ')}
             </div>
             <div class="text-xs text-gray-600 mb-2">
-              ${d.contract ? '<i class=\'fas fa-file-signature\'></i> Contract: ' + d.contract + ' | ' : ''}
-              ${d.furniture ? '<i class=\'fas fa-couch\'></i> Furniture: ' + d.furniture + ' | ' : ''}
-              ${d.date_of_entry ? '<i class=\'fas fa-calendar-alt\'></i> Entry: ' + d.date_of_entry : ''}
+              ${apartment.contract_type ? '<i class=\'fas fa-file-signature\'></i> Contract: ' + apartment.contract_type + ' | ' : ''}
+              ${apartment.date_of_entry ? '<i class=\'fas fa-calendar-alt\'></i> Entry: ' + apartment.date_of_entry : ''}
             </div>
           </div>
-          <button class="block mt-4 bg-gradient-to-r from-purple-700 to-pink-500 hover:from-purple-800 hover:to-pink-600 text-white text-center py-3 rounded-xl font-bold mx-4 mb-5 w-full schedule-tour-btn text-lg shadow-lg transition" data-apt="${idx}">Schedule Tour</button>
         `;
         container.appendChild(card);
       });

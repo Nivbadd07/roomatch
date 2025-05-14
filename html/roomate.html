@@ -269,63 +269,37 @@
     async function renderRoommateSeekers() {
       const container = document.getElementById('roommate-list');
       container.innerHTML = '<div class="text-center text-gray-400 mt-10">Loading matches...</div>';
-      const { results, error } = await fetchMatchedRoommates();
-      if (error) {
-        container.innerHTML = `<div class='text-center text-red-500 mt-10'>${error}</div>`;
-        return;
-      }
-      if (!Array.isArray(results) || results.length === 0) {
-        container.innerHTML = '<div class="text-center text-gray-500 mt-10">No roommates found yet. Be the first to set your preferences!</div>';
+      const res = await fetch(`https://roomatch-backend-109620478954.europe-west1.run.app/api/match/roommates/${localStorage.getItem('user_id')}`);
+      const { results = [] } = await res.json();
+      if (!results.length) {
+        container.innerHTML = '<div class="text-center text-gray-500 mt-10">No roommates found yet.</div>';
         return;
       }
       container.innerHTML = '';
-      results.forEach((match, idx) => {
-        const user = match.roommate;
-        let interestsHTML = '';
-        if (user.interests && user.interests.length) {
-          user.interests.forEach(i => {
-            let icon = '';
-            if (/read/i.test(i)) icon = '<i class="fas fa-book"></i>';
-            else if (/music/i.test(i)) icon = '<i class="fas fa-music"></i>';
-            else if (/cook/i.test(i)) icon = '<i class="fas fa-utensils"></i>';
-            else if (/pet/i.test(i)) icon = '<i class="fas fa-paw"></i>';
-            else if (/sport/i.test(i)) icon = '<i class="fas fa-basketball-ball"></i>';
-            else if (/game/i.test(i)) icon = '<i class="fas fa-gamepad"></i>';
-            else if (/photo/i.test(i)) icon = '<i class="fas fa-camera"></i>';
-            else if (/travel/i.test(i)) icon = '<i class="fas fa-plane"></i>';
-            else if (/paint/i.test(i)) icon = '<i class="fas fa-paint-brush"></i>';
-            else if (/politic/i.test(i)) icon = '<i class="fas fa-scale-balanced"></i>';
-            else if (/charity/i.test(i)) icon = '<i class="fas fa-hands-helping"></i>';
-            else if (/fashion/i.test(i)) icon = '<i class="fas fa-tshirt"></i>';
-            else icon = '<i class="fas fa-star"></i>';
-            interestsHTML += `<span class='flex items-center gap-1'>${icon} ${i}</span>`;
-          });
-        } else {
-          interestsHTML = '<span class="text-purple-600">No interests listed</span>';
-        }
-        const roommatePhoto = user.photo || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+      results.forEach(({ roommate, preferences }) => {
         const card = document.createElement('div');
         card.className = 'relative flex flex-col items-center mb-10 roommate-card bg-white rounded-[20px] overflow-hidden shadow-md w-full max-w-[370px] mx-auto';
         card.innerHTML = `
-          <div class="absolute top-4 left-4 bg-[#e0d9ff] px-4 py-2 rounded-[16px] font-bold text-sm z-10 text-purple-900">
-            <span>Looking for Apartment</span>
-          </div>
-          <div class="absolute top-4 right-4 bg-purple-100 px-3 py-1 rounded-full text-xs font-bold text-purple-900 z-10">
-            ${match.match_score}% Match
-          </div>
           <div class="w-full flex justify-center z-20">
-            <div class="relative" style="width: 100%; max-width: 370px;">
-              <img src="${roommatePhoto}" alt="${user.name}" class="w-full h-64 object-cover rounded-t-2xl shadow-lg" style="position: relative; z-index: 2; background:#f3e8ff;" />
-            </div>
+            <img src="${roommate.profile_img || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="w-24 h-24 rounded-full" />
           </div>
-          <div class="bg-white rounded-b-2xl shadow-md w-full max-w-[370px] -mt-8 pt-10 pb-6 px-4 z-10 relative">
-            <h2 class="text-lg font-bold">${user.name}${user.age ? ', ' + user.age : ''}</h2>
-            <p class="text-sm text-gray-600 mt-1 mb-2">Interests</p>
-            <div class="flex items-center text-purple-800 gap-4 text-sm mb-2">
-              ${interestsHTML}
+          <div class="bg-white rounded-b-2xl shadow-md w-full max-w-[370px] pt-4 pb-6 px-4 z-10 relative">
+            <h2 class="text-lg font-bold">${roommate.full_name}${roommate.age ? ', ' + roommate.age : ''}</h2>
+            <div class="text-xs text-gray-600 mb-2">${roommate.email}</div>
+            <div class="flex flex-wrap gap-2 mb-2">
+              ${(roommate.interests || []).map(i => `<span class='px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs'>${i}</span>`).join(' ')}
+            </div>
+            <div class="text-xs text-gray-700">
+              Prefers: ${preferences.city || ''} ${preferences.area ? ', ' + preferences.area : ''}
+            </div>
+            <div class="text-xs text-gray-700 mt-1">
+              Contract: ${preferences.contract_type || ''} | Price: ${preferences.price_min || ''} - ${preferences.price_max || ''}
+            </div>
+            <div class="text-xs text-gray-700 mt-1">
+              Entry: ${preferences.date_of_entry || ''} | Rooms: ${preferences.num_rooms || ''}
             </div>
             <div class="flex flex-wrap gap-2 mt-2 text-xs text-gray-700">
-              <span>${user.city ? `<a href='location.html' class='text-purple-800 hover:underline cursor-pointer'>${user.city}</a>` : ''}</span>
+              ${(preferences.features || []).map(f => `<span class='px-2 py-1 bg-purple-100 text-purple-800 rounded-full'>${f}</span>`).join(' ')}
             </div>
           </div>
         `;
