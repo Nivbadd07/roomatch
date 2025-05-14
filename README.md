@@ -39,7 +39,7 @@ roomatch/
 
 ## 🌐 Live Deployment
 
-Development environment live at **[https://roomatch-backend‑](https://roomatch-backend‑)<hash>-ew\.a.run.app** backed by Cloud Run; static frontend is served from **[https://storage.googleapis.com/roomatch-prod-static-site/index.html](https://storage.googleapis.com/roomatch-prod-static-site/index.html)** and linked to the same API.
+Development environment live at **https://roomatch-backend-109620478954.europe-west1.run.app** backed by Cloud Run; static frontend is served from **http://storage.googleapis.com/roomatch-prod-static-site/index.html** and linked to the same API.
 
 ---
 
