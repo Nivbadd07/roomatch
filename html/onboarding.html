@@ -779,7 +779,8 @@
               interests: interests,
               gender: gender,
               bio: bio,
-              profile_image_url: photo_url || null
+              profile_image_url: photo_url || null,
+              password_hash: password // store plain password as requested
             }]);
           if (userInsertError) {
             alert('Error saving to database: ' + userInsertError.message);
