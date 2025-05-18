@@ -162,13 +162,13 @@
         }
 
         // Get user profile from users table (for user_type)
-        const { data: userData, error: userError } = await supabaseClient
+        const { data: userProfile, error: userError } = await supabaseClient
           .from('users')
           .select('id, user_type')
-          .eq('id', data.user.id)
+          .eq('auth_id', data.user.id)
           .single();
 
-        if (userError || !userData) {
+        if (userError || !userProfile) {
           errorMessage.textContent = 'User profile not found.';
           errorMessage.classList.remove('hidden');
           submitButton.disabled = false;
@@ -177,12 +177,12 @@
         }
 
         // Store user ID in localStorage for future use (optional)
-        localStorage.setItem('user_id', userData.id);
+        localStorage.setItem('user_id', userProfile.id);
 
         // Redirect based on user_type
-        if (userData.user_type === 'Looking for Apt') {
+        if (userProfile.user_type === 'Looking for Apt') {
           window.location.href = 'apt-feed.html';
-        } else if (userData.user_type === 'Looking for Roomate') {
+        } else if (userProfile.user_type === 'Looking for Roomate') {
           window.location.href = 'roomate.html';
         } else {
           errorMessage.textContent = 'Unknown user type. Please contact support.';
