@@ -179,11 +179,11 @@
         // Store user ID in localStorage for future use (optional)
         localStorage.setItem('user_id', userProfile.id);
 
-        // Redirect based on user_type
+          // Redirect based on user_type
         if (userProfile.user_type === 'Looking for Apt') {
-          window.location.href = 'apt-feed.html';
+            window.location.href = 'apt-feed.html';
         } else if (userProfile.user_type === 'Looking for Roomate') {
-          window.location.href = 'roomate.html';
+            window.location.href = 'roomate.html';
         } else {
           errorMessage.textContent = 'Unknown user type. Please contact support.';
           errorMessage.classList.remove('hidden');
