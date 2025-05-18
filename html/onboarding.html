@@ -750,6 +750,7 @@
         validate: () => null,
         save: async () => {
           const name = localStorage.getItem('user_name');
+          const manualId = localStorage.getItem('user_id'); // Manual user ID from onboarding
           const email = localStorage.getItem('user_email');
           const password = localStorage.getItem('user_password');
           const age = localStorage.getItem('user_age');
@@ -764,14 +765,14 @@
             alert('Error signing up: ' + error.message);
             throw error;
           }
-          const userId = data.user.id;
-          localStorage.setItem('user_id', userId);
+          const authUserId = data.user.id; // Supabase Auth UUID
 
           // 2. Insert into Supabase users table
           const { data: userData, error: userInsertError } = await supabaseClient
             .from('users')
             .insert([{
-              id: userId,
+              id: manualId ? parseInt(manualId) : null, // manual int8
+              auth_id: authUserId, // uuid from Supabase Auth
               full_name: name,
               email: email,
               age: age ? parseInt(age) : null,
@@ -787,7 +788,7 @@
           // 3. Insert blank user_preferences row
           const { error: prefInsertError } = await supabaseClient
             .from('user_preferences')
-            .insert([{ user_id: userId }]);
+            .insert([{ user_id: manualId ? parseInt(manualId) : null }]);
           if (prefInsertError) {
             alert('Error creating preferences row: ' + JSON.stringify(prefInsertError));
             throw prefInsertError;
