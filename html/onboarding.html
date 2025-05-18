@@ -767,6 +767,13 @@
           }
           const authUserId = data.user.id; // Supabase Auth UUID
 
+          // 1.5. Explicitly log in the user to ensure session is set
+          const { error: loginError } = await supabaseClient.auth.signInWithPassword({ email, password });
+          if (loginError) {
+            alert('Error logging in: ' + loginError.message);
+            throw loginError;
+          }
+
           // 2. Insert into Supabase users table
           const { data: userData, error: userInsertError } = await supabaseClient
             .from('users')
