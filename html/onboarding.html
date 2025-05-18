@@ -760,6 +760,7 @@
           const photo_url = localStorage.getItem('user_photo_url');
 
           // 1. Sign up with Supabase Auth
+          console.log('Signing up:', email, password);
           const { data, error } = await supabaseClient.auth.signUp({ email, password });
           if (error) {
             alert('Error signing up: ' + error.message);
@@ -767,7 +768,11 @@
           }
           const authUserId = data.user.id; // Supabase Auth UUID
 
-          // 1.5. Explicitly log in the user to ensure session is set
+          // 1.5. Wait a moment to ensure user is available for login
+          await new Promise(res => setTimeout(res, 1000));
+
+          // 1.6. Explicitly log in the user to ensure session is set
+          console.log('Logging in:', email, password);
           const { error: loginError } = await supabaseClient.auth.signInWithPassword({ email, password });
           if (loginError) {
             alert('Error logging in: ' + loginError.message);
