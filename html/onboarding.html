@@ -749,7 +749,6 @@
         },
         validate: () => null,
         save: async () => {
-          const id = localStorage.getItem('user_id');
           const name = localStorage.getItem('user_name');
           const email = localStorage.getItem('user_email');
           const password = localStorage.getItem('user_password');
@@ -758,54 +757,40 @@
           const gender = localStorage.getItem('user_gender') || null;
           const bio = localStorage.getItem('user_bio') || null;
           const photo_url = localStorage.getItem('user_photo_url');
-          
-          // Insert into Supabase users
-          const { data, error } = await supabaseClient
+
+          // 1. Sign up with Supabase Auth
+          const { data, error } = await supabaseClient.auth.signUp({ email, password });
+          if (error) {
+            alert('Error signing up: ' + error.message);
+            throw error;
+          }
+          const userId = data.user.id;
+          localStorage.setItem('user_id', userId);
+
+          // 2. Insert into Supabase users table
+          const { data: userData, error: userInsertError } = await supabaseClient
             .from('users')
             .insert([{
-              id: id,
+              id: userId,
               full_name: name,
               email: email,
-              password_hash: password,
               age: age ? parseInt(age) : null,
               interests: interests,
               gender: gender,
               bio: bio,
-              profile_image_url: localStorage.getItem('user_photo_url') || null
+              profile_image_url: photo_url || null
             }]);
-          if (error) {
-            alert('Error saving to database: ' + error.message);
-            throw error;
+          if (userInsertError) {
+            alert('Error saving to database: ' + userInsertError.message);
+            throw userInsertError;
           }
-          // Insert blank user_preferences row
+          // 3. Insert blank user_preferences row
           const { error: prefInsertError } = await supabaseClient
             .from('user_preferences')
-            .insert([{ user_id: parseInt(id) }]);
+            .insert([{ user_id: userId }]);
           if (prefInsertError) {
             alert('Error creating preferences row: ' + JSON.stringify(prefInsertError));
             throw prefInsertError;
-          }
-          // Update user_preferences row with quiz answers
-          const quizYN = JSON.parse(localStorage.getItem('roommate_quiz_yn') || '{}');
-          const quizRadio = JSON.parse(localStorage.getItem('roommate_quiz_radio') || '{}');
-          const preferences = {
-            works_from_home: quizYN.work_home === 'yes',
-            shares_cleaning: quizYN.cleaning_resp === 'yes',
-            has_or_wants_pet: quizYN.pet === 'yes',
-            smokes: quizYN.smoke === 'yes',
-            ok_with_smoker: quizYN.ok_smoke === 'yes',
-            cleanliness_importance: quizRadio.cleanliness ? parseInt(quizRadio.cleanliness) : null,
-            cleaning_frequency: quizRadio.cleaning || null,
-            guest_frequency: quizRadio.guests || null,
-            noise_sensitivity: quizRadio.noise || null
-          };
-          const { error: prefUpdateError } = await supabaseClient
-            .from('user_preferences')
-            .update(preferences)
-            .eq('user_id', parseInt(id));
-          if (prefUpdateError) {
-            alert('Error updating preferences: ' + JSON.stringify(prefUpdateError));
-            throw prefUpdateError;
           }
         }
       }
