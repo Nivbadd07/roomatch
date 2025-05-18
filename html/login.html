@@ -143,44 +143,49 @@
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
       const errorMessage = document.getElementById('errorMessage');
-      const submitButton = this.querySelector('button[type=\"submit\"]');
+      const submitButton = this.querySelector('button[type="submit"]');
 
       // Disable button and show loading state
       submitButton.disabled = true;
       submitButton.textContent = 'Logging in...';
 
       try {
-        // Query the users table for the email
-        const { data: userData, error: userError } = await supabaseClient
-          .from('users')
-          .select('id, email, password_hash, user_type')
-          .eq('email', email)
-          .single();
+        // Use Supabase Auth for login
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
-        console.log('userData:', userData);
-        console.log('userError:', userError);
-
-        if (userError) {
-          throw new Error('User not found');
+        if (error) {
+          errorMessage.textContent = error.message || 'Invalid email or password';
+          errorMessage.classList.remove('hidden');
+          submitButton.disabled = false;
+          submitButton.textContent = 'Log In';
+          return;
         }
 
-        // Check if password_hash matches
-        if (userData && userData.password_hash === password) {
-          // Store user ID in localStorage for future use
-          localStorage.setItem('user_id', userData.id);
-          // Redirect based on user_type
-          if (userData.user_type === 'Looking for Apt') {
-            window.location.href = 'apt-feed.html';
-          } else if (userData.user_type === 'Looking for Roomate') {
-            window.location.href = 'roomate.html';
-          } else {
-            // Fallback: show error if user_type is not recognized
-            errorMessage.textContent = 'Unknown user type. Please contact support.';
-            errorMessage.classList.remove('hidden');
-          }
+        // Get user profile from users table (for user_type)
+        const { data: userData, error: userError } = await supabaseClient
+          .from('users')
+          .select('id, user_type')
+          .eq('id', data.user.id)
+          .single();
+
+        if (userError || !userData) {
+          errorMessage.textContent = 'User profile not found.';
+          errorMessage.classList.remove('hidden');
+          submitButton.disabled = false;
+          submitButton.textContent = 'Log In';
+          return;
+        }
+
+        // Store user ID in localStorage for future use (optional)
+        localStorage.setItem('user_id', userData.id);
+
+        // Redirect based on user_type
+        if (userData.user_type === 'Looking for Apt') {
+          window.location.href = 'apt-feed.html';
+        } else if (userData.user_type === 'Looking for Roomate') {
+          window.location.href = 'roomate.html';
         } else {
-          // Invalid password
-          errorMessage.textContent = 'Invalid email or password';
+          errorMessage.textContent = 'Unknown user type. Please contact support.';
           errorMessage.classList.remove('hidden');
         }
       } catch (error) {
@@ -188,7 +193,6 @@
         errorMessage.textContent = 'Invalid email or password';
         errorMessage.classList.remove('hidden');
       } finally {
-        // Re-enable button and restore text
         submitButton.disabled = false;
         submitButton.textContent = 'Log In';
       }
