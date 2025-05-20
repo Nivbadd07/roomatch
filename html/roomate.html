@@ -141,7 +141,13 @@
 
     async function getUserId() {
       const { data: { user } } = await supabaseClient.auth.getUser();
-      return user?.id;
+      if (!user) return null;
+      // Fetch the int8 user id from the users table using the auth_id (UUID)
+      const { data: userRows } = await supabaseClient
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id);
+      return userRows && userRows.length > 0 ? userRows[0].id : null;
     }
 
     // Show user's actual location at the top left
