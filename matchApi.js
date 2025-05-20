@@ -11,7 +11,9 @@ router.get('/api/match/apartments/:user_id', async (req, res) => {
     const userId = parseInt(req.params.user_id);
     const userPrefs = await UserApartmentPref.findOne({ where: { user_id: userId } });
     if (!userPrefs) {
-      return res.json({ results: [] });
+      // Return 3 random apartments if no preferences found
+      const randomApts = await Apartment.findAll({ order: sequelize.random(), limit: 3 });
+      return res.json({ results: randomApts.map(apt => ({ apartment: apt, match_score: null })) });
     }
     // Find matching apartments
     const apartments = await Apartment.findAll({
@@ -27,11 +29,16 @@ router.get('/api/match/apartments/:user_id', async (req, res) => {
       }
     });
     // Calculate match scores
-    const scoredMatches = apartments.map(apt => ({
+    let scoredMatches = apartments.map(apt => ({
       apartment: apt,
       match_score: calculateApartmentMatchScore(userPrefs, apt)
     }));
     scoredMatches.sort((a, b) => b.match_score - a.match_score);
+    // If no matches, return 3 random apartments
+    if (scoredMatches.length === 0) {
+      const randomApts = await Apartment.findAll({ order: sequelize.random(), limit: 3 });
+      return res.json({ results: randomApts.map(apt => ({ apartment: apt, match_score: null })) });
+    }
     res.json({ results: scoredMatches.slice(0, 5) });
   } catch (err) {
     console.error(err);
@@ -46,7 +53,16 @@ router.get('/api/match/roommates/:user_id', async (req, res) => {
     // Get user's apartment
     const userApt = await Apartment.findOne({ where: { roommate_id: { [sequelize.Op.contains]: [userId] } } });
     if (!userApt) {
-      return res.json({ results: [] });
+      // Return 3 random users looking for Apt if no apartment found
+      const randomUsers = await User.findAll({
+        where: {
+          user_type: 'Looking for Apt',
+          id: { [sequelize.Op.ne]: userId }
+        },
+        order: sequelize.random(),
+        limit: 3
+      });
+      return res.json({ results: randomUsers.map(roommate => ({ roommate, match_score: null })) });
     }
     // Get user's preferences
     const userPrefs = await UserPreference.findOne({ where: { user_id: userId } });
@@ -57,7 +73,7 @@ router.get('/api/match/roommates/:user_id', async (req, res) => {
         id: { [sequelize.Op.ne]: userId }
       }
     });
-    const scoredMatches = [];
+    let scoredMatches = [];
     for (const roommate of potentialRoommates) {
       const roommatePrefs = await UserApartmentPref.findOne({ where: { user_id: roommate.id } });
       if (roommatePrefs) {
@@ -66,6 +82,18 @@ router.get('/api/match/roommates/:user_id', async (req, res) => {
       }
     }
     scoredMatches.sort((a, b) => b.match_score - a.match_score);
+    // If no matches, return 3 random users looking for Apt
+    if (scoredMatches.length === 0) {
+      const randomUsers = await User.findAll({
+        where: {
+          user_type: 'Looking for Apt',
+          id: { [sequelize.Op.ne]: userId }
+        },
+        order: sequelize.random(),
+        limit: 3
+      });
+      return res.json({ results: randomUsers.map(roommate => ({ roommate, match_score: null })) });
+    }
     res.json({ results: scoredMatches.slice(0, 5) });
   } catch (err) {
     console.error(err);
