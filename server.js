@@ -13,7 +13,19 @@ const storage = new Storage(); // No need to specify credentials on Cloud Run
 const bucket = storage.bucket('roomatch-prod-static-site');
 
 // Enable CORS for all origins (you can restrict to your domain later)
-app.use(cors());
+app.use(cors({
+  origin: '*', // Change to your frontend URL for production
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+// Explicitly handle preflight requests for all routes
+app.options('*', cors({
+  origin: '*', // Change to your frontend URL for production
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
