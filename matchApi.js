@@ -1,6 +1,6 @@
 // matchApi.js
 const express = require('express');
-const { Apartment, UserApartmentPref, UserPreference, sequelize } = require('./models');
+const { Apartment, UserApartmentPref, UserPreference, sequelize, User } = require('./models');
 const { calculateApartmentMatchScore, calculateRoommateMatchScore } = require('./matchEngine');
 
 const router = express.Router();
@@ -50,10 +50,13 @@ router.get('/api/match/roommates/:user_id', async (req, res) => {
     }
     // Get user's preferences
     const userPrefs = await UserPreference.findOne({ where: { user_id: userId } });
-    // Find potential roommates (users looking for apartments)
-    // This assumes you have a User model and a way to filter by user_type
-    // For now, this is a placeholder
-    const potentialRoommates = []; // TODO: Query your User model here
+    // Find all users looking for an apartment (except the current user)
+    const potentialRoommates = await User.findAll({
+      where: {
+        user_type: 'Looking for Apt',
+        id: { [sequelize.Op.ne]: userId }
+      }
+    });
     const scoredMatches = [];
     for (const roommate of potentialRoommates) {
       const roommatePrefs = await UserApartmentPref.findOne({ where: { user_id: roommate.id } });

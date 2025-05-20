@@ -51,9 +51,20 @@ const UserPreference = sequelize.define('UserPreference', {
   timestamps: false
 });
 
+// User model
+const User = sequelize.define('User', {
+  id: { type: DataTypes.INTEGER, primaryKey: true },
+  user_type: DataTypes.STRING,
+  // Add other fields as needed
+}, {
+  tableName: 'users',
+  timestamps: false
+});
+
 module.exports = {
   sequelize,
   Apartment,
   UserApartmentPref,
-  UserPreference
+  UserPreference,
+  User
 }; 
