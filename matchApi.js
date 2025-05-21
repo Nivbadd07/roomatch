@@ -1,7 +1,7 @@
 // matchApi.js (ES module)
 import express from 'express';
 import { Apartment, UserApartmentPref, UserPreference, sequelize, User } from './models.js';
-import { calculateApartmentMatchScore, calculateRoommateMatchScore } from './matchEngine.js';
+import { calculateApartmentMatchScore, calculateRoommateMatchScore } from './matchEngineAptFeed.js';
 import { calculateApartmentFeedMatches } from './matchEngineAptFeed.js';
 
 const router = express.Router();
