@@ -38,9 +38,6 @@ export async function calculateApartmentFeedMatches(userId) {
     }
 
     for (const apt of apartments) {
-      // Skip apartments where user is already a roommate
-      if (Array.isArray(apt.roommate_id) && apt.roommate_id.includes(userId)) continue;
-
       // 3. Apartment match score
       let aptScore = 0;
       let aptMax = 0;
