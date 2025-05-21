@@ -8,6 +8,7 @@ const router = express.Router();
 
 // GET /api/match/apartments/:user_id
 router.get('/api/match/apartments/:user_id', async (req, res) => {
+  console.log('MATCH ROUTE HIT', req.params.user_id);
   try {
     const userId = parseInt(req.params.user_id);
     let matches = await calculateApartmentFeedMatches(userId);
