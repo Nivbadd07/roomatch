@@ -4,6 +4,7 @@ import { Storage } from '@google-cloud/storage';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import matchApi from './matchApi.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -79,6 +80,8 @@ app.post('/api/upload-to-gcp', upload.single('file'), async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+app.use(matchApi);
 
 // Start the server (Cloud Run will use this)
 const PORT = process.env.PORT || 8080;
