@@ -1,10 +1,10 @@
-const { Sequelize, DataTypes } = require('sequelize');
+import { Sequelize, DataTypes } from 'sequelize';
 
 // Update the connection string with your actual database credentials
 const sequelize = new Sequelize('postgres://username:password@localhost:5432/yourdb');
 
 // Apartment model
-const Apartment = sequelize.define('Apartment', {
+export const Apartment = sequelize.define('Apartment', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   city: DataTypes.STRING,
   area: DataTypes.STRING,
@@ -19,7 +19,7 @@ const Apartment = sequelize.define('Apartment', {
 });
 
 // UserApartmentPref model
-const UserApartmentPref = sequelize.define('UserApartmentPref', {
+export const UserApartmentPref = sequelize.define('UserApartmentPref', {
   user_id: { type: DataTypes.INTEGER, primaryKey: true },
   preferred_city: DataTypes.STRING,
   preferred_area: DataTypes.STRING,
@@ -35,7 +35,7 @@ const UserApartmentPref = sequelize.define('UserApartmentPref', {
 });
 
 // UserPreference model
-const UserPreference = sequelize.define('UserPreference', {
+export const UserPreference = sequelize.define('UserPreference', {
   user_id: { type: DataTypes.INTEGER, primaryKey: true },
   works_from_home: DataTypes.BOOLEAN,
   shares_cleaning: DataTypes.BOOLEAN,
@@ -52,7 +52,7 @@ const UserPreference = sequelize.define('UserPreference', {
 });
 
 // User model
-const User = sequelize.define('User', {
+export const User = sequelize.define('User', {
   id: { type: DataTypes.INTEGER, primaryKey: true },
   user_type: DataTypes.STRING,
   // Add other fields as needed
@@ -61,10 +61,4 @@ const User = sequelize.define('User', {
   timestamps: false
 });
 
-module.exports = {
-  sequelize,
-  Apartment,
-  UserApartmentPref,
-  UserPreference,
-  User
-}; 
+export { sequelize }; 

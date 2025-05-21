@@ -1,4 +1,4 @@
-const { Apartment, User, UserApartmentPref, UserPreference, sequelize } = require('./models');
+import { Apartment, User, UserApartmentPref, UserPreference, sequelize } from './models.js';
 
 // Weights (adjust as needed)
 const APARTMENT_WEIGHTS = {
@@ -22,7 +22,7 @@ const ROOMMATE_WEIGHTS = {
   noise_sensitivity: 5
 };
 
-async function calculateApartmentFeedMatches(userId) {
+export async function calculateApartmentFeedMatches(userId) {
   try {
     // 1. Fetch user preferences
     const userPref = await UserPreference.findOne({ where: { user_id: userId } });
@@ -125,4 +125,5 @@ async function calculateApartmentFeedMatches(userId) {
   }
 }
 
-module.exports = { calculateApartmentFeedMatches }; 
+export function calculateApartmentMatchScore() {}
+export function calculateRoommateMatchScore() {} 
