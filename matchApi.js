@@ -2,6 +2,7 @@
 const express = require('express');
 const { Apartment, UserApartmentPref, UserPreference, sequelize, User } = require('./models');
 const { calculateApartmentMatchScore, calculateRoommateMatchScore } = require('./matchEngine');
+const { calculateApartmentFeedMatches } = require('./matchEngineAptFeed');
 
 const router = express.Router();
 
@@ -9,40 +10,28 @@ const router = express.Router();
 router.get('/api/match/apartments/:user_id', async (req, res) => {
   try {
     const userId = parseInt(req.params.user_id);
-    const userPrefs = await UserApartmentPref.findOne({ where: { user_id: userId } });
-    if (!userPrefs) {
-      // Return 3 random apartments if no preferences found
-      const randomApts = await Apartment.findAll({ order: sequelize.random(), limit: 3 });
-      return res.json({ results: randomApts.map(apt => ({ apartment: apt, match_score: null })) });
+    let matches = await calculateApartmentFeedMatches(userId);
+
+    console.log('User ID:', userId, 'Matches found:', matches.length);
+
+    // If no matches, return 4 random apartments
+    if (!matches || matches.length === 0) {
+      const apartments = await Apartment.findAll({ order: sequelize.random(), limit: 4 });
+      matches = apartments.map(apt => ({ apartment: apt, score: 0 }));
+      console.log('Fallback: returning 4 random apartments');
     }
-    // Find matching apartments
-    const apartments = await Apartment.findAll({
-      where: {
-        city: userPrefs.preferred_city,
-        price_per_month: {
-          [sequelize.Op.gte]: userPrefs.preferred_price_min,
-          [sequelize.Op.lte]: userPrefs.preferred_price_max
-        },
-        date_of_entry: {
-          [sequelize.Op.lte]: userPrefs.preferred_date_of_entry
-        }
-      }
-    });
-    // Calculate match scores
-    let scoredMatches = apartments.map(apt => ({
-      apartment: apt,
-      match_score: calculateApartmentMatchScore(userPrefs, apt)
-    }));
-    scoredMatches.sort((a, b) => b.match_score - a.match_score);
-    // If no matches, return 3 random apartments
-    if (scoredMatches.length === 0) {
-      const randomApts = await Apartment.findAll({ order: sequelize.random(), limit: 3 });
-      return res.json({ results: randomApts.map(apt => ({ apartment: apt, match_score: null })) });
-    }
-    res.json({ results: scoredMatches.slice(0, 5) });
+
+    res.status(200).json({ results: matches });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
+    console.error('Error in /api/match/apartments:', err);
+    // Fallback: return 4 random apartments even on error
+    try {
+      const apartments = await Apartment.findAll({ order: sequelize.random(), limit: 4 });
+      const matches = apartments.map(apt => ({ apartment: apt, score: 0 }));
+      res.status(200).json({ results: matches });
+    } catch (fallbackErr) {
+      res.status(200).json({ results: [] });
+    }
   }
 });
 
