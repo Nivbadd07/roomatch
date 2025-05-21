@@ -141,7 +141,7 @@
         return;
       }
       container.innerHTML = '';
-      results.forEach(({ apartment, owner }) => {
+      results.forEach(({ apartment }) => {
         const card = document.createElement('div');
         card.className = 'relative max-w-[400px] mx-auto my-4 p-0 rounded-3xl shadow-xl overflow-hidden border border-purple-200';
         card.innerHTML = `
@@ -150,10 +150,6 @@
             <div class="text-sm text-gray-700 mb-1">
               <strong>${apartment.city ? `<a href='location.html' class='text-purple-800 hover:underline cursor-pointer'>${apartment.city}</a>` : ''}</strong>
               ${apartment.area ? ', ' + apartment.area : ''}
-            </div>
-            <div class="flex items-center gap-2 mt-2">
-              <img src="${owner.profile_img || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="w-8 h-8 rounded-full" />
-              <span>${owner.full_name || ''} ${owner.age ? '(' + owner.age + ')' : ''}</span>
             </div>
             <div class="flex flex-wrap gap-2 mb-2">
               ${(apartment.features || []).map(f => `<span class='px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs'>${f}</span>`).join(' ')}
