@@ -1,8 +1,8 @@
-// matchApi.js
-const express = require('express');
-const { Apartment, UserApartmentPref, UserPreference, sequelize, User } = require('./models');
-const { calculateApartmentMatchScore, calculateRoommateMatchScore } = require('./matchEngine');
-const { calculateApartmentFeedMatches } = require('./matchEngineAptFeed');
+// matchApi.js (ES module)
+import express from 'express';
+import { Apartment, UserApartmentPref, UserPreference, sequelize, User } from './models.js';
+import { calculateApartmentMatchScore, calculateRoommateMatchScore } from './matchEngine.js';
+import { calculateApartmentFeedMatches } from './matchEngineAptFeed.js';
 
 const router = express.Router();
 
@@ -91,4 +91,4 @@ router.get('/api/match/roommates/:user_id', async (req, res) => {
   }
 });
 
-module.exports = router; 
+export default router; 
