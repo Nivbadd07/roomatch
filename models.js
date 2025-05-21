@@ -1,7 +1,12 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import { Sequelize, DataTypes } from 'sequelize';
 
-// Update the connection string with your actual database credentials
-const sequelize = new Sequelize('postgres://username:password@localhost:5432/yourdb');
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  dialect: 'postgres',
+  protocol: 'postgres',
+  logging: false,
+});
 
 // Apartment model
 export const Apartment = sequelize.define('Apartment', {
