@@ -11,7 +11,7 @@ const router = express.Router();
 router.get('/api/match/apartments/:user_id', async (req, res) => {
   console.log('MATCH ROUTE HIT', req.params.user_id);
   try {
-    const userId = parseInt(req.params.user_id);
+    const userId = BigInt(req.params.user_id); // Convert to BigInt
     let matches = await calculateApartmentFeedMatches(userId);
 
     console.log('User ID:', userId, 'Matches found:', matches.length);
@@ -40,11 +40,17 @@ router.get('/api/match/apartments/:user_id', async (req, res) => {
 // GET /api/match/roommates/:user_id
 router.get('/api/match/roommates/:user_id', async (req, res, next) => {
   try {
-    const userId = parseInt(req.params.user_id);
+    const userId = BigInt(req.params.user_id); // Convert to BigInt
     console.log('[match/roommates] userId =', userId);
 
     // Get user's apartment
-    const userApt = await Apartment.findOne({ where: { roommate_id: { [Op.contains]: [userId] } } });
+    const userApt = await Apartment.findOne({ 
+      where: { 
+        roommate_id: { 
+          [Op.contains]: [userId] 
+        } 
+      } 
+    });
     console.log('[match/roommates] userApt =', !!userApt);
 
     if (!userApt) {

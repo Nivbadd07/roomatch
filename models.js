@@ -13,14 +13,19 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
 
 // Apartment model
 export const Apartment = sequelize.define('Apartment', {
-  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  id: { 
+    type: DataTypes.UUID,
+    primaryKey: true,
+    defaultValue: DataTypes.UUIDV4
+  },
   city: DataTypes.STRING,
   area: DataTypes.STRING,
   contract_type: DataTypes.STRING,
   price_per_month: DataTypes.INTEGER,
   num_rooms: DataTypes.INTEGER,
   features: DataTypes.ARRAY(DataTypes.STRING),
-  date_of_entry: DataTypes.DATE
+  date_of_entry: DataTypes.DATE,
+  roommate_id: DataTypes.ARRAY(DataTypes.BIGINT) // INT8 array
 }, {
   tableName: 'apartments',
   timestamps: false
@@ -28,7 +33,7 @@ export const Apartment = sequelize.define('Apartment', {
 
 // UserApartmentPref model
 export const UserApartmentPref = sequelize.define('UserApartmentPref', {
-  user_id: { type: DataTypes.INTEGER, primaryKey: true },
+  user_id: { type: DataTypes.BIGINT, primaryKey: true }, // INT8
   preferred_city: DataTypes.STRING,
   preferred_area: DataTypes.STRING,
   preferred_contract_type: DataTypes.STRING,
@@ -44,7 +49,7 @@ export const UserApartmentPref = sequelize.define('UserApartmentPref', {
 
 // UserPreference model
 export const UserPreference = sequelize.define('UserPreference', {
-  user_id: { type: DataTypes.INTEGER, primaryKey: true },
+  user_id: { type: DataTypes.BIGINT, primaryKey: true }, // INT8
   works_from_home: DataTypes.BOOLEAN,
   shares_cleaning: DataTypes.BOOLEAN,
   has_or_wants_pet: DataTypes.BOOLEAN,
@@ -61,7 +66,7 @@ export const UserPreference = sequelize.define('UserPreference', {
 
 // User model
 export const User = sequelize.define('User', {
-  id: { type: DataTypes.INTEGER, primaryKey: true },
+  id: { type: DataTypes.BIGINT, primaryKey: true }, // INT8
   user_type: DataTypes.STRING,
   // Add other fields as needed
 }, {
