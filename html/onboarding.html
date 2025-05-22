@@ -799,13 +799,11 @@
             alert('Error saving to database: ' + userInsertError.message);
             throw userInsertError;
           }
-          // 3. Insert user_preferences row using the actual inserted user id and collected preferences
+          const insertedUser = userData && userData[0];
+          const userId = insertedUser ? insertedUser.id : null;
+
           const quizYN = JSON.parse(localStorage.getItem('roommate_quiz_yn') || '{}');
           const quizRadio = JSON.parse(localStorage.getItem('roommate_quiz_radio') || '{}');
-
-          // Debug logs
-          console.log('quizYN:', quizYN);
-          console.log('quizRadio:', quizRadio);
 
           const userPreferences = {
             user_id: userId,
@@ -820,12 +818,22 @@
             noise_sensitivity: quizRadio.noise || null
           };
 
-          const { error: prefInsertError } = await supabaseClient
-            .from('user_preferences')
-            .insert([userPreferences]);
-          if (prefInsertError) {
-            alert('Error creating preferences row: ' + JSON.stringify(prefInsertError));
-            throw prefInsertError;
+          // Debug logs
+          console.log('quizYN:', quizYN);
+          console.log('quizRadio:', quizRadio);
+          console.log('userPreferences:', userPreferences);
+
+          if (userId) {
+            const { error: prefInsertError } = await supabaseClient
+              .from('user_preferences')
+              .insert([userPreferences]);
+            if (prefInsertError) {
+              alert('Error creating preferences row: ' + JSON.stringify(prefInsertError));
+              throw prefInsertError;
+            }
+          } else {
+            alert('Could not determine user id for preferences insert.');
+            throw new Error('No user id for preferences insert');
           }
         }
       }
