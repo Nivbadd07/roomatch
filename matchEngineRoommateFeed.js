@@ -145,7 +145,18 @@ export async function calculateRoommateFeedMatches(userId) {
 
       // 5. Combine scores (50% roommate preferences, 50% apartment preferences)
       const finalScore = Math.round((roommateMatch * 0.5 + apartmentMatch * 0.5) * 100);
-      results.push({ user: potentialRoommate, score: finalScore });
+      results.push({
+        user: {
+          id: potentialRoommate.id,
+          full_name: potentialRoommate.full_name,
+          email: potentialRoommate.email,
+          profile_img: potentialRoommate.profile_image_url,
+          age: potentialRoommate.age,
+          preferences: roommatePref,
+          apartmentPreferences: aptPref
+        },
+        score: finalScore
+      });
       console.log("Pushed roommate:", potentialRoommate.id, "score:", finalScore);
     }
 
@@ -160,7 +171,18 @@ export async function calculateRoommateFeedMatches(userId) {
       );
       if (unused.length === 0) break;
       const rand = unused[Math.floor(Math.random() * unused.length)];
-      results.push({ user: rand, score: 0 });
+      results.push({
+        user: {
+          id: rand.id,
+          full_name: rand.full_name,
+          email: rand.email,
+          profile_img: rand.profile_image_url,
+          age: rand.age,
+          preferences: null,
+          apartmentPreferences: null
+        },
+        score: 0
+      });
       console.log("Added fallback roommate:", rand.id);
     }
 

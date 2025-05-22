@@ -281,7 +281,7 @@
         card.innerHTML = `
           <div class="w-full flex justify-center z-20">
             <div class="relative">
-              <img src="${user.profile_img || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" 
+              <img src="${user.profile_img || user.profile_image_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" 
                    class="w-24 h-24 rounded-full object-cover" />
               <div class="absolute -top-2 -right-2 bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded-full">
                 ${score}% Match
@@ -289,8 +289,8 @@
             </div>
           </div>
           <div class="bg-white rounded-b-2xl shadow-md w-full max-w-[370px] pt-4 pb-6 px-4 z-10 relative">
-            <h2 class="text-lg font-bold">${user.full_name || ''}${user.age ? ', ' + user.age : ''}</h2>
-            <div class="text-xs text-gray-600 mb-2">${user.email || ''}</div>
+            <h2 class="text-lg font-bold">${user.full_name || user.id || 'Roommate'}${user.age ? ', ' + user.age : ''}</h2>
+            <div class="text-xs text-gray-600 mb-2">${user.email || 'No email provided'}</div>
             <div class="mb-3">
               <h3 class="text-sm font-semibold text-purple-800 mb-1">Roommate Preferences</h3>
               <div class="flex flex-wrap gap-2 text-xs">
