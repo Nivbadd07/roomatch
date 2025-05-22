@@ -178,8 +178,8 @@ export async function calculateRoommateFeedMatches(userId) {
           email: rand.email,
           profile_img: rand.profile_image_url,
           age: rand.age,
-          preferences: null,
-          apartmentPreferences: null
+          preferences: rand.preferences,
+          apartmentPreferences: rand.apartmentPreferences
         },
         score: 0
       });
