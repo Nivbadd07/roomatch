@@ -1,4 +1,5 @@
-import { Sequelize, DataTypes, Op } from 'sequelize';
+import pkg from 'sequelize';
+const { Sequelize, DataTypes, Op } = pkg;
 
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL environment variable is not set. Please check your .env file or Cloud Run environment variables.');
