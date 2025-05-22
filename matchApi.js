@@ -1,6 +1,6 @@
 // matchApi.js (ES module)
 import express from 'express';
-import { Apartment, UserApartmentPref, UserPreference, sequelize, User } from './models.js';
+import { Apartment, UserApartmentPref, UserPreference, sequelize, User, Op } from './models.js';
 import { calculateApartmentMatchScore, calculateRoommateMatchScore } from './matchEngineAptFeed.js';
 import { calculateApartmentFeedMatches } from './matchEngineAptFeed.js';
 
@@ -41,13 +41,13 @@ router.get('/api/match/roommates/:user_id', async (req, res) => {
   try {
     const userId = parseInt(req.params.user_id);
     // Get user's apartment
-    const userApt = await Apartment.findOne({ where: { roommate_id: { [sequelize.Op.contains]: [userId] } } });
+    const userApt = await Apartment.findOne({ where: { roommate_id: { [Op.contains]: [userId] } } });
     if (!userApt) {
       // Return 3 random users looking for Apt if no apartment found
       const randomUsers = await User.findAll({
         where: {
           user_type: 'Looking for Apt',
-          id: { [sequelize.Op.ne]: userId }
+          id: { [Op.ne]: userId }
         },
         order: sequelize.random(),
         limit: 3
@@ -60,7 +60,7 @@ router.get('/api/match/roommates/:user_id', async (req, res) => {
     const potentialRoommates = await User.findAll({
       where: {
         user_type: 'Looking for Apt',
-        id: { [sequelize.Op.ne]: userId }
+        id: { [Op.ne]: userId }
       }
     });
     let scoredMatches = [];
@@ -77,7 +77,7 @@ router.get('/api/match/roommates/:user_id', async (req, res) => {
       const randomUsers = await User.findAll({
         where: {
           user_type: 'Looking for Apt',
-          id: { [sequelize.Op.ne]: userId }
+          id: { [Op.ne]: userId }
         },
         order: sequelize.random(),
         limit: 3

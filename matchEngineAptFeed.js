@@ -1,4 +1,4 @@
-import { Apartment, User, UserApartmentPref, UserPreference, sequelize } from './models.js';
+import { Apartment, User, UserApartmentPref, UserPreference, sequelize, Op } from './models.js';
 
 // Weights (adjust as needed)
 const APARTMENT_WEIGHTS = {

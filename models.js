@@ -1,4 +1,4 @@
-import { Sequelize, DataTypes } from 'sequelize';
+import { Sequelize, DataTypes, Op } from 'sequelize';
 
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL environment variable is not set. Please check your .env file or Cloud Run environment variables.');
@@ -68,4 +68,4 @@ export const User = sequelize.define('User', {
   timestamps: false
 });
 
-export { sequelize }; 
+export { sequelize, Op }; 

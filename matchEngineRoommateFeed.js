@@ -1,4 +1,4 @@
-import { Apartment, User, UserApartmentPref, UserPreference, sequelize } from './models.js';
+import { Apartment, User, UserApartmentPref, UserPreference, sequelize, Op } from './models.js';
 
 // Weights for roommate preferences matching
 const ROOMMATE_WEIGHTS = {
@@ -28,7 +28,7 @@ export async function calculateRoommateFeedMatches(userId) {
   try {
     // 1. Fetch the current user's preferences and apartment
     const userPref = await UserPreference.findOne({ where: { user_id: userId } });
-    const userApt = await Apartment.findOne({ where: { roommate_id: { [sequelize.Op.contains]: [userId] } } });
+    const userApt = await Apartment.findOne({ where: { roommate_id: { [Op.contains]: [userId] } } });
     
     console.log("User preferences:", userPref);
     console.log("User apartment:", userApt);
