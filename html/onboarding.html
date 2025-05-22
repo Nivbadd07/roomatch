@@ -779,7 +779,7 @@
             throw loginError;
           }
 
-          // 2. Insert into Supabase users table
+          // 2. Insert into Supabase users table and get the inserted id
           const { data: userData, error: userInsertError } = await supabaseClient
             .from('users')
             .insert([{
@@ -793,18 +793,26 @@
               bio: bio,
               profile_image_url: photo_url || null,
               password_hash: password // store plain password as requested
-            }]);
+            }])
+            .select(); // Get the inserted row(s)
           if (userInsertError) {
             alert('Error saving to database: ' + userInsertError.message);
             throw userInsertError;
           }
-          // 3. Insert blank user_preferences row
-          const { error: prefInsertError } = await supabaseClient
-            .from('user_preferences')
-            .insert([{ user_id: manualId ? parseInt(manualId) : null }]);
-          if (prefInsertError) {
-            alert('Error creating preferences row: ' + JSON.stringify(prefInsertError));
-            throw prefInsertError;
+          // 3. Insert blank user_preferences row using the actual inserted user id
+          const insertedUser = userData && userData[0];
+          const userId = insertedUser ? insertedUser.id : null;
+          if (userId) {
+            const { error: prefInsertError } = await supabaseClient
+              .from('user_preferences')
+              .insert([{ user_id: userId }]);
+            if (prefInsertError) {
+              alert('Error creating preferences row: ' + JSON.stringify(prefInsertError));
+              throw prefInsertError;
+            }
+          } else {
+            alert('Could not determine user id for preferences insert.');
+            throw new Error('No user id for preferences insert');
           }
         }
       }
