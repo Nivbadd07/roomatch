@@ -62,7 +62,11 @@ router.get('/api/match/roommates/:user_id', async (req, res, next) => {
           id: { [Op.ne]: userId }
         },
         order: sequelize.random(),
-        limit: 3
+        limit: 3,
+        include: [
+          { model: UserPreference, as: 'preferences' },
+          { model: UserApartmentPref, as: 'apartmentPreferences' }
+        ]
       });
       return res.json({ results: randomUsers.map(roommate => ({ roommate, match_score: null })) });
     }
@@ -76,13 +80,17 @@ router.get('/api/match/roommates/:user_id', async (req, res, next) => {
       where: {
         user_type: 'Looking for Apt',
         id: { [Op.ne]: userId }
-      }
+      },
+      include: [
+        { model: UserPreference, as: 'preferences' },
+        { model: UserApartmentPref, as: 'apartmentPreferences' }
+      ]
     });
     console.log('[match/roommates] potentialRoommates count =', potentialRoommates.length);
 
     let scoredMatches = [];
     for (const roommate of potentialRoommates) {
-      const roommatePrefs = await UserApartmentPref.findOne({ where: { user_id: roommate.id } });
+      const roommatePrefs = roommate.apartmentPreferences;
       if (roommatePrefs) {
         const score = calculateRoommateMatchScore(userApt, userPrefs, roommate, roommatePrefs);
         scoredMatches.push({ roommate, match_score: score });
@@ -101,7 +109,11 @@ router.get('/api/match/roommates/:user_id', async (req, res, next) => {
           id: { [Op.ne]: userId }
         },
         order: sequelize.random(),
-        limit: 3
+        limit: 3,
+        include: [
+          { model: UserPreference, as: 'preferences' },
+          { model: UserApartmentPref, as: 'apartmentPreferences' }
+        ]
       });
       return res.json({ results: randomUsers.map(roommate => ({ roommate, match_score: null })) });
     }
