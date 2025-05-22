@@ -4,200 +4,227 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Upload Apartment</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
   <style>
     body {
+      background: linear-gradient(135deg, #fde2f3 0%, #e0d9ff 50%, #f3e8ff 100%);
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      background-size: cover;
       min-height: 100vh;
-      background: linear-gradient(to bottom, #f7d5ea 0%, #e3dafb 60%, #e3dafb 100%);
+      position: relative;
+      overflow-x: hidden;
       overflow-y: auto;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Inter', Arial, sans-serif;
+      padding: 0;
+      margin: 0;
     }
-    body::before {
-      content: '';
+
+    .svg-bg {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 50%;
-      background: linear-gradient(135deg, #f7d5ea 0%, #e3dafb 100%);
-      clip-path: ellipse(70% 100% at 50% 0%);
+      top: 40vh;
+      left: 50vw;
+      transform: translate(-50%, -50%) scale(1.2);
       z-index: 0;
+      opacity: 0.10;
+      pointer-events: none;
     }
-    body::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
+
+    .glass-card {
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+      border-radius: 2rem;
+      border: 1.5px solid rgba(162, 59, 177, 0.13);
+      padding: 3rem 2.5rem 2.5rem 2.5rem;
+      max-width: 480px;
       width: 100%;
-      height: 50%;
-      background: linear-gradient(135deg, #e3dafb 0%, #f7d5ea 100%);
-      clip-path: ellipse(70% 100% at 50% 100%);
-      z-index: 0;
-    }
-    .apt-card {
+      margin: 4rem auto 2rem auto;
       position: relative;
-      z-index: 10;
-      max-width: 28rem;
-      width: 100%;
-      background: white;
-      border-radius: 1.5rem;
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-      border: 1px solid #e5e7eb;
-      padding: 2.5rem 2rem 3.5rem 2rem;
-      margin: 2rem 0 3rem 0;
+      z-index: 2;
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-height: 80vh;
-      justify-content: flex-start;
+      animation: fadeInUp 0.8s cubic-bezier(.4,1.7,.6,.97);
     }
-    .close-btn {
+
+    @keyframes fadeInUp {
+      0% { opacity: 0; transform: translateY(40px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .border-gradient-anim {
+      pointer-events: none;
+      border-radius: 2rem;
+      background: linear-gradient(120deg, #fde2f3, #a23bb1 60%, #e0d9ff 100%);
+      opacity: 0.5;
+      filter: blur(10px);
+      animation: borderAnim 6s linear infinite alternate;
       position: absolute;
-      top: 1.25rem;
-      left: 1.25rem;
-      background: white;
-      border-radius: 9999px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      padding: 0.5rem 0.7rem;
-      z-index: 20;
-      cursor: pointer;
-      border: none;
-      transition: background 0.2s;
+      top: -8px; left: -8px; right: -8px; bottom: -8px;
+      z-index: 0;
     }
-    .close-btn:hover {
-      background: #f3e8ff;
+
+    @keyframes borderAnim {
+      0% { opacity: 0.5; filter: blur(10px); }
+      100% { opacity: 0.8; filter: blur(18px); }
     }
-    h2 {
-      text-align: center;
-      margin-bottom: 24px;
-      font-size: 1.5rem;
+
+    .main-title {
+      font-size: 2.2rem;
       font-weight: bold;
-      color: #541257;
+      color: #2d1b4d;
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 2;
     }
-    label {
-      font-weight: 600;
-      color: #541257;
-      margin-bottom: 6px;
-      display: block;
-      margin-top: 12px;
+
+    .subtitle {
+      color: #a23bb1;
+      font-size: 1.1rem;
+      font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+      margin-bottom: 2.2rem;
+      z-index: 2;
     }
-    select, input[type="text"], input[type="date"], textarea {
+
+    .glass-select, .glass-input, textarea {
+      background: #ffffff;
+      border: 2px solid #a23bb1;
+      border-radius: 1rem;
+      padding: 0.9rem 1.2rem;
+      font-size: 1rem;
+      color: #2d1b4d;
+      margin-bottom: 0.7rem;
       width: 100%;
-      padding: 12px;
-      margin-bottom: 16px;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      font-size: 15px;
-      background: #f8f6fc;
-      color: #541257;
-      transition: border 0.2s;
+      box-shadow: 0 4px 12px rgba(162, 59, 177, 0.25);
       outline: none;
+      transition: border 0.2s, box-shadow 0.2s;
     }
-    select:focus, input[type="text"]:focus, input[type="date"]:focus, textarea:focus {
-      border: 1.5px solid #a23bb1;
-      background: #f3e8ff;
+
+    .glass-select:focus, .glass-input:focus, textarea:focus {
+      border: 2px solid #541257;
+      box-shadow: 0 0 0 3px rgba(162, 59, 177, 0.2), 0 4px 12px rgba(162, 59, 177, 0.3);
+      background: white;
     }
-    .features {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 12px 0 24px;
-      justify-content: center;
+
+    .glass-select::placeholder, .glass-input::placeholder, textarea::placeholder {
+      color: #a23bb1;
+      opacity: 0.8;
+      font-weight: 500;
     }
+
     .feature-btn {
-      padding: 10px 16px;
-      border: 1.5px solid #a23bb1;
-      border-radius: 20px;
-      font-size: 14px;
-      background-color: #fff;
+      background: rgba(255,255,255,0.7);
+      border: 2px solid #a23bb1;
       color: #a23bb1;
-      cursor: pointer;
-      transition: all 0.2s ease;
+      border-radius: 9999px;
       font-weight: 500;
-    }
-    .feature-btn.active {
-      background-color: #a23bb1;
-      color: white;
-      border-color: #a23bb1;
-    }
-    .rooms {
+      font-size: 1rem;
+      padding: 0.7rem 1.3rem;
+      margin: 0.2rem 0.2rem 0.5rem 0.2rem;
+      transition: all 0.2s cubic-bezier(.4,1.7,.6,.97);
+      box-shadow: 0 2px 8px 0 rgba(162, 59, 177, 0.06);
+      cursor: pointer;
       display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      outline: none;
+      position: relative;
     }
-    .rooms button {
-      flex: 1;
-      padding: 10px;
-      font-size: 14px;
-      border: 1.5px solid #a23bb1;
-      border-radius: 20px;
-      background-color: #fff;
-      color: #a23bb1;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-weight: 500;
-    }
-    .rooms button.active {
-      background-color: #a23bb1;
-      color: white;
+
+    .feature-btn.active {
+      background: linear-gradient(45deg, #a23bb1, #fde2f3);
+      color: #fff !important;
       border-color: #a23bb1;
+      box-shadow: 0 0 18px #a23bb1;
+      animation: popSelected 0.4s cubic-bezier(.4,1.7,.6,.97);
     }
-    textarea {
-      resize: vertical;
-      height: 80px;
+
+    .rooms button {
+      background: rgba(255,255,255,0.7);
+      border: 2px solid #a23bb1;
+      color: #a23bb1;
+      border-radius: 9999px;
+      font-weight: 500;
+      font-size: 1rem;
+      padding: 0.7rem 1.3rem;
+      margin: 0.2rem;
+      transition: all 0.2s cubic-bezier(.4,1.7,.6,.97);
+      box-shadow: 0 2px 8px 0 rgba(162, 59, 177, 0.06);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      outline: none;
+      position: relative;
+      min-width: 60px;
     }
+
+    .rooms button.active {
+      background: linear-gradient(45deg, #a23bb1, #fde2f3);
+      color: #fff !important;
+      border-color: #a23bb1;
+      box-shadow: 0 0 18px #a23bb1;
+      animation: popSelected 0.4s cubic-bezier(.4,1.7,.6,.97);
+    }
+
+    @keyframes popSelected {
+      0% { transform: scale(0.95); }
+      100% { transform: scale(1); }
+    }
+
     .photo-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 12px;
       margin-top: 12px;
       margin-bottom: 16px;
+      width: 100%;
     }
+
     .photo-upload {
       width: 100%;
       aspect-ratio: 1;
-      background-color: #f3e8ff;
-      border: 2.5px dashed #a23bb1;
-      border-radius: 18px;
+      background: rgba(255,255,255,0.7);
+      border: 2px solid #a23bb1;
+      border-radius: 1rem;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 38px;
-      color: #a23bb1;
       cursor: pointer;
       position: relative;
       overflow: hidden;
-      transition: border 0.2s, background 0.2s;
-      min-width: 90px;
-      min-height: 90px;
-      max-width: 140px;
-      max-height: 140px;
-      margin: 0 auto;
+      transition: all 0.2s cubic-bezier(.4,1.7,.6,.97);
+      box-shadow: 0 2px 8px 0 rgba(162, 59, 177, 0.06);
     }
+
     .photo-upload:hover {
-      background-color: #e0d9ff;
+      background: #f3e8ff;
       border-color: #541257;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(162, 59, 177, 0.3);
     }
+
     .photo-upload span {
-      font-size: 2.5rem;
-      font-weight: bold;
+      font-size: 2rem;
       color: #a23bb1;
       opacity: 0.7;
       pointer-events: none;
-      transition: color 0.2s;
+      transition: all 0.2s;
     }
+
     .photo-upload img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 12px;
+      border-radius: 0.8rem;
       display: none;
     }
+
     .photo-upload input {
       position: absolute;
       width: 100%;
@@ -205,35 +232,60 @@
       opacity: 0;
       cursor: pointer;
     }
+
     .submit-btn {
-      width: 100%;
-      background-color: #a23bb1;
-      color: white;
-      padding: 18px 0 18px 0;
+      background: linear-gradient(45deg, #a23bb1, #fde2f3);
       border: none;
-      border-radius: 24px;
-      font-size: 18px;
+      color: #fff;
       font-weight: bold;
-      text-align: center;
-      cursor: pointer;
-      margin-top: 32px;
-      margin-bottom: 0;
-      box-shadow: 0 2px 8px rgba(162,59,177,0.08);
-      transition: background 0.2s;
-      letter-spacing: 0.5px;
+      box-shadow: 0 0 20px rgba(162, 59, 177, 0.13);
+      transition: all 0.3s ease;
+      font-size: 1.2rem;
+      padding: 1.2rem 0;
+      border-radius: 1.2rem;
+      width: 100%;
+      margin-top: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.7rem;
+      outline: none;
     }
+
     .submit-btn:hover {
-      background-color: #541257;
+      background: linear-gradient(45deg, #fde2f3, #a23bb1);
+      box-shadow: 0 0 30px rgba(162, 59, 177, 0.18);
+      filter: brightness(1.08);
     }
+
+    .submit-btn:active {
+      transform: scale(0.97);
+      box-shadow: 0 0 30px #a23bb1;
+    }
+
+    .submit-btn:focus {
+      box-shadow: 0 0 0 3px #fde2f3, 0 0 20px #a23bb1;
+    }
+
+    .section-title {
+      font-weight: bold;
+      color: #2d1b4d;
+      font-size: 1.1rem;
+      margin-bottom: 0.7rem;
+      margin-top: 1.2rem;
+      text-align: left;
+      width: 100%;
+    }
+
     .popup {
       position: fixed;
       left: 50%;
       bottom: 40px;
       transform: translateX(-50%);
-      background-color: #4BB543;
+      background: linear-gradient(45deg, #4BB543, #45a33e);
       color: white;
-      padding: 18px 32px;
-      border-radius: 16px;
+      padding: 1.2rem 2rem;
+      border-radius: 1rem;
       box-shadow: 0 4px 16px rgba(0,0,0,0.13);
       font-size: 1.1rem;
       font-weight: 600;
@@ -241,55 +293,85 @@
       z-index: 9999;
       text-align: center;
       letter-spacing: 0.5px;
+      animation: fadeInUp 0.5s cubic-bezier(.4,1.7,.6,.97);
     }
-    .section-title {
-      font-weight: bold;
-      color: #541257;
-      font-size: 1.1rem;
-      margin-bottom: 8px;
-      margin-top: 18px;
-      text-align: left;
-      width: 100%;
+
+    .back-link {
+      color: #a23bb1;
+      text-decoration: underline;
+      font-weight: 500;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 1.5rem;
+      transition: color 0.2s;
+      z-index: 2;
+    }
+
+    .back-link:hover {
+      color: #2d1b4d;
+    }
+
+    @media (max-width: 600px) {
+      .glass-card {
+        padding: 2rem 1.5rem;
+        margin: 1rem;
+        width: calc(100% - 2rem);
+      }
+      .main-title { font-size: 1.6rem; }
+      .subtitle { font-size: 1rem; }
+      .photo-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
   </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col items-center relative font-sans">
+  <svg class="svg-bg" width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="200" cy="200" rx="180" ry="120" fill="#e0d9ff"/>
+    <ellipse cx="120" cy="120" rx="60" ry="40" fill="#fde2f3"/>
+    <ellipse cx="320" cy="280" rx="70" ry="50" fill="#a23bb1"/>
+  </svg>
 
-  <div class="apt-card">
-    <a href="apt-room.html" class="close-btn" title="Back to main selection">
-      <i class="fas fa-times text-gray-700 text-xl"></i>
-    </a>
-    <h2>Upload A New Apartment</h2>
+  <div class="glass-card">
+    <div class="border-gradient-anim"></div>
+    <div class="main-title">
+      Upload Your Apartment <span style="font-size:1.2em;">🏠</span>
+    </div>
+    <div class="subtitle">
+      Let's find you the perfect roommate!
+    </div>
 
     <div class="section-title">City</div>
-    <select id="city">
-      <option disabled selected value="">City</option>
+    <select id="city" class="glass-select">
+      <option disabled selected value="">Select city</option>
       <option>Tel Aviv</option>
       <option>Jerusalem</option>
       <option>Haifa</option>
     </select>
 
     <div class="section-title">Address</div>
-    <input type="text" id="address" placeholder="Enter address" style="width:100%;padding:12px;margin-bottom:16px;border:1px solid #e5e7eb;border-radius:12px;font-size:15px;background:#f8f6fc;color:#541257;transition:border 0.2s;outline:none;" />
+    <input type="text" id="address" placeholder="Enter address" class="glass-input" />
 
     <div class="section-title">Area</div>
-    <select id="area">
-      <option disabled selected value="">Area</option>
+    <select id="area" class="glass-select">
+      <option disabled selected value="">Select area</option>
       <option>Center</option>
       <option>North</option>
       <option>South</option>
     </select>
 
     <div class="section-title">Contract</div>
-    <select id="contract">
-      <option disabled selected value="">Contract</option>
+    <select id="contract" class="glass-select">
+      <option disabled selected value="">Select contract type</option>
       <option>Long term</option>
       <option>Short term</option>
       <option>Sublet</option>
     </select>
 
     <div class="section-title">Features</div>
-    <div class="features">
+    <div class="flex flex-wrap justify-center gap-2">
       <button class="feature-btn">🏠 Balcony</button>
       <button class="feature-btn">🛗 Elevator</button>
       <button class="feature-btn">🛡 Mamad</button>
@@ -299,8 +381,8 @@
       <button class="feature-btn">♿ Accessible</button>
     </div>
 
-    <div class="section-title">How many rooms are there in total in the apartment?</div>
-    <div class="rooms">
+    <div class="section-title">Number of Rooms</div>
+    <div class="rooms flex flex-wrap justify-center gap-2">
       <button>2</button>
       <button>2.5</button>
       <button>3</button>
@@ -308,16 +390,16 @@
       <button>5</button>
     </div>
 
-    <div class="section-title">Room price</div>
-    <input type="text" id="roomPrice" placeholder="0" />
+    <div class="section-title">Room Price</div>
+    <input type="text" id="roomPrice" placeholder="Enter price" class="glass-input" />
 
-    <div class="section-title">Detail of furniture in the room</div>
-    <textarea placeholder="Describe the furniture..."></textarea>
+    <div class="section-title">Furniture Details</div>
+    <textarea placeholder="Describe the furniture..." class="glass-input"></textarea>
 
-    <div class="section-title">Date of entry</div>
-    <input type="date" value="2025-01-01" />
+    <div class="section-title">Date of Entry</div>
+    <input type="date" value="2025-01-01" class="glass-input" />
 
-    <div class="section-title">Add photos</div>
+    <div class="section-title">Apartment Photos</div>
     <div class="photo-grid">
       <div class="photo-upload">
         <span>+</span>
@@ -351,10 +433,15 @@
       </div>
     </div>
 
-    <button class="submit-btn" id="submitBtn" type="button">I'm done</button>
+    <button class="submit-btn" id="submitBtn" type="button">
+      <i class="fas fa-check"></i> Upload Apartment
+    </button>
+
+    <a href="apt-room.html" class="back-link">
+      <span style="font-size:1.2em;">←</span> Back
+    </a>
   </div>
 
-  <!-- ✅ Popup Element -->
   <div id="successPopup" class="popup">
     <span style="font-size:1.2em;">🎉</span><br>
     Your apartment was uploaded!<br>
