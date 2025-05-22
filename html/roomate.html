@@ -263,36 +263,89 @@
         container.innerHTML = '<div class="text-center text-red-500 mt-10">Failed to load matches.</div>';
         return;
       }
-      const { results = [] } = await res.json();
-      if (!results.length) {
+      const matches = await res.json();
+      if (!matches || !matches.length) {
         container.innerHTML = '<div class="text-center text-gray-500 mt-10">No roommates found yet.</div>';
         return;
       }
       container.innerHTML = '';
-      results.forEach(({ roommate, preferences }) => {
+      matches.forEach(({ user, score }) => {
         const card = document.createElement('div');
         card.className = 'relative flex flex-col items-center mb-10 roommate-card bg-white rounded-[20px] overflow-hidden shadow-md w-full max-w-[370px] mx-auto';
+        
+        // Get preferences from the user object
+        const preferences = user.preferences || {};
+        const aptPreferences = user.apartmentPreferences || {};
+        
         card.innerHTML = `
           <div class="w-full flex justify-center z-20">
-            <img src="${roommate.profile_img || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="w-24 h-24 rounded-full" />
+            <div class="relative">
+              <img src="${user.profile_img || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" 
+                   class="w-24 h-24 rounded-full object-cover" />
+              <div class="absolute -top-2 -right-2 bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded-full">
+                ${score}% Match
+              </div>
+            </div>
           </div>
           <div class="bg-white rounded-b-2xl shadow-md w-full max-w-[370px] pt-4 pb-6 px-4 z-10 relative">
-            <h2 class="text-lg font-bold">${roommate.full_name}${roommate.age ? ', ' + roommate.age : ''}</h2>
-            <div class="text-xs text-gray-600 mb-2">${roommate.email}</div>
-            <div class="flex flex-wrap gap-2 mb-2">
-              ${(roommate.interests || []).map(i => `<span class='px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs'>${i}</span>`).join(' ')}
+            <h2 class="text-lg font-bold">${user.full_name}${user.age ? ', ' + user.age : ''}</h2>
+            <div class="text-xs text-gray-600 mb-2">${user.email}</div>
+            
+            <!-- Roommate Preferences -->
+            <div class="mb-3">
+              <h3 class="text-sm font-semibold text-purple-800 mb-1">Roommate Preferences</h3>
+              <div class="flex flex-wrap gap-2 text-xs">
+                ${preferences.works_from_home ? '<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full">Works from home</span>' : ''}
+                ${preferences.shares_cleaning ? '<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full">Shares cleaning</span>' : ''}
+                ${preferences.has_or_wants_pet ? '<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full">Pet friendly</span>' : ''}
+                ${preferences.smokes ? '<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full">Smoker</span>' : ''}
+                ${preferences.ok_with_smoker ? '<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full">OK with smokers</span>' : ''}
+                ${preferences.cleanliness_importance ? `<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full">Cleanliness: ${preferences.cleanliness_importance}/5</span>` : ''}
+                ${preferences.cleaning_frequency ? `<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full">Cleans: ${preferences.cleaning_frequency}</span>` : ''}
+                ${preferences.guest_frequency ? `<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full">Guests: ${preferences.guest_frequency}</span>` : ''}
+                ${preferences.noise_sensitivity ? `<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full">Noise: ${preferences.noise_sensitivity}</span>` : ''}
+              </div>
             </div>
-            <div class="text-xs text-gray-700">
-              Prefers: ${preferences.city || ''} ${preferences.area ? ', ' + preferences.area : ''}
+
+            <!-- Apartment Preferences -->
+            <div class="mb-3">
+              <h3 class="text-sm font-semibold text-purple-800 mb-1">Apartment Preferences</h3>
+              <div class="text-xs text-gray-700">
+                <div class="mb-1">
+                  <i class="fas fa-map-marker-alt text-purple-800"></i>
+                  ${aptPreferences.preferred_city || ''} ${aptPreferences.preferred_area ? ', ' + aptPreferences.preferred_area : ''}
+                </div>
+                <div class="mb-1">
+                  <i class="fas fa-home text-purple-800"></i>
+                  ${aptPreferences.preferred_contract_type || ''} | 
+                  <i class="fas fa-dollar-sign text-purple-800"></i>
+                  ${aptPreferences.preferred_price_min || ''} - ${aptPreferences.preferred_price_max || ''}
+                </div>
+                <div class="mb-1">
+                  <i class="fas fa-calendar text-purple-800"></i>
+                  Entry: ${aptPreferences.preferred_date_of_entry ? new Date(aptPreferences.preferred_date_of_entry).toLocaleDateString() : ''} | 
+                  <i class="fas fa-door-open text-purple-800"></i>
+                  Rooms: ${aptPreferences.preferred_num_rooms ? aptPreferences.preferred_num_rooms.join(', ') : ''}
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-2 mt-2">
+                ${(aptPreferences.preferred_features || []).map(f => 
+                  `<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">${f}</span>`
+                ).join('')}
+              </div>
             </div>
-            <div class="text-xs text-gray-700 mt-1">
-              Contract: ${preferences.contract_type || ''} | Price: ${preferences.price_min || ''} - ${preferences.price_max || ''}
-            </div>
-            <div class="text-xs text-gray-700 mt-1">
-              Entry: ${preferences.date_of_entry || ''} | Rooms: ${preferences.num_rooms || ''}
-            </div>
-            <div class="flex flex-wrap gap-2 mt-2 text-xs text-gray-700">
-              ${(preferences.features || []).map(f => `<span class='px-2 py-1 bg-purple-100 text-purple-800 rounded-full'>${f}</span>`).join(' ')}
+
+            <!-- Match Score -->
+            <div class="mt-3 pt-3 border-t border-gray-100">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-semibold text-purple-800">Match Score</span>
+                <div class="flex items-center">
+                  <div class="w-24 h-2 bg-gray-200 rounded-full mr-2">
+                    <div class="w-${score} h-2 bg-purple-600 rounded-full"></div>
+                  </div>
+                  <span class="text-sm font-bold text-purple-800">${score}%</span>
+                </div>
+              </div>
             </div>
           </div>
         `;
