@@ -86,7 +86,7 @@ app.use(matchApi);
 
 // Global error handler
 app.use((err, req, res, next) => {
-  console.error('💥 Unhandled error:', err);   // goes to Cloud Run stderr
+  console.error('💥 Unhandled error:\n', err?.stack || err);   // shows complete stack trace
   res.status(500).json({ error: 'Internal server error' });
 });
 
