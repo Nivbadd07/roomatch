@@ -254,10 +254,12 @@
       const container = document.getElementById('roommate-list');
       container.innerHTML = '<div class="text-center text-gray-400 mt-10">Loading matches...</div>';
       const userId = await getUserId();
+      console.log('Fetched userId:', userId); // Debug log
       if (!userId) {
         container.innerHTML = '<div class="text-center text-red-500 mt-10">User not logged in.</div>';
         return;
       }
+      console.log('About to fetch roommates for userId:', userId); // Debug log
       const res = await fetch(`https://roomatch-prod-1-109620478954.europe-west1.run.app/api/match/roommates/${userId}`);
       if (!res.ok) {
         container.innerHTML = '<div class="text-center text-red-500 mt-10">Failed to load matches.</div>';
