@@ -74,4 +74,11 @@ export const User = sequelize.define('User', {
   timestamps: false
 });
 
+// Define associations
+User.hasOne(UserPreference, { foreignKey: 'user_id', as: 'preferences' });
+UserPreference.belongsTo(User, { foreignKey: 'user_id' });
+
+User.hasOne(UserApartmentPref, { foreignKey: 'user_id', as: 'apartmentPreferences' });
+UserApartmentPref.belongsTo(User, { foreignKey: 'user_id' });
+
 export { sequelize, Op }; 
