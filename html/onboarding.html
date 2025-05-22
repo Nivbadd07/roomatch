@@ -803,6 +803,10 @@
           const quizYN = JSON.parse(localStorage.getItem('roommate_quiz_yn') || '{}');
           const quizRadio = JSON.parse(localStorage.getItem('roommate_quiz_radio') || '{}');
 
+          // Debug logs
+          console.log('quizYN:', quizYN);
+          console.log('quizRadio:', quizRadio);
+
           const userPreferences = {
             user_id: userId,
             works_from_home: quizYN.work_home === 'yes',
