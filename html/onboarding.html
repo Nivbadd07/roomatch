@@ -818,11 +818,6 @@
             noise_sensitivity: quizRadio.noise || null
           };
 
-          // Debug logs
-          console.log('quizYN:', quizYN);
-          console.log('quizRadio:', quizRadio);
-          console.log('userPreferences:', userPreferences);
-
           if (userId) {
             const { error: prefInsertError } = await supabaseClient
               .from('user_preferences')
