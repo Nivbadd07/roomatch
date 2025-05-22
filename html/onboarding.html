@@ -799,20 +799,29 @@
             alert('Error saving to database: ' + userInsertError.message);
             throw userInsertError;
           }
-          // 3. Insert blank user_preferences row using the actual inserted user id
-          const insertedUser = userData && userData[0];
-          const userId = insertedUser ? insertedUser.id : null;
-          if (userId) {
-            const { error: prefInsertError } = await supabaseClient
-              .from('user_preferences')
-              .insert([{ user_id: userId }]);
-            if (prefInsertError) {
-              alert('Error creating preferences row: ' + JSON.stringify(prefInsertError));
-              throw prefInsertError;
-            }
-          } else {
-            alert('Could not determine user id for preferences insert.');
-            throw new Error('No user id for preferences insert');
+          // 3. Insert user_preferences row using the actual inserted user id and collected preferences
+          const quizYN = JSON.parse(localStorage.getItem('roommate_quiz_yn') || '{}');
+          const quizRadio = JSON.parse(localStorage.getItem('roommate_quiz_radio') || '{}');
+
+          const userPreferences = {
+            user_id: userId,
+            works_from_home: quizYN.work_home === 'yes',
+            shares_cleaning: quizYN.cleaning_resp === 'yes',
+            has_or_wants_pet: quizYN.pet === 'yes',
+            smokes: quizYN.smoke === 'yes',
+            ok_with_smoker: quizYN.ok_smoke === 'yes',
+            cleanliness_importance: quizRadio.cleanliness ? parseInt(quizRadio.cleanliness) : null,
+            cleaning_frequency: quizRadio.cleaning || null,
+            guest_frequency: quizRadio.guests || null,
+            noise_sensitivity: quizRadio.noise || null
+          };
+
+          const { error: prefInsertError } = await supabaseClient
+            .from('user_preferences')
+            .insert([userPreferences]);
+          if (prefInsertError) {
+            alert('Error creating preferences row: ' + JSON.stringify(prefInsertError));
+            throw prefInsertError;
           }
         }
       }
