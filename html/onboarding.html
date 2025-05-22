@@ -706,7 +706,7 @@
               progressDiv.style.display = 'none';
             } catch (error) {
               alert('Error uploading photo: ' + error.message);
-              throw error;
+              return;
             }
           }
         }
@@ -764,7 +764,7 @@
           const { data, error } = await supabaseClient.auth.signUp({ email, password });
           if (error) {
             alert('Error signing up: ' + error.message);
-            throw error;
+            return;
           }
           const authUserId = data.user.id; // Supabase Auth UUID
 
@@ -776,7 +776,7 @@
           const { error: loginError } = await supabaseClient.auth.signInWithPassword({ email, password });
           if (loginError) {
             alert('Error logging in: ' + loginError.message);
-            throw loginError;
+            return;
           }
 
           // 2. Insert into Supabase users table and get the inserted id
@@ -797,7 +797,7 @@
             .select(); // Get the inserted row(s)
           if (userInsertError) {
             alert('Error saving to database: ' + userInsertError.message);
-            throw userInsertError;
+            return;
           }
           const insertedUser = userData && userData[0];
           const userId = insertedUser ? insertedUser.id : null;
@@ -824,11 +824,11 @@
               .insert([userPreferences]);
             if (prefInsertError) {
               alert('Error creating preferences row: ' + JSON.stringify(prefInsertError));
-              throw prefInsertError;
+              return;
             }
           } else {
             alert('Could not determine user id for preferences insert.');
-            throw new Error('No user id for preferences insert');
+            return;
           }
         }
       }
