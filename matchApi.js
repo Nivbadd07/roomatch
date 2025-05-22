@@ -1,6 +1,7 @@
 // matchApi.js (ES module)
 import express from 'express';
-import { Apartment, UserApartmentPref, UserPreference, sequelize, User, Op } from './models.js';
+import { Op } from 'sequelize';
+import { Apartment, UserApartmentPref, UserPreference, sequelize, User } from './models.js';
 import { calculateApartmentMatchScore, calculateRoommateMatchScore } from './matchEngineAptFeed.js';
 import { calculateApartmentFeedMatches } from './matchEngineAptFeed.js';
 
@@ -37,12 +38,17 @@ router.get('/api/match/apartments/:user_id', async (req, res) => {
 });
 
 // GET /api/match/roommates/:user_id
-router.get('/api/match/roommates/:user_id', async (req, res) => {
+router.get('/api/match/roommates/:user_id', async (req, res, next) => {
   try {
     const userId = parseInt(req.params.user_id);
+    console.log('[match/roommates] userId =', userId);
+
     // Get user's apartment
     const userApt = await Apartment.findOne({ where: { roommate_id: { [Op.contains]: [userId] } } });
+    console.log('[match/roommates] userApt =', !!userApt);
+
     if (!userApt) {
+      console.log('[match/roommates] Fallback → returning random users');
       // Return 3 random users looking for Apt if no apartment found
       const randomUsers = await User.findAll({
         where: {
@@ -54,8 +60,11 @@ router.get('/api/match/roommates/:user_id', async (req, res) => {
       });
       return res.json({ results: randomUsers.map(roommate => ({ roommate, match_score: null })) });
     }
+
     // Get user's preferences
     const userPrefs = await UserPreference.findOne({ where: { user_id: userId } });
+    console.log('[match/roommates] userPrefs =', !!userPrefs);
+
     // Find all users looking for an apartment (except the current user)
     const potentialRoommates = await User.findAll({
       where: {
@@ -63,6 +72,8 @@ router.get('/api/match/roommates/:user_id', async (req, res) => {
         id: { [Op.ne]: userId }
       }
     });
+    console.log('[match/roommates] potentialRoommates count =', potentialRoommates.length);
+
     let scoredMatches = [];
     for (const roommate of potentialRoommates) {
       const roommatePrefs = await UserApartmentPref.findOne({ where: { user_id: roommate.id } });
@@ -71,9 +82,13 @@ router.get('/api/match/roommates/:user_id', async (req, res) => {
         scoredMatches.push({ roommate, match_score: score });
       }
     }
+    console.log('[match/roommates] scoredMatches count =', scoredMatches.length);
+
     scoredMatches.sort((a, b) => b.match_score - a.match_score);
+    
     // If no matches, return 3 random users looking for Apt
     if (scoredMatches.length === 0) {
+      console.log('[match/roommates] No scored matches → returning random users');
       const randomUsers = await User.findAll({
         where: {
           user_type: 'Looking for Apt',
@@ -84,10 +99,12 @@ router.get('/api/match/roommates/:user_id', async (req, res) => {
       });
       return res.json({ results: randomUsers.map(roommate => ({ roommate, match_score: null })) });
     }
+
+    console.log('[match/roommates] Success → returning top matches');
     res.json({ results: scoredMatches.slice(0, 5) });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
+    console.error('[match/roommates] Caught error:', err);
+    next(err);  // bubble to global handler
   }
 });
 

@@ -84,6 +84,12 @@ app.post('/api/upload-to-gcp', upload.single('file'), async (req, res) => {
 
 app.use(matchApi);
 
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('💥 Unhandled error:', err);   // goes to Cloud Run stderr
+  res.status(500).json({ error: 'Internal server error' });
+});
+
 // Start the server (Cloud Run will use this)
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
