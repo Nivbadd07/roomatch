@@ -143,10 +143,18 @@
       container.innerHTML = '';
       window._aptResults = results; // Store globally for modal use
       results.forEach(({ apartment }, idx) => {
-        const placeholderUrl = "https://via.placeholder.com/600x400?text=No+Image";
-        const imgUrl = Array.isArray(apartment.image_urls) && apartment.image_urls.length > 0
-          ? apartment.image_urls[0]
-          : placeholderUrl;
+        const placeholderUrl = "https://dummyimage.com/600x400/cccccc/ffffff&text=No+Image";
+        let imgUrl = placeholderUrl;
+        if (Array.isArray(apartment.image_urls) && apartment.image_urls.length > 0) {
+          const firstUrl = apartment.image_urls[0];
+          if (typeof firstUrl === 'string' && firstUrl.trim() !== '') {
+            if (firstUrl.startsWith('http')) {
+              imgUrl = firstUrl;
+            } else {
+              imgUrl = `https://storage.googleapis.com/roomatch-prod-static-site/${firstUrl.replace(/^\/+/, '')}`;
+            }
+          }
+        }
         const featuresHtml = (apartment.features || []).map(f => `<span class='px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-base font-medium'>${f}</span>`).join(' ');
         const entryDate = apartment.date_of_entry ? new Date(apartment.date_of_entry).toLocaleDateString() : '';
         const address = apartment.address ? `<div class='text-base text-gray-500 mb-1'><i class='fas fa-map-marker-alt'></i> ${apartment.address}</div>` : '';
