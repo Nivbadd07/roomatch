@@ -259,20 +259,37 @@
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZna3ZrbXBja25lY2VxZmdnemVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1NDA0NjAsImV4cCI6MjA2MjExNjQ2MH0.1ZEMsUleNaBrePUuagdZAKL2gYA-9-vM9wrTIW8-tdU'
   );
 
+  async function handlePostOAuthRedirect() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return; // Not logged in
+    // Check if user profile exists in your users table
+    const { data: userProfile } = await supabase
+      .from('users')
+      .select('id')
+      .eq('auth_id', user.id)
+      .single();
+    if (userProfile) {
+      window.location.href = 'apt-feed.html';
+    } else {
+      window.location.href = 'onboarding.html';
+    }
+  }
+
   document.getElementById('google-login').addEventListener('click', async () => {
     await supabase.auth.signInWithOAuth({ provider: 'google' });
+    // After redirect, handlePostOAuthRedirect will run
   });
 
   document.getElementById('facebook-login').addEventListener('click', async () => {
     await supabase.auth.signInWithOAuth({ provider: 'facebook' });
+    // After redirect, handlePostOAuthRedirect will run
   });
 
-  // Optional: On page load, check if user is already logged in
-  supabase.auth.getUser().then(({ data: { user } }) => {
-    if (user) {
-      window.location.href = 'apt-feed.html';
-    }
-  });
+  // Only run this after OAuth redirect (not on every page load)
+  // Detect if we are returning from OAuth (Supabase sets access_token in URL hash)
+  if (window.location.hash.includes('access_token')) {
+    handlePostOAuthRedirect();
+  }
 </script>
 
 </html>
