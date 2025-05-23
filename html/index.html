@@ -233,6 +233,16 @@
         <a href="onboarding.html" onclick="window.location.href='onboarding.html'; return false;" class="w-1/3 bg-gradient-to-r from-purple-500 via-pink-400 to-purple-700 hover:from-purple-700 hover:to-pink-500 text-white py-2 rounded-lg text-base font-semibold transform transition duration-200 hover:scale-105 hover:shadow-2xl shadow-lg">Sign Up</a>
         <a href="login.html" onclick="window.location.href='login.html'; return false;" class="w-1/3 bg-white hover:bg-purple-50 text-purple-800 py-2 rounded-lg text-base font-semibold border border-purple-200 transform transition duration-200 hover:scale-105 hover:shadow-2xl shadow">Log In</a>
       </div>
+      <!-- OAuth Buttons -->
+      <div class="flex flex-col gap-3 w-full justify-center mt-6 z-10">
+        <button id="google-login" class="flex items-center justify-center gap-2 w-full bg-white border border-gray-200 hover:bg-purple-50 text-gray-800 py-2 rounded-lg text-base font-semibold shadow transition duration-200">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google" class="w-5 h-5"> Sign in with Google
+        </button>
+        <button id="facebook-login" class="flex items-center justify-center gap-2 w-full bg-[#1877f2] hover:bg-[#145db2] text-white py-2 rounded-lg text-base font-semibold shadow transition duration-200">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M22.675 0h-21.35C.595 0 0 .592 0 1.326v21.348C0 23.408.595 24 1.325 24h11.495v-9.294H9.692v-3.622h3.128V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.797.143v3.24l-1.918.001c-1.504 0-1.797.715-1.797 1.763v2.313h3.587l-.467 3.622h-3.12V24h6.116C23.406 24 24 23.408 24 22.674V1.326C24 .592 23.406 0 22.675 0"/></svg>
+          Sign in with Facebook
+        </button>
+      </div>
     </div>
     <footer class="mt-2 text-gray-600 text-xs opacity-90 flex items-center justify-center gap-1">
       Made with <span style="font-size:1.3em;">💖</span> for your next home adventure &copy; 2025 Roomatch
@@ -240,5 +250,29 @@
   </div>
 
 </body>
+
+<!-- Supabase OAuth logic -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script>
+  const supabase = window.supabase.createClient(
+    'https://vgkvkmpckneceqfggzes.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZna3ZrbXBja25lY2VxZmdnemVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1NDA0NjAsImV4cCI6MjA2MjExNjQ2MH0.1ZEMsUleNaBrePUuagdZAKL2gYA-9-vM9wrTIW8-tdU'
+  );
+
+  document.getElementById('google-login').addEventListener('click', async () => {
+    await supabase.auth.signInWithOAuth({ provider: 'google' });
+  });
+
+  document.getElementById('facebook-login').addEventListener('click', async () => {
+    await supabase.auth.signInWithOAuth({ provider: 'facebook' });
+  });
+
+  // Optional: On page load, check if user is already logged in
+  supabase.auth.getUser().then(({ data: { user } }) => {
+    if (user) {
+      window.location.href = 'apt-feed.html';
+    }
+  });
+</script>
 
 </html>
