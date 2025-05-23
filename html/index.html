@@ -7,16 +7,26 @@
   <title>ROOMATCH - Welcome</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body {
-      background: linear-gradient(135deg, #fde2f3 0%, #e0d9ff 50%, #f3e8ff 100%);
-      background-attachment: fixed;
-      background-repeat: no-repeat;
-      background-size: cover;
-      position: relative;
-      min-height: 100vh;
-      overflow-x: hidden;
+    html, body {
+      height: 100%;
+      margin: 0;
       padding: 0;
     }
+
+    body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #fde2f3 0%, #e0d9ff 50%, #f3e8ff 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
 
     /* הגלים */
     .wave {
@@ -84,19 +94,19 @@
     }
 
     .glass-card {
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(18px);
-      box-shadow: 0 8px 40px 0 rgba(162, 59, 177, 0.13), 0 2px 8px 0 rgba(31, 38, 135, 0.08);
-      border: 2.5px solid rgba(162, 59, 177, 0.10);
-      border-radius: 2rem;
-      overflow: hidden;
-      max-width: 650px;
-      width: 98vw;
-      padding: 1rem 1.2rem 1rem 1.2rem;
-      box-sizing: border-box;
-      display: block;
-      position: relative;
-    }
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 8px 40px 0 rgba(162, 59, 177, 0.13), 0 2px 8px 0 rgba(31, 38, 135, 0.08);
+  border: 2.5px solid rgba(162, 59, 177, 0.10);
+  border-radius: 2rem;
+  overflow: hidden;
+  max-width: 650px;
+  width: 98vw;
+  padding: 1rem 1.2rem;
+  box-sizing: border-box;
+  position: relative;
+}
+
     .border-gradient {
       position: relative;
       z-index: 1;
@@ -295,12 +305,18 @@
   }
 
   document.getElementById('google-login').addEventListener('click', async () => {
-    await supabase.auth.signInWithOAuth({ provider: 'google' });
+    await supabase.auth.signInWithOAuth({ 
+      provider: 'google',
+      options: { redirectTo: window.location.origin + '/html/index.html' }
+    });
     // After redirect, handlePostOAuthRedirect will run
   });
 
   document.getElementById('facebook-login').addEventListener('click', async () => {
-    await supabase.auth.signInWithOAuth({ provider: 'facebook' });
+    await supabase.auth.signInWithOAuth({ 
+      provider: 'facebook',
+      options: { redirectTo: window.location.origin + '/html/index.html' }
+    });
     // After redirect, handlePostOAuthRedirect will run
   });
 
