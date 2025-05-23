@@ -43,6 +43,10 @@ export async function calculateApartmentFeedMatches(userId) {
     }
 
     for (const apt of apartments) {
+      // Ensure image_urls is always an array (even if empty) and contains full URLs
+      if (!Array.isArray(apt.image_urls)) {
+        apt.image_urls = [];
+      }
       console.log("Processing apartment:", apt.id, "roommate_id:", apt.roommate_id);
       // 3. Apartment match score
       let aptScore = 0;
