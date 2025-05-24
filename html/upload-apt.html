@@ -396,8 +396,8 @@
     <div class="section-title">Furniture Details</div>
     <textarea placeholder="Describe the furniture..." class="glass-input"></textarea>
 
-    <div class="section-title">Date of Entry</div>
-    <input type="date" value="2025-01-01" class="glass-input" />
+    <div class="section-title" style="font-size:1.15rem;">Date of Entry</div>
+    <input type="date" id="dateOfEntry" class="glass-input" style="font-size:1.1rem;" />
 
     <div class="section-title">Apartment Photos</div>
     <div class="photo-grid">
@@ -574,7 +574,7 @@
         const furniture = document.querySelector('textarea').value.trim();
         if (!furniture) throw new Error('Please describe the furniture.');
         // Validate date
-        const date = document.querySelector('input[type="date"]').value;
+        const date = document.getElementById('dateOfEntry').value;
         if (!date) throw new Error('Please select a date of entry.');
 
         // Upload all selected images to GCP
@@ -634,6 +634,12 @@
         btn.textContent = "I'm done";
       }
     });
+
+    // Set default and min date for calendar
+    const dateInput = document.getElementById('dateOfEntry');
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.value = today;
+    dateInput.min = today;
   </script>
 
 </body>

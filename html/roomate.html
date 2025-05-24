@@ -46,62 +46,21 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center pt-6 pb-28">
+<body class="min-h-screen bg-gradient-to-br from-purple-100 to-pink-100 scroll-smooth">
+
+  <!-- גל ברקע -->
   <div class="wave1"></div>
 
-  <div class="w-full max-w-md px-4 relative">
-    <!-- Location and Bills Bar -->
-    <div class="flex justify-between items-center text-sm mb-4">
-      <div>
-        <a href="location.html" id="location-link" class="hover:underline cursor-pointer">📍 <span id="user-location">Detecting location...</span></a>
-      </div>
-      <a href="bills.html" title="Split Bills">
-        <i class="fas fa-money-bill-wave text-purple-800 text-xl"></i>
-      </a>
-    </div>
-
-    <!-- Title -->
-    <h1 class="text-[22px] mb-8 font-semibold text-center">Discover Roommates</h1>
-  </div>
-
-  <!-- All Roommate Cards Container (including user's card) -->
-  <div class="max-w-md w-full mx-auto px-4 pb-28">
-    <!-- User Profile Card -->
-    <div id="user-profile-card" class="relative flex flex-col items-center mb-10 roommate-card bg-white rounded-[20px] overflow-hidden shadow-md w-full max-w-[370px] mx-auto" style="display:none;">
-      <div class="w-full flex justify-center z-20">
-        <div class="relative" style="width: 100%; max-width: 370px;">
-          <img id="user-photo" src="" alt="User Photo" class="w-full h-64 object-cover rounded-t-2xl shadow-lg" style="position: relative; z-index: 2; background:#f3e8ff;" />
-        </div>
-      </div>
-      <div class="bg-white rounded-b-2xl shadow-md w-full max-w-[370px] -mt-8 pt-10 pb-6 px-4 z-10 relative">
-        <h2 class="text-lg font-bold" id="user-name"></h2>
-        <p class="text-sm text-gray-600 mt-1 mb-2" id="user-interests-label">Your interests</p>
-        <div class="flex items-center text-purple-800 gap-4 text-sm mb-2" id="user-interests"></div>
-        <div class="flex justify-between text-sm text-gray-600 mt-2">
-          <div class="flex items-center gap-1">
-            <i class="fas fa-map-marker-alt text-purple-800"></i>
-            <span id="user-apt-city"></span>
-          </div>
-          <div class="flex items-center gap-1 text-purple-800 font-semibold">
-            <i class="fas fa-dollar-sign"></i>
-            <span id="user-apt-price"></span>
-          </div>
-        </div>
-        <div class="flex flex-wrap gap-2 mt-2 text-xs text-gray-700" id="user-apt-features"></div>
-        <div class="flex flex-wrap gap-2 mt-2 text-xs text-gray-700">
-          <span id="user-age"></span>
-          <span id="user-email"></span>
-          <span id="user-apt-area"></span>
-          <span id="user-apt-contract"></span>
-          <span id="user-apt-rooms"></span>
-          <span id="user-apt-furniture"></span>
-          <span id="user-apt-date"></span>
-        </div>
+  <!-- Main container -->
+  <div class="max-w-2xl mx-auto pt-6 pb-36">
+    <div class="flex justify-between items-center mb-6">
+      <div class="flex items-center gap-2 text-sm text-purple-800">
+        <i class="fas fa-map-marker-alt"></i>
+        <a id="user-location" href="location.html" class="hover:underline cursor-pointer text-purple-800">Detecting location...</a>
       </div>
     </div>
-
-    <!-- Other Roommate Cards -->
-    <div id="roommate-list" class="w-full"></div>
+    <h1 class="text-2xl font-bold text-center text-purple-900 mb-8">Discover Roommates</h1>
+    <div id="roommate-feed" class="flex flex-col gap-14"></div>
   </div>
 
   <!-- Bottom Nav -->
@@ -150,7 +109,61 @@
       return userRows && userRows.length > 0 ? userRows[0].id : null;
     }
 
-    // Show user's actual location at the top left
+    async function renderRoommates() {
+      const container = document.getElementById('roommate-feed');
+      container.innerHTML = '<div class="text-center text-gray-400 mt-10">Loading matches...</div>';
+      const userId = await getUserId();
+      if (!userId) {
+        container.innerHTML = '<div class="text-center text-red-500 mt-10">User not logged in.</div>';
+        return;
+      }
+      const res = await fetch(`https://roomatch-prod-1-109620478954.europe-west1.run.app/api/match/roommates/${userId}`);
+      if (!res.ok) {
+        container.innerHTML = '<div class="text-center text-red-500 mt-10">Failed to load matches.</div>';
+        return;
+      }
+      const matches = await res.json();
+      if (!matches || !matches.length) {
+        container.innerHTML = '<div class="text-center text-gray-500 mt-10">No roommates found yet.</div>';
+        return;
+      }
+      container.innerHTML = '';
+      matches.forEach(({ user, score }, idx) => {
+        const placeholderUrl = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+        const imgUrl = user.profile_img || user.profile_image_url || placeholderUrl;
+        const interestsHtml = (user.interests || []).map(i => `<span class='px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-base font-medium'>${i}</span>`).join(' ');
+        const prefs = user.preferences || {};
+        const aptPrefs = user.apartmentPreferences || {};
+        const card = document.createElement('div');
+        card.className = 'relative max-w-2xl mx-auto my-8 p-0 rounded-3xl shadow-2xl overflow-hidden border-2 border-purple-300 bg-white bg-opacity-80';
+        card.innerHTML = `
+          <div class="flex flex-col md:flex-row items-center gap-6 px-8 pt-6 pb-4">
+            <img src="${imgUrl}" alt="User photo" class="w-40 h-40 object-cover rounded-2xl border-2 border-purple-200 bg-purple-50" loading="lazy" onerror="this.onerror=null;this.src='${placeholderUrl}';">
+            <div class="flex-1 w-full">
+              <div class="flex items-center gap-2 mb-2">
+                <div class="text-2xl font-bold text-purple-900">${user.full_name || user.id || 'Roommate'}${user.age ? ', ' + user.age : ''}</div>
+                <span class="ml-2 px-3 py-1 bg-purple-200 text-purple-900 rounded-full text-base font-semibold">${score}% Match</span>
+              </div>
+              <div class="text-base text-gray-600 mb-1">${user.email || ''}</div>
+              <div class="flex flex-wrap gap-2 mb-2">${interestsHtml}</div>
+              <div class="mb-2">
+                <span class="font-semibold text-purple-800">Roommate Preferences:</span>
+                <span class="text-gray-700 text-sm">${Object.entries(prefs).map(([k,v]) => v ? `<span class='px-2 py-1 bg-purple-100 text-purple-800 rounded-full mr-1'>${k.replace(/_/g,' ')}: ${v}</span>` : '').join(' ')}</span>
+              </div>
+              <div class="mb-2">
+                <span class="font-semibold text-purple-800">Apartment Preferences:</span>
+                <span class="text-gray-700 text-sm">${Object.entries(aptPrefs).map(([k,v]) => v ? `<span class='px-2 py-1 bg-pink-100 text-pink-800 rounded-full mr-1'>${k.replace(/_/g,' ')}: ${Array.isArray(v) ? v.join(', ') : v}</span>` : '').join(' ')}</span>
+              </div>
+              <button class="mt-2 w-full bg-gradient-to-r from-purple-500 via-pink-400 to-purple-700 hover:from-purple-700 hover:to-pink-500 text-white py-3 rounded-xl text-lg font-semibold shadow">Connect</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+    renderRoommates();
+
+    // Geolocation for location at the top
     function setLocationText(text) {
       document.getElementById('user-location').textContent = text;
     }
@@ -175,193 +188,6 @@
     } else {
       setLocationText('Location unavailable');
     }
-
-    // --- Dynamic User Profile Card ---
-    function renderUserProfile() {
-      // Use onboarding/roommate-seeker data only
-      const name = localStorage.getItem('user_name') || '';
-      const email = localStorage.getItem('user_email') || '';
-      const age = localStorage.getItem('user_age') || '';
-      const interests = JSON.parse(localStorage.getItem('user_interests') || '[]');
-      // Use user_apartment as preferences if present, else apt_preferences
-      let preferences = {};
-      if (localStorage.getItem('user_apartment')) {
-        preferences = JSON.parse(localStorage.getItem('user_apartment'));
-      } else if (localStorage.getItem('apt_preferences')) {
-        preferences = JSON.parse(localStorage.getItem('apt_preferences'));
-      }
-      const photo = localStorage.getItem('user_photo') || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-      const card = document.getElementById('user-profile-card');
-      let hasData = false;
-      // Only show if all required data is present
-      if (name && email && age && interests.length && preferences.city) {
-        hasData = true;
-      }
-      document.getElementById('user-photo').src = photo;
-      document.getElementById('user-name').textContent = name ? `${name}${age ? ', ' + age : ''}` : '';
-      // Interests
-      const interestsDiv = document.getElementById('user-interests');
-      interestsDiv.innerHTML = '';
-      if (interests.length) {
-        interests.forEach(i => {
-          let icon = '';
-          if (/read/i.test(i)) icon = '<i class="fas fa-book"></i>';
-          else if (/music/i.test(i)) icon = '<i class="fas fa-music"></i>';
-          else if (/cook/i.test(i)) icon = '<i class="fas fa-utensils"></i>';
-          else if (/pet/i.test(i)) icon = '<i class="fas fa-paw"></i>';
-          else if (/sport/i.test(i)) icon = '<i class="fas fa-basketball-ball"></i>';
-          else if (/game/i.test(i)) icon = '<i class="fas fa-gamepad"></i>';
-          else if (/photo/i.test(i)) icon = '<i class="fas fa-camera"></i>';
-          else if (/travel/i.test(i)) icon = '<i class="fas fa-plane"></i>';
-          else if (/paint/i.test(i)) icon = '<i class="fas fa-paint-brush"></i>';
-          else if (/politic/i.test(i)) icon = '<i class="fas fa-scale-balanced"></i>';
-          else if (/charity/i.test(i)) icon = '<i class="fas fa-hands-helping"></i>';
-          else if (/fashion/i.test(i)) icon = '<i class="fas fa-tshirt"></i>';
-          else icon = '<i class="fas fa-star"></i>';
-          interestsDiv.innerHTML += `<span class='flex items-center gap-1'>${icon} ${i}</span>`;
-        });
-      } else {
-        interestsDiv.innerHTML = '<span class="text-purple-600">No interests listed</span>';
-      }
-      // City, price, etc. from preferences
-      const citySpan = document.getElementById('user-apt-city');
-      citySpan.innerHTML = preferences.city ? `<a href="location.html" class="text-purple-800 hover:underline cursor-pointer">${preferences.city}</a>` : '';
-      document.getElementById('user-apt-price').textContent = preferences.minPrice ? '$' + preferences.minPrice : preferences.price ? '$' + preferences.price : '';
-      // Features (area, contract, rooms, etc.)
-      const featuresDiv = document.getElementById('user-apt-features');
-      featuresDiv.innerHTML = '';
-      if (preferences.features && preferences.features.length) {
-        preferences.features.forEach(f => {
-          featuresDiv.innerHTML += `<span class='px-2 py-1 bg-purple-100 text-purple-800 rounded-full'>${f}</span>`;
-        });
-      }
-      document.getElementById('user-age').textContent = age ? `Age: ${age}` : '';
-      document.getElementById('user-email').textContent = email;
-      document.getElementById('user-apt-area').textContent = preferences.area ? `Area: ${preferences.area}` : '';
-      document.getElementById('user-apt-contract').textContent = preferences.contract ? `Contract: ${preferences.contract}` : '';
-      document.getElementById('user-apt-rooms').textContent = preferences.rooms ? `Rooms: ${preferences.rooms}` : '';
-      document.getElementById('user-apt-furniture').textContent = preferences.furniture ? `Furniture: ${preferences.furniture}` : '';
-      document.getElementById('user-apt-date').textContent = preferences.date ? `Entry Date: ${preferences.date}` : '';
-      card.style.display = hasData ? '' : 'none';
-      // Add border to differentiate user card
-      card.style.boxShadow = hasData ? '0 0 0 4px #e0d9ff, 0 2px 8px rgba(0,0,0,0.08)' : '';
-      card.style.background = hasData ? 'linear-gradient(135deg, #f3e8ff 0%, #fff 100%)' : '';
-    }
-    renderUserProfile();
-
-    // --- Dynamic Roommate Seekers List ---
-    async function renderRoommateSeekers() {
-      const container = document.getElementById('roommate-list');
-      container.innerHTML = '<div class="text-center text-gray-400 mt-10">Loading matches...</div>';
-      const userId = await getUserId();
-      console.log('Fetched userId:', userId); // Debug log
-      if (!userId) {
-        container.innerHTML = '<div class="text-center text-red-500 mt-10">User not logged in.</div>';
-        return;
-      }
-      console.log('About to fetch roommates for userId:', userId); // Debug log
-      const res = await fetch(`https://roomatch-prod-1-109620478954.europe-west1.run.app/api/match/roommates/${userId}`);
-      if (!res.ok) {
-        container.innerHTML = '<div class="text-center text-red-500 mt-10">Failed to load matches.</div>';
-        return;
-      }
-      const matches = await res.json();
-      if (!matches || !matches.length) {
-        container.innerHTML = '<div class="text-center text-gray-500 mt-10">No roommates found yet.</div>';
-        return;
-      }
-      container.innerHTML = '';
-      matches.forEach(({ roommate, match_score }) => {
-        const user = roommate;
-        const score = match_score ?? 0;
-        const preferences = user.preferences || {};
-        const aptPreferences = user.apartmentPreferences || {};
-        const card = document.createElement('div');
-        card.className = 'relative flex flex-col items-center mb-10 roommate-card bg-white rounded-[20px] overflow-hidden shadow-md w-full max-w-[370px] mx-auto';
-        card.innerHTML = `
-          <div class="w-full flex justify-center z-20">
-            <div class="relative">
-              <img src="${user.profile_img || user.profile_image_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" 
-                   class="w-24 h-24 rounded-full object-cover" />
-              <div class="absolute -top-2 -right-2 bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded-full">
-                ${score}% Match
-              </div>
-            </div>
-          </div>
-          <div class="bg-white rounded-b-2xl shadow-md w-full max-w-[370px] pt-4 pb-6 px-4 z-10 relative">
-            <h2 class="text-lg font-bold">${user.full_name || user.id || 'Roommate'}${user.age ? ', ' + user.age : ''}</h2>
-            <div class="text-xs text-gray-600 mb-2">${user.email || 'No email provided'}</div>
-            <div class="mb-3">
-              <h3 class="text-sm font-semibold text-purple-800 mb-1">Roommate Preferences</h3>
-              <div class="flex flex-wrap gap-2 text-xs">
-                ${preferences.works_from_home ? '<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full">Works from home</span>' : ''}
-                ${preferences.shares_cleaning ? '<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full">Shares cleaning</span>' : ''}
-                ${preferences.has_or_wants_pet ? '<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full">Pet friendly</span>' : ''}
-                ${preferences.smokes ? '<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full">Smoker</span>' : ''}
-                ${preferences.ok_with_smoker ? '<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full">OK with smokers</span>' : ''}
-                ${preferences.cleanliness_importance ? `<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full">Cleanliness: ${preferences.cleanliness_importance}/5</span>` : ''}
-                ${preferences.cleaning_frequency ? `<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full">Cleans: ${preferences.cleaning_frequency}</span>` : ''}
-                ${preferences.guest_frequency ? `<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full">Guests: ${preferences.guest_frequency}</span>` : ''}
-                ${preferences.noise_sensitivity ? `<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full">Noise: ${preferences.noise_sensitivity}</span>` : ''}
-              </div>
-            </div>
-            <div class="mb-3">
-              <h3 class="text-sm font-semibold text-purple-800 mb-1">Apartment Preferences</h3>
-              <div class="text-xs text-gray-700">
-                <div class="mb-1">
-                  <i class="fas fa-map-marker-alt text-purple-800"></i>
-                  ${aptPreferences.preferred_city || ''} ${aptPreferences.preferred_area ? ', ' + aptPreferences.preferred_area : ''}
-                </div>
-                <div class="mb-1">
-                  <i class="fas fa-home text-purple-800"></i>
-                  ${aptPreferences.preferred_contract_type || ''} | 
-                  <i class="fas fa-dollar-sign text-purple-800"></i>
-                  ${aptPreferences.preferred_price_min || ''} - ${aptPreferences.preferred_price_max || ''}
-                </div>
-                <div class="mb-1">
-                  <i class="fas fa-calendar text-purple-800"></i>
-                  Entry: ${aptPreferences.preferred_date_of_entry ? new Date(aptPreferences.preferred_date_of_entry).toLocaleDateString() : ''} | 
-                  <i class="fas fa-door-open text-purple-800"></i>
-                  Rooms: ${aptPreferences.preferred_num_rooms ? aptPreferences.preferred_num_rooms.join(', ') : ''}
-                </div>
-              </div>
-              <div class="flex flex-wrap gap-2 mt-2">
-                ${(aptPreferences.preferred_features || []).map(f => 
-                  `<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">${f}</span>`
-                ).join('')}
-              </div>
-            </div>
-            <div class="mt-3 pt-3 border-t border-gray-100">
-              <div class="flex items-center justify-between">
-                <span class="text-sm font-semibold text-purple-800">Match Score</span>
-                <div class="flex items-center">
-                  <div class="w-24 h-2 bg-gray-200 rounded-full mr-2">
-                    <div class="w-${score} h-2 bg-purple-600 rounded-full"></div>
-                  </div>
-                  <span class="text-sm font-bold text-purple-800">${score}%</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    // Initialize the page
-    renderUserProfile();
-    renderRoommateSeekers();
-
-    // Delete button handler
-    document.addEventListener('click', function(e) {
-      if (e.target.closest('.delete-roommate-btn')) {
-        const idx = e.target.closest('.delete-roommate-btn').getAttribute('data-idx');
-        let roommateSeekers = JSON.parse(localStorage.getItem('roommate_seekers') || '[]');
-        roommateSeekers.splice(idx, 1);
-        localStorage.setItem('roommate_seekers', JSON.stringify(roommateSeekers));
-        renderRoommateSeekers();
-      }
-    });
   </script>
 
 </body>
