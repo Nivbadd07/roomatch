@@ -29,21 +29,43 @@ export async function calculateApartmentFeedMatches(userId) {
     const userAptPref = await UserApartmentPref.findOne({ where: { user_id: userId } });
     console.log("userPref:", userPref);
     console.log("userAptPref:", userAptPref);
-    // 2. Fetch all apartments not occupied by this user
-    const apartments = await Apartment.findAll();
+    // 2. Fetch all apartments not occupied by this user, with explicit attributes
+    const apartments = await Apartment.findAll({
+      attributes: [
+        'id', 'city', 'area', 'price_per_month', 'features', 'num_rooms', 'contract_type',
+        'date_of_entry', 'address', 'roommate_id', 'image_urls', 'description'
+      ]
+    });
     console.log("Fetched apartments:", apartments.length);
     const results = [];
 
     if (!userPref || !userAptPref) {
       console.log("Missing user preferences, using fallback.");
-      // Fallback: return 4 random apartments
-      const randomApts = await Apartment.findAll({ order: sequelize.random(), limit: 4 });
+      // Fallback: return 4 random apartments with explicit attributes
+      const randomApts = await Apartment.findAll({
+        order: sequelize.random(),
+        limit: 4,
+        attributes: [
+          'id', 'city', 'area', 'price_per_month', 'features', 'num_rooms', 'contract_type',
+          'date_of_entry', 'address', 'roommate_id', 'image_urls', 'description'
+        ]
+      });
       console.log("Fallback random apartments:", randomApts.map(a => a.id));
+      // Ensure image_urls is always an array
+      randomApts.forEach(apt => {
+        if (typeof apt.image_urls === 'string') {
+          try { apt.image_urls = JSON.parse(apt.image_urls); } catch { apt.image_urls = []; }
+        }
+        if (!Array.isArray(apt.image_urls)) apt.image_urls = [];
+      });
       return randomApts.map(apt => ({ apartment: apt, score: 0 }));
     }
 
     for (const apt of apartments) {
       // Ensure image_urls is always an array (even if empty) and contains full URLs
+      if (typeof apt.image_urls === 'string') {
+        try { apt.image_urls = JSON.parse(apt.image_urls); } catch { apt.image_urls = []; }
+      }
       if (!Array.isArray(apt.image_urls)) {
         apt.image_urls = [];
       }
