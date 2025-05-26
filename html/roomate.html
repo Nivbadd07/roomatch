@@ -138,7 +138,7 @@
         const mainHeader = user.full_name || user.id || 'Roommate';
         // Gender, age, interests
         const genderAge = [user.gender, user.age ? user.age + ' yrs' : null].filter(Boolean).join(' | ');
-        const genderAgeHtml = genderAge ? `<div class='text-lg font-bold text-purple-800 mb-1'>${genderAge}</div>` : '';
+        const genderAgeHtml = genderAge ? `<div class='text-xl font-bold text-purple-900 mb-2'>${genderAge}</div>` : '';
         const interestsHtml = (user.interests || []).map(i => `<span class='px-3 py-1 bg-pink-100 text-pink-800 rounded-full text-base font-medium mr-2 mb-2 inline-block'>${i}</span>`).join(' ');
         // Preferences as tags
         const prefs = user.preferences || {};
