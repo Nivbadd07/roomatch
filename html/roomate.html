@@ -131,8 +131,7 @@
         return;
       }
       container.innerHTML = '';
-      matches.forEach(({ roommate, score }, idx) => {
-        const user = roommate;
+      matches.forEach(({ user, score }, idx) => {
         const placeholderUrl = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
         function isImageUrl(url) {
           return typeof url === 'string' && url.match(/\.(jpeg|jpg|gif|png|webp)$/i);
