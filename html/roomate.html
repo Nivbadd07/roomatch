@@ -140,12 +140,6 @@
         const genderAge = [user.gender, user.age ? user.age + ' yrs' : null].filter(Boolean).join(' | ');
         const genderAgeHtml = genderAge ? `<div class='text-base font-semibold text-purple-900 mb-2'>${genderAge}</div>` : '';
         const interestsHtml = (user.interests || []).map(i => `<span class='px-3 py-1 bg-pink-100 text-pink-800 rounded-full text-base font-medium mr-2 mb-2 inline-block'>${i}</span>`).join(' ');
-        // Preferences as tags
-        const prefs = user.preferences || {};
-        const matchingPrefs = Object.entries(prefs)
-          .filter(([k, v]) => v && v !== '' && v !== false && v !== 'false')
-          .map(([k, v]) => `<span class='px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-base font-medium mr-2 mb-2 inline-block'>${k.replace(/_/g, ' ')}: ${v}</span>`)
-          .join(' ');
         // Bio
         const bioHtml = user.bio ? `<div class='mt-2'><div class='text-base font-semibold text-purple-900 mb-1'>Bio</div><div class='text-lg text-gray-800'>${user.bio}</div></div>` : '';
         const card = document.createElement('div');
@@ -157,7 +151,6 @@
             ${genderAgeHtml}
             <div class="flex flex-wrap gap-2 mb-3">${interestsHtml}</div>
             ${bioHtml}
-            <div class="flex flex-wrap gap-2 mt-3">${matchingPrefs}</div>
           </div>
         `;
         container.appendChild(card);
