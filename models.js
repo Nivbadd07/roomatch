@@ -68,6 +68,10 @@ export const UserPreference = sequelize.define('UserPreference', {
 export const User = sequelize.define('User', {
   id: { type: DataTypes.BIGINT, primaryKey: true }, // INT8
   user_type: DataTypes.STRING,
+  full_name: DataTypes.STRING,
+  email: DataTypes.STRING,
+  profile_image_url: DataTypes.STRING,
+  age: DataTypes.INTEGER,
   // Add other fields as needed
 }, {
   tableName: 'users',
