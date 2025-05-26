@@ -72,6 +72,9 @@ export const User = sequelize.define('User', {
   email: DataTypes.STRING,
   profile_image_url: DataTypes.STRING,
   age: DataTypes.INTEGER,
+  gender: DataTypes.STRING,
+  interests: DataTypes.ARRAY(DataTypes.STRING),
+  bio: DataTypes.TEXT,
   // Add other fields as needed
 }, {
   tableName: 'users',
