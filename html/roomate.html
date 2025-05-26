@@ -129,7 +129,8 @@
         return;
       }
       container.innerHTML = '';
-      matches.forEach(({ user, score }, idx) => {
+      matches.forEach(({ roommate, score }, idx) => {
+        const user = roommate;
         const placeholderUrl = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
         const imgUrl = user.profile_img || user.profile_image_url || placeholderUrl;
         const interestsHtml = (user.interests || []).map(i => `<span class='px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-base font-medium'>${i}</span>`).join(' ');
@@ -140,7 +141,7 @@
         card.innerHTML = `
           <img src="${imgUrl}" alt="User photo" class="w-full h-80 object-cover rounded-t-3xl border-b-2 border-purple-200" loading="lazy" onerror="this.onerror=null;this.src='${placeholderUrl}';">
           <div class="px-8 pt-6 pb-4">
-            <div class="text-2xl font-bold text-purple-900 mb-2">${user.full_name || user.id || 'Roommate'}${user.age ? ', ' + user.age : ''} <span class="ml-2 px-3 py-1 bg-purple-200 text-purple-900 rounded-full text-base font-semibold">${score}% Match</span></div>
+            <div class="text-2xl font-bold text-purple-900 mb-2">${user.full_name || user.id || 'Roommate'}${user.age ? ', ' + user.age : ''} <span class="ml-2 px-3 py-1 bg-purple-200 text-purple-900 rounded-full text-base font-semibold">${score !== undefined ? score + '% Match' : ''}</span></div>
             <div class="text-base text-gray-600 mb-1">${user.email || ''}</div>
             <div class="flex flex-wrap gap-2 mb-3">${interestsHtml}</div>
             <div class="mb-2">
