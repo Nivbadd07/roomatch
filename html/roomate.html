@@ -22,10 +22,11 @@
 
     .wave1 {
       position: fixed;
-      width: 100vw;
-      height: 100vh;
-      left: 0;
+      width: 200%;
+      height: 100%;
+      left: 50%;
       top: 0;
+      transform: translateX(-50%);
       background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23f8bbd0" fill-opacity="1" d="M0,32L40,37.3C80,43,160,53,240,80C320,107,400,149,480,165.3C560,181,640,171,720,165.3C800,160,880,160,960,170.7C1040,181,1120,203,1200,197.3C1280,192,1360,160,1400,144L1440,128L1440,0L1400,0C1360,0,1280,0,1200,0C1120,0,1040,0,960,0C880,0,800,0,720,0C640,0,560,0,480,0C400,0,320,0,240,0C160,0,80,0,40,0L0,0Z"></path></svg>') no-repeat center center;
       background-size: cover;
       opacity: 0.4;
@@ -49,7 +50,7 @@
 <body class="min-h-screen bg-gradient-to-br from-purple-100 to-pink-100 scroll-smooth">
 
   <!-- גל ברקע -->
-  <div class="wave1"></div>
+  <div class="wave1" style="z-index:0;"></div>
 
   <!-- Main container -->
   <div class="max-w-2xl mx-auto pt-6 pb-36" style="position:relative;z-index:10;">
@@ -138,10 +139,10 @@
         const mainHeader = user.full_name || user.id || 'Roommate';
         // Gender, age, interests
         const genderAge = [user.gender, user.age ? user.age + ' yrs' : null].filter(Boolean).join(' | ');
-        const genderAgeHtml = genderAge ? `<div class='text-base font-semibold text-purple-900 mb-2'>${genderAge}</div>` : '';
+        const genderAgeHtml = genderAge ? `<div class='text-sm font-semibold text-purple-900 mb-2'>${genderAge}</div>` : '';
         const interestsHtml = (user.interests || []).map(i => `<span class='px-3 py-1 bg-pink-100 text-pink-800 rounded-full text-base font-medium mr-2 mb-2 inline-block'>${i}</span>`).join(' ');
         // Bio
-        const bioHtml = user.bio ? `<div class='mt-2'><div class='text-base font-semibold text-purple-900 mb-1'>Bio</div><div class='text-lg text-gray-800'>${user.bio}</div></div>` : '';
+        const bioHtml = user.bio ? `<div class='mt-2'><div class='text-sm font-semibold text-purple-900 mb-1'>Bio</div><div class='text-base text-gray-800'>${user.bio}</div></div>` : '';
         const card = document.createElement('div');
         card.className = 'relative max-w-2xl mx-auto my-8 p-0 rounded-3xl shadow-2xl overflow-hidden border-2 border-purple-300 bg-white bg-opacity-80';
         card.innerHTML = `
