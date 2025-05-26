@@ -124,12 +124,14 @@
       }
       const data = await res.json();
       const matches = data.results || [];
+      console.log("matches from API:", matches);
       if (!matches.length) {
         container.innerHTML = '<div class="text-center text-gray-500 mt-10">No roommates found yet.</div>';
         return;
       }
       container.innerHTML = '';
       matches.forEach(({ roommate, score }, idx) => {
+        console.log("Rendering roommate:", roommate, "score:", score);
         const user = roommate;
         const placeholderUrl = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
         const imgUrl = user.profile_img || user.profile_image_url || placeholderUrl;
