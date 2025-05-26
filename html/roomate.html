@@ -21,7 +21,7 @@
     }
 
     .wave1 {
-      position: absolute;
+      position: fixed;
       width: 100vw;
       height: 100vh;
       left: 0;
@@ -138,7 +138,7 @@
         const mainHeader = user.full_name || user.id || 'Roommate';
         // Gender, age, interests
         const genderAge = [user.gender, user.age ? user.age + ' yrs' : null].filter(Boolean).join(' | ');
-        const genderAgeHtml = genderAge ? `<div class='text-xl font-bold text-purple-900 mb-2'>${genderAge}</div>` : '';
+        const genderAgeHtml = genderAge ? `<div class='text-base font-semibold text-purple-900 mb-2'>${genderAge}</div>` : '';
         const interestsHtml = (user.interests || []).map(i => `<span class='px-3 py-1 bg-pink-100 text-pink-800 rounded-full text-base font-medium mr-2 mb-2 inline-block'>${i}</span>`).join(' ');
         // Preferences as tags
         const prefs = user.preferences || {};
@@ -147,7 +147,7 @@
           .map(([k, v]) => `<span class='px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-base font-medium mr-2 mb-2 inline-block'>${k.replace(/_/g, ' ')}: ${v}</span>`)
           .join(' ');
         // Bio
-        const bioHtml = user.bio ? `<div class='mt-2'><div class='text-base font-semibold text-purple-900 mb-1'>Bio</div><div class='text-3xl text-gray-800'>${user.bio}</div></div>` : '';
+        const bioHtml = user.bio ? `<div class='mt-2'><div class='text-base font-semibold text-purple-900 mb-1'>Bio</div><div class='text-lg text-gray-800'>${user.bio}</div></div>` : '';
         const card = document.createElement('div');
         card.className = 'relative max-w-2xl mx-auto my-8 p-0 rounded-3xl shadow-2xl overflow-hidden border-2 border-purple-300 bg-white bg-opacity-80';
         card.innerHTML = `
