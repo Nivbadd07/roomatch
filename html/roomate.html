@@ -122,8 +122,9 @@
         container.innerHTML = '<div class="text-center text-red-500 mt-10">Failed to load matches.</div>';
         return;
       }
-      const matches = await res.json();
-      if (!matches || !matches.length) {
+      const data = await res.json();
+      const matches = data.results || [];
+      if (!matches.length) {
         container.innerHTML = '<div class="text-center text-gray-500 mt-10">No roommates found yet.</div>';
         return;
       }
