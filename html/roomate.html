@@ -133,6 +133,7 @@
       container.innerHTML = '';
       matches.forEach(({ roommate: user, match_score: score }, idx) => {
         if (!user) return;
+        console.log('Rendering roommate:', user);
         const placeholderUrl = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
         function isImageUrl(url) {
           return typeof url === 'string' && url.match(/\.(jpeg|jpg|gif|png|webp)$/i);
