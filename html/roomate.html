@@ -132,15 +132,16 @@
       }
       container.innerHTML = '';
       matches.forEach(({ roommate: user, match_score: score }, idx) => {
-        if (!user) return;
+        if (!user) {
+          console.warn('Skipping undefined roommate at index', idx, matches[idx]);
+          return;
+        }
         console.log('Rendering roommate:', user);
         const placeholderUrl = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
         function isImageUrl(url) {
           return typeof url === 'string' && url.match(/\.(jpeg|jpg|gif|png|webp)$/i);
         }
-        const imgUrl = isImageUrl(user.profile_img) ? user.profile_img
-                      : isImageUrl(user.profile_image_url) ? user.profile_image_url
-                      : placeholderUrl;
+        const imgUrl = isImageUrl(user.profile_image_url) ? user.profile_image_url : placeholderUrl;
         // Main header: full_name (fallback to id)
         const mainHeader = user.full_name || user.id || 'Roommate';
         // Gender, age, interests
