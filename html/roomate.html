@@ -133,9 +133,11 @@
         return;
       }
       container.innerHTML = '';
-      matches.forEach(({ roommate, match_score: score }, idx) => {
+      matches.forEach((match, idx) => {
+        const roommate = match.roommate;
+        const score = match.match_score;
         if (!roommate) {
-          console.warn('Skipping undefined roommate at index', idx, matches[idx]);
+          console.warn('Skipping undefined roommate at index', idx, match);
           return;
         }
         console.log('Rendering roommate:', roommate);
