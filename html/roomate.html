@@ -126,6 +126,8 @@
       const data = await res.json();
       const matches = data.results || [];
       console.log("matches from API:", matches);
+      console.log('About to render matches:', matches.length, matches);
+      container.innerHTML = '<div>Test Card Before Loop</div>';
       if (!matches.length) {
         container.innerHTML = '<div class="text-center text-gray-500 mt-10">No roommates found yet.</div>';
         return;
