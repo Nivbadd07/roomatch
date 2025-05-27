@@ -131,25 +131,25 @@
         return;
       }
       container.innerHTML = '';
-      matches.forEach(({ roommate: user, match_score: score }, idx) => {
-        if (!user) {
+      matches.forEach(({ roommate, match_score: score }, idx) => {
+        if (!roommate) {
           console.warn('Skipping undefined roommate at index', idx, matches[idx]);
           return;
         }
-        console.log('Rendering roommate:', user);
+        console.log('Rendering roommate:', roommate);
         const placeholderUrl = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
         function isImageUrl(url) {
           return typeof url === 'string' && url.match(/\.(jpeg|jpg|gif|png|webp)$/i);
         }
-        const imgUrl = isImageUrl(user.profile_image_url) ? user.profile_image_url : placeholderUrl;
+        const imgUrl = isImageUrl(roommate.profile_image_url) ? roommate.profile_image_url : placeholderUrl;
         // Main header: full_name (fallback to id)
-        const mainHeader = user.full_name || user.id || 'Roommate';
+        const mainHeader = roommate.full_name || roommate.id || 'Roommate';
         // Gender, age, interests
-        const genderAge = [user.gender, user.age ? user.age + ' yrs' : null].filter(Boolean).join(' | ');
+        const genderAge = [roommate.gender, roommate.age ? roommate.age + ' yrs' : null].filter(Boolean).join(' | ');
         const genderAgeHtml = genderAge ? `<div class='text-sm font-semibold text-purple-900 mb-2'>${genderAge}</div>` : '';
-        const interestsHtml = (user.interests || []).map(i => `<span class='px-3 py-1 bg-pink-100 text-pink-800 rounded-full text-base font-medium mr-2 mb-2 inline-block'>${i}</span>`).join(' ');
+        const interestsHtml = (roommate.interests || []).map(i => `<span class='px-3 py-1 bg-pink-100 text-pink-800 rounded-full text-base font-medium mr-2 mb-2 inline-block'>${i}</span>`).join(' ');
         // Bio
-        const bioHtml = user.bio ? `<div class='mt-2'><div class='text-sm font-semibold text-purple-900 mb-1'>Bio</div><div class='text-base text-gray-800'>${user.bio}</div></div>` : '';
+        const bioHtml = roommate.bio ? `<div class='mt-2'><div class='text-sm font-semibold text-purple-900 mb-1'>Bio</div><div class='text-base text-gray-800'>${roommate.bio}</div></div>` : '';
         const card = document.createElement('div');
         card.className = 'relative w-96 h-[500px] flex flex-col mx-auto my-8 p-0 rounded-3xl shadow-2xl overflow-hidden border-2 border-purple-300 bg-white bg-opacity-80';
         card.innerHTML = `
