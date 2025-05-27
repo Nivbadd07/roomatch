@@ -53,7 +53,21 @@ export async function calculateRoommateFeedMatches(userId) {
         order: sequelize.random(),
         limit: 4
       });
-      return randomUsers.map(user => ({ user, score: 0 }));
+      return randomUsers.map(user => ({
+        roommate: {
+          id: user.id,
+          full_name: user.full_name,
+          email: user.email,
+          profile_image_url: user.profile_image_url,
+          age: user.age,
+          gender: user.gender,
+          interests: user.interests,
+          bio: user.bio,
+          preferences: user.preferences,
+          apartmentPreferences: user.apartmentPreferences
+        },
+        match_score: 0
+      }));
     }
 
     for (const potentialRoommate of potentialRoommates) {
@@ -178,6 +192,9 @@ export async function calculateRoommateFeedMatches(userId) {
           email: rand.email,
           profile_image_url: rand.profile_image_url,
           age: rand.age,
+          gender: rand.gender,
+          interests: rand.interests,
+          bio: rand.bio,
           preferences: rand.preferences,
           apartmentPreferences: rand.apartmentPreferences
         },
@@ -197,7 +214,21 @@ export async function calculateRoommateFeedMatches(userId) {
         order: sequelize.random(),
         limit: 4
       });
-      return randomUsers.map(user => ({ user, score: 0 }));
+      return randomUsers.map(user => ({
+        roommate: {
+          id: user.id,
+          full_name: user.full_name,
+          email: user.email,
+          profile_image_url: user.profile_image_url,
+          age: user.age,
+          gender: user.gender,
+          interests: user.interests,
+          bio: user.bio,
+          preferences: user.preferences,
+          apartmentPreferences: user.apartmentPreferences
+        },
+        match_score: 0
+      }));
     } catch (fallbackErr) {
       console.log("Error in fallback:", fallbackErr);
       return [];
