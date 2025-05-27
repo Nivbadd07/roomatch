@@ -146,47 +146,47 @@ export async function calculateRoommateFeedMatches(userId) {
       // 5. Combine scores (50% roommate preferences, 50% apartment preferences)
       const finalScore = Math.round((roommateMatch * 0.5 + apartmentMatch * 0.5) * 100);
       results.push({
-        user: {
+        roommate: {
           id: potentialRoommate.id,
           full_name: potentialRoommate.full_name,
           email: potentialRoommate.email,
-          profile_img: potentialRoommate.profile_image_url,
+          profile_image_url: potentialRoommate.profile_image_url,
           age: potentialRoommate.age,
           preferences: roommatePref,
           apartmentPreferences: aptPref
         },
-        score: finalScore
+        match_score: finalScore
       });
       console.log("Pushed roommate:", potentialRoommate.id, "score:", finalScore);
     }
 
     // Sort by score descending, take top 4, fill with randoms if needed
-    results.sort((a, b) => b.score - a.score);
+    results.sort((a, b) => b.match_score - a.match_score);
     console.log("Results before fallback:", results.length);
     
     while (results.length < 4) {
       // Add random users (score 0) if not enough
       const unused = potentialRoommates.filter(user => 
-        !results.some(r => r.user.id === user.id) && user.id !== userId
+        !results.some(r => r.roommate.id === user.id) && user.id !== userId
       );
       if (unused.length === 0) break;
       const rand = unused[Math.floor(Math.random() * unused.length)];
       results.push({
-        user: {
+        roommate: {
           id: rand.id,
           full_name: rand.full_name,
           email: rand.email,
-          profile_img: rand.profile_image_url,
+          profile_image_url: rand.profile_image_url,
           age: rand.age,
           preferences: rand.preferences,
           apartmentPreferences: rand.apartmentPreferences
         },
-        score: 0
+        match_score: 0
       });
       console.log("Added fallback roommate:", rand.id);
     }
 
-    console.log("Final results:", results.slice(0, 4).map(r => ({ id: r.user.id, score: r.score })));
+    console.log("Final results:", results.slice(0, 4).map(r => ({ id: r.roommate.id, score: r.match_score })));
     return results.slice(0, 4);
   } catch (err) {
     console.log("Error in roommate match engine:", err);
