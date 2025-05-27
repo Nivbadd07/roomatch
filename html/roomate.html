@@ -64,6 +64,17 @@
     <div id="roommate-feed" class="flex flex-col gap-14"></div>
   </div>
 
+  <!-- Schedule Meeting Modal -->
+  <div id="scheduleModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl p-6 shadow-lg w-80 relative">
+      <button id="closeModal" class="absolute top-2 right-2 text-gray-400 hover:text-purple-700 text-xl">&times;</button>
+      <div class="font-bold text-lg mb-2">Schedule a Meeting</div>
+      <label class="block mb-2 text-sm font-medium">Pick a date and time:</label>
+      <input id="tourDateTime" type="datetime-local" class="w-full border border-purple-200 rounded-lg px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-purple-300" />
+      <button id="addToGoogleCal" class="w-full bg-purple-800 hover:bg-purple-900 text-white py-2 rounded-lg font-semibold">Add to Google Calendar</button>
+    </div>
+  </div>
+
   <!-- Bottom Nav -->
   <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-md z-50">
     <div class="max-w-md mx-auto px-6 py-2 flex justify-between items-center text-center">
@@ -170,12 +181,60 @@
             ${genderAgeHtml}
             <div class="flex flex-wrap gap-2 mb-3">${interestsHtml}</div>
             ${bioHtml}
+            <button class="mt-4 w-full bg-gradient-to-r from-purple-500 via-pink-400 to-purple-700 hover:from-purple-700 hover:to-pink-500 text-white py-3 rounded-xl text-lg font-semibold shadow schedule-tour-btn" data-roommate="${idx}">
+              <i class="fa-solid fa-calendar-check mr-1"></i> Schedule Meeting
+            </button>
           </div>
         `;
         container.appendChild(card);
       });
     }
     renderRoommates();
+
+    // Schedule Meeting Modal logic
+    let selectedRoommateIdx = null;
+    const scheduleModal = document.getElementById('scheduleModal');
+    const closeModal = document.getElementById('closeModal');
+    const addToGoogleCal = document.getElementById('addToGoogleCal');
+    const tourDateTime = document.getElementById('tourDateTime');
+
+    document.addEventListener('click', function(e) {
+      if (e.target.classList.contains('schedule-tour-btn')) {
+        selectedRoommateIdx = e.target.getAttribute('data-roommate');
+        scheduleModal.classList.remove('hidden');
+      }
+    });
+    closeModal.addEventListener('click', () => {
+      scheduleModal.classList.add('hidden');
+    });
+    scheduleModal.addEventListener('click', (e) => {
+      if (e.target === scheduleModal) scheduleModal.classList.add('hidden');
+    });
+    addToGoogleCal.addEventListener('click', () => {
+      const dt = tourDateTime.value;
+      if (!dt) {
+        alert('Please select a date and time.');
+        return;
+      }
+      const roommate = window._roommateResults && window._roommateResults[selectedRoommateIdx] ? window._roommateResults[selectedRoommateIdx].roommate : null;
+      if (!roommate) {
+        alert('No roommate data found.');
+        return;
+      }
+      // Format date/time for Google Calendar (YYYYMMDDTHHMMSSZ)
+      const start = new Date(dt);
+      const end = new Date(start.getTime() + 60 * 60 * 1000); // 1 hour meeting
+      function toGCalFormat(date) {
+        return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+      }
+      const startStr = toGCalFormat(start);
+      const endStr = toGCalFormat(end);
+      const title = encodeURIComponent('Roommate Meeting: ' + (roommate.full_name || 'Potential Roommate'));
+      const details = encodeURIComponent('Schedule a meeting with ' + (roommate.full_name || 'Potential Roommate'));
+      const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startStr}/${endStr}&details=${details}`;
+      window.open(url, '_blank');
+      scheduleModal.classList.add('hidden');
+    });
 
     // Geolocation for location at the top
     function setLocationText(text) {
