@@ -186,7 +186,9 @@
 
     // Geolocation for location at the top
     function setLocationText(text) {
-      document.getElementById('user-location').textContent = text;
+      const locationLink = document.getElementById('user-location');
+      locationLink.textContent = text;
+      locationLink.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(text)}`;
     }
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(async pos => {
@@ -260,9 +262,21 @@
       }
       const startStr = toGCalFormat(start);
       const endStr = toGCalFormat(end);
-      const title = encodeURIComponent('Apartment Tour: ' + (apt.address || ''));
-      const details = encodeURIComponent('Schedule a tour for the apartment at ' + (apt.address || '') + (apt.roommate ? '. Roommate: ' + apt.roommate : ''));
+      
+      // Enhanced apartment tour details
+      const title = encodeURIComponent(`Apartment Tour: ${apt.address || 'New Apartment'}`);
+      const details = encodeURIComponent(
+        `Apartment Details:\n` +
+        `Address: ${apt.address || 'N/A'}\n` +
+        `Price: $${apt.price_per_month || 'N/A'} / month\n` +
+        `Rooms: ${apt.num_rooms || 'N/A'}\n` +
+        `Contract Type: ${apt.contract_type || 'N/A'}\n` +
+        `Features: ${(apt.features || []).join(', ') || 'N/A'}\n` +
+        `Entry Date: ${apt.date_of_entry ? new Date(apt.date_of_entry).toLocaleDateString() : 'N/A'}\n` +
+        `Description: ${apt.description || 'N/A'}`
+      );
       const location = encodeURIComponent(apt.address || '');
+      
       const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startStr}/${endStr}&details=${details}&location=${location}`;
       window.open(url, '_blank');
       scheduleModal.classList.add('hidden');

@@ -59,6 +59,11 @@
         <i class="fas fa-map-marker-alt"></i>
         <a id="user-location" href="location.html" class="hover:underline cursor-pointer text-purple-800">Detecting location...</a>
       </div>
+      <div class="flex items-center gap-2 text-sm text-purple-800">
+        <a href="bills.html" class="hover:underline cursor-pointer text-purple-800">
+          <i class="fas fa-file-invoice-dollar"></i> Bills
+        </a>
+      </div>
     </div>
     <h1 class="text-2xl font-bold text-center text-purple-900 mb-8">Discover Roommates</h1>
     <div id="roommate-feed" class="flex flex-col gap-14"></div>
@@ -226,8 +231,17 @@
       }
       const startStr = toGCalFormat(start);
       const endStr = toGCalFormat(end);
-      const title = encodeURIComponent('Roommate Meeting: ' + (roommate.full_name || 'Potential Roommate'));
-      const details = encodeURIComponent('Schedule a meeting with ' + (roommate.full_name || 'Potential Roommate'));
+      
+      // Enhanced meeting details
+      const title = encodeURIComponent(`Roommate Meeting: ${roommate.full_name || 'Potential Roommate'}`);
+      const details = encodeURIComponent(
+        `Meeting with: ${roommate.full_name || 'Potential Roommate'}\n` +
+        `Age: ${roommate.age || 'N/A'}\n` +
+        `Gender: ${roommate.gender || 'N/A'}\n` +
+        `Interests: ${(roommate.interests || []).join(', ') || 'N/A'}\n` +
+        `Bio: ${roommate.bio || 'N/A'}`
+      );
+      
       const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startStr}/${endStr}&details=${details}`;
       window.open(url, '_blank');
       scheduleModal.classList.add('hidden');
@@ -235,7 +249,9 @@
 
     // Geolocation for location at the top
     function setLocationText(text) {
-      document.getElementById('user-location').textContent = text;
+      const locationLink = document.getElementById('user-location');
+      locationLink.textContent = text;
+      locationLink.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(text)}`;
     }
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(async pos => {

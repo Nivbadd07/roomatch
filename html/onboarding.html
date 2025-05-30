@@ -421,15 +421,27 @@
         subtitle: "Let's Get to Know Each Other",
         render: () => `
           <input id='nameInput' class='onboard-input' type='text' placeholder='John Dope' maxlength='32' autocomplete='off' />
-          <input id='idInput' class='onboard-input' type='text' placeholder='Please add ID' maxlength='20' autocomplete='off' />
+          <input id='idInput' class='onboard-input' type='text' placeholder='Please add ID (minimum 8 digits)' maxlength='20' autocomplete='off' />
+          <div id='idError' class='text-red-500 text-sm mt-1'></div>
         `,
         validate: () => {
           const name = document.getElementById('nameInput').value.trim();
           const id = document.getElementById('idInput').value.trim();
+          const idError = document.getElementById('idError');
+          
           if (!name) return 'Please enter your name!';
           if (!/^[A-Za-z ]+$/.test(name)) return 'Name must contain only English letters and spaces!';
-          if (!id) return 'Please enter your ID!';
-          if (!/^[A-Za-z0-9]+$/.test(id)) return 'ID must contain only letters and numbers!';
+          
+          if (!id) {
+            idError.textContent = 'Please enter your ID!';
+            return 'Please enter your ID!';
+          }
+          if (!/^\d{8,}$/.test(id)) {
+            idError.textContent = 'ID must be at least 8 digits!';
+            return 'ID must be at least 8 digits!';
+          }
+          
+          idError.textContent = '';
           return null;
         },
         save: () => {
@@ -456,11 +468,52 @@
       {
         title: "Create a Password",
         subtitle: "Set a secure password for your account",
-        render: () => `<input id='passwordInput' class='onboard-input' type='password' placeholder='Password' maxlength='32' autocomplete='new-password' />`,
+        render: () => `
+          <input id='passwordInput' class='onboard-input' type='password' placeholder='Password' maxlength='32' autocomplete='new-password' />
+          <div class='text-sm text-gray-600 mt-2'>
+            Password must contain:
+            <ul class='list-disc list-inside mt-1'>
+              <li id='lengthCheck'>At least 8 characters</li>
+              <li id='uppercaseCheck'>One uppercase letter</li>
+              <li id='lowercaseCheck'>One lowercase letter</li>
+              <li id='numberCheck'>One number</li>
+              <li id='specialCheck'>One special character</li>
+            </ul>
+          </div>
+        `,
         validate: () => {
           const password = document.getElementById('passwordInput').value.trim();
+          const lengthCheck = document.getElementById('lengthCheck');
+          const uppercaseCheck = document.getElementById('uppercaseCheck');
+          const lowercaseCheck = document.getElementById('lowercaseCheck');
+          const numberCheck = document.getElementById('numberCheck');
+          const specialCheck = document.getElementById('specialCheck');
+          
+          // Reset all checks
+          [lengthCheck, uppercaseCheck, lowercaseCheck, numberCheck, specialCheck].forEach(el => {
+            el.style.color = '#4B5563';
+          });
+          
           if (!password) return 'Please enter your password!';
-          if (password.length < 6) return 'Password must be at least 6 characters!';
+          
+          // Check each requirement
+          const hasLength = password.length >= 8;
+          const hasUppercase = /[A-Z]/.test(password);
+          const hasLowercase = /[a-z]/.test(password);
+          const hasNumber = /[0-9]/.test(password);
+          const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+          
+          // Update visual feedback
+          if (hasLength) lengthCheck.style.color = '#059669';
+          if (hasUppercase) uppercaseCheck.style.color = '#059669';
+          if (hasLowercase) lowercaseCheck.style.color = '#059669';
+          if (hasNumber) numberCheck.style.color = '#059669';
+          if (hasSpecial) specialCheck.style.color = '#059669';
+          
+          if (!hasLength || !hasUppercase || !hasLowercase || !hasNumber || !hasSpecial) {
+            return 'Please meet all password requirements!';
+          }
+          
           return null;
         },
         save: () => {
@@ -613,33 +666,69 @@
         render: () => `
           <div class='space-y-8 text-left'>
             <div>
-              <p class='text-gray-700 mb-3'>How important is cleanliness at home to you, from 1 to 5?</p>
-              <div class='flex gap-2'>
-                ${[1,2,3,4,5].map(n => `<input type='radio' name='cleanliness' value='${n}' class='w-5 h-5 quiz-radio'>`).join('')}
+              <p class='text-gray-700 mb-3'>How important is cleanliness at home to you?</p>
+              <div class='flex justify-start items-center gap-1 mb-2'>
+                ${[1,2,3,4,5].map(n => `
+                  <div class='flex flex-col items-center'>
+                    <input type='radio' name='cleanliness' value='${n}' class='w-5 h-5 quiz-radio' id='cleanliness${n}'>
+                    <label for='cleanliness${n}' class='text-sm text-gray-600'>${n}</label>
+                  </div>
+                `).join('')}
+              </div>
+              <div class='flex items-center text-xs text-gray-500'>
+                <span>Not Important</span>
+                <span class='ml-8'>Very Important</span>
               </div>
             </div>
             <div>
               <p class='text-gray-700 mb-3'>How often do you prefer to clean the common areas?</p>
               <div class='space-y-3'>
-                <label class='block'><input type='radio' name='cleaning' value='Once a week' class='w-5 h-5 quiz-radio'> Once a week</label>
-                <label class='block'><input type='radio' name='cleaning' value='Once every two weeks' class='w-5 h-5 quiz-radio'> Once every two weeks</label>
-                <label class='block'><input type='radio' name='cleaning' value='Once a month' class='w-5 h-5 quiz-radio'> Once a month</label>
+                <label class='block flex items-center gap-2'>
+                  <input type='radio' name='cleaning' value='Once a week' class='w-5 h-5 quiz-radio'>
+                  <span>Once a week</span>
+                </label>
+                <label class='block flex items-center gap-2'>
+                  <input type='radio' name='cleaning' value='Once every two weeks' class='w-5 h-5 quiz-radio'>
+                  <span>Once every two weeks</span>
+                </label>
+                <label class='block flex items-center gap-2'>
+                  <input type='radio' name='cleaning' value='Once a month' class='w-5 h-5 quiz-radio'>
+                  <span>Once a month</span>
+                </label>
               </div>
             </div>
             <div>
               <p class='text-gray-700 mb-3'>How often do you invite friends or guests home?</p>
               <div class='space-y-3'>
-                <label class='block'><input type='radio' name='guests' value='Once a week' class='w-5 h-5 quiz-radio'> Once a week</label>
-                <label class='block'><input type='radio' name='guests' value='Once every two weeks' class='w-5 h-5 quiz-radio'> Once every two weeks</label>
-                <label class='block'><input type='radio' name='guests' value='Once a month' class='w-5 h-5 quiz-radio'> Once a month</label>
+                <label class='block flex items-center gap-2'>
+                  <input type='radio' name='guests' value='Once a week' class='w-5 h-5 quiz-radio'>
+                  <span>Once a week</span>
+                </label>
+                <label class='block flex items-center gap-2'>
+                  <input type='radio' name='guests' value='Once every two weeks' class='w-5 h-5 quiz-radio'>
+                  <span>Once every two weeks</span>
+                </label>
+                <label class='block flex items-center gap-2'>
+                  <input type='radio' name='guests' value='Once a month' class='w-5 h-5 quiz-radio'>
+                  <span>Once a month</span>
+                </label>
               </div>
             </div>
             <div>
               <p class='text-gray-700 mb-3'>How sensitive are you to noise during study or rest hours?</p>
               <div class='space-y-3'>
-                <label class='block'><input type='radio' name='noise' value='very sensitive' class='w-5 h-5 quiz-radio'> very sensitive</label>
-                <label class='block'><input type='radio' name='noise' value='acceptable to me' class='w-5 h-5 quiz-radio'> acceptable to me</label>
-                <label class='block'><input type='radio' name='noise' value='Not sensitive at all' class='w-5 h-5 quiz-radio'> Not sensitive at all</label>
+                <label class='block flex items-center gap-2'>
+                  <input type='radio' name='noise' value='very sensitive' class='w-5 h-5 quiz-radio'>
+                  <span>Very sensitive</span>
+                </label>
+                <label class='block flex items-center gap-2'>
+                  <input type='radio' name='noise' value='acceptable to me' class='w-5 h-5 quiz-radio'>
+                  <span>Acceptable to me</span>
+                </label>
+                <label class='block flex items-center gap-2'>
+                  <input type='radio' name='noise' value='Not sensitive at all' class='w-5 h-5 quiz-radio'>
+                  <span>Not sensitive at all</span>
+                </label>
               </div>
             </div>
           </div>
