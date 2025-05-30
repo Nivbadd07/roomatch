@@ -292,7 +292,7 @@
           <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#a23bb1;font-size:1.1em;">
             <i class="fa-solid fa-calendar-days"></i>
           </span>
-          <input type="date" value="2024-01-01" class="glass-input pl-10 text-center">
+          <input id="entryDate" type="date" class="glass-input pl-10 text-center">
         </div>
       </div>
       <button id="continueBtn" type="button" class="continue-btn"><i class="fa-solid fa-check"></i> Continue</button>
@@ -408,6 +408,20 @@
         popup.classList.add('hidden');
         window.location.href = 'apt-feed.html';
       }, 2000);
+    });
+
+    // Set date input to today and prevent past dates
+    window.addEventListener('DOMContentLoaded', function() {
+      const dateInput = document.getElementById('entryDate');
+      if (dateInput) {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        const todayStr = `${yyyy}-${mm}-${dd}`;
+        dateInput.value = todayStr;
+        dateInput.min = todayStr;
+      }
     });
   </script>
 
