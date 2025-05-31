@@ -537,7 +537,7 @@
                 <i class='fas fa-genderless mr-2'></i> Other
               </button>
             </div>
-            <label class='block mb-2 font-semibold'>Bio</label>
+            <label class='block mb-2 font-semibold'>Tell us about you! </label>
             <textarea id='bioInput' class='onboard-input' placeholder='Tell us about yourself...' maxlength='300' rows='7' style='min-height:120px;font-size:1.2rem;'></textarea>
           </div>
         `,
@@ -613,35 +613,35 @@
         render: () => `
           <div class='space-y-8'>
             <div class='text-left'>
-              <p class='text-gray-700 mb-3'>Do you work or study from home?</p>
+              <p class='text-gray-700 mb-3 text-xl font-bold'>Do you work or study from home?</p>
               <div class='flex gap-4'>
                 <button type='button' class='quiz-yn-btn px-5 py-2.5 rounded-full border border-purple-800 text-purple-800 hover:bg-purple-100' data-q='work_home' data-a='yes'>YES</button>
                 <button type='button' class='quiz-yn-btn px-5 py-2.5 rounded-full border border-purple-800 text-purple-800 hover:bg-purple-100' data-q='work_home' data-a='no'>NO</button>
               </div>
             </div>
             <div class='text-left'>
-              <p class='text-gray-700 mb-3'>Do you agree to share responsibility for cleaning?</p>
+              <p class='text-gray-700 mb-3 text-xl font-bold'>Do you agree to share responsibility for cleaning?</p>
               <div class='flex gap-4'>
                 <button type='button' class='quiz-yn-btn px-5 py-2.5 rounded-full border border-purple-800 text-purple-800 hover:bg-purple-100' data-q='cleaning_resp' data-a='yes'>YES</button>
                 <button type='button' class='quiz-yn-btn px-5 py-2.5 rounded-full border border-purple-800 text-purple-800 hover:bg-purple-100' data-q='cleaning_resp' data-a='no'>NO</button>
               </div>
             </div>
             <div class='text-left'>
-              <p class='text-gray-700 mb-3'>Do you have a pet or are you planning to get one?</p>
+              <p class='text-gray-700 mb-3 text-xl font-bold'>Do you have a pet or are you planning to get one?</p>
               <div class='flex gap-4'>
                 <button type='button' class='quiz-yn-btn px-5 py-2.5 rounded-full border border-purple-800 text-purple-800 hover:bg-purple-100' data-q='pet' data-a='yes'>YES</button>
                 <button type='button' class='quiz-yn-btn px-5 py-2.5 rounded-full border border-purple-800 text-purple-800 hover:bg-purple-100' data-q='pet' data-a='no'>NO</button>
               </div>
             </div>
             <div class='text-left'>
-              <p class='text-gray-700 mb-3'>Do you smoke?</p>
+              <p class='text-gray-700 mb-3 text-xl font-bold'>Do you smoke?</p>
               <div class='flex gap-4'>
                 <button type='button' class='quiz-yn-btn px-5 py-2.5 rounded-full border border-purple-800 text-purple-800 hover:bg-purple-100' data-q='smoke' data-a='yes'>YES</button>
                 <button type='button' class='quiz-yn-btn px-5 py-2.5 rounded-full border border-purple-800 text-purple-800 hover:bg-purple-100' data-q='smoke' data-a='no'>NO</button>
               </div>
             </div>
             <div class='text-left'>
-              <p class='text-gray-700 mb-3'>Are you comfortable with a partner who smokes?</p>
+              <p class='text-gray-700 mb-3 text-xl font-bold'>Are you comfortable with a partner who smokes?</p>
               <div class='flex gap-4'>
                 <button type='button' class='quiz-yn-btn px-5 py-2.5 rounded-full border border-purple-800 text-purple-800 hover:bg-purple-100' data-q='ok_smoke' data-a='yes'>YES</button>
                 <button type='button' class='quiz-yn-btn px-5 py-2.5 rounded-full border border-purple-800 text-purple-800 hover:bg-purple-100' data-q='ok_smoke' data-a='no'>NO</button>
@@ -666,7 +666,7 @@
         render: () => `
           <div class='space-y-8 text-left'>
             <div>
-              <p class='text-gray-700 mb-3'>How important is cleanliness at home to you?</p>
+              <p class='text-gray-700 mb-3 text-xl font-bold'>How important is cleanliness at home to you?</p>
               <div class='flex justify-start items-center gap-1 mb-2'>
                 ${[1,2,3,4,5].map(n => `
                   <div class='flex flex-col items-center'>
@@ -681,7 +681,7 @@
               </div>
             </div>
             <div>
-              <p class='text-gray-700 mb-3'>How often do you prefer to clean the common areas?</p>
+              <p class='text-gray-700 mb-3 text-xl font-bold'>How often do you prefer to clean the common areas?</p>
               <div class='space-y-3'>
                 <label class='block flex items-center gap-2'>
                   <input type='radio' name='cleaning' value='Once a week' class='w-5 h-5 quiz-radio'>
@@ -698,7 +698,7 @@
               </div>
             </div>
             <div>
-              <p class='text-gray-700 mb-3'>How often do you invite friends or guests home?</p>
+              <p class='text-gray-700 mb-3 text-xl font-bold'>How often do you invite friends or guests home?</p>
               <div class='space-y-3'>
                 <label class='block flex items-center gap-2'>
                   <input type='radio' name='guests' value='Once a week' class='w-5 h-5 quiz-radio'>
@@ -715,7 +715,7 @@
               </div>
             </div>
             <div>
-              <p class='text-gray-700 mb-3'>How sensitive are you to noise during study or rest hours?</p>
+              <p class='text-gray-700 mb-3 text-xl font-bold'>How sensitive are you to noise during study or rest hours?</p>
               <div class='space-y-3'>
                 <label class='block flex items-center gap-2'>
                   <input type='radio' name='noise' value='very sensitive' class='w-5 h-5 quiz-radio'>

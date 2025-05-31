@@ -44,7 +44,7 @@ export async function calculateApartmentFeedMatches(userId) {
       // Fallback: return 4 random apartments with explicit attributes
       const randomApts = await Apartment.findAll({
         order: sequelize.random(),
-        limit: 4,
+        limit: 6,
         attributes: [
           'id', 'city', 'area', 'price_per_month', 'features', 'num_rooms', 'contract_type',
           'date_of_entry', 'address', 'roommate_id', 'image_urls', 'description'
@@ -137,7 +137,7 @@ export async function calculateApartmentFeedMatches(userId) {
     // Sort by score descending, take top 4, fill with randoms if needed
     results.sort((a, b) => b.score - a.score);
     console.log("Results before fallback:", results.length);
-    while (results.length < 4) {
+    while (results.length < 6) {
       // Add random apartments (score 0) if not enough
       const unused = apartments.filter(apt => !results.some(r => r.apartment.id === apt.id));
       if (unused.length === 0) break;
@@ -145,13 +145,13 @@ export async function calculateApartmentFeedMatches(userId) {
       results.push({ apartment: rand, score: 0 });
       console.log("Added fallback apartment:", rand.id);
     }
-    console.log("Final results:", results.slice(0, 4).map(r => ({ id: r.apartment.id, score: r.score })));
-    return results.slice(0, 4);
+    console.log("Final results:", results.slice(0, 6).map(r => ({ id: r.apartment.id, score: r.score })));
+    return results.slice(0, 6);
   } catch (err) {
     console.log("Error in match engine:", err);
-    // Fallback: return 4 random apartments even on error
+    // Fallback: return 6 random apartments even on error
     try {
-      const randomApts = await Apartment.findAll({ order: sequelize.random(), limit: 4 });
+      const randomApts = await Apartment.findAll({ order: sequelize.random(), limit: 6 });
       console.log("Catch fallback random apartments:", randomApts.map(a => a.id));
       return randomApts.map(apt => ({ apartment: apt, score: 0 }));
     } catch (fallbackErr) {
