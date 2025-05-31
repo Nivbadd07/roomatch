@@ -8,10 +8,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
   <style>
     body {
-      background: linear-gradient(135deg, #fde2f3 0%, #e0d9ff 50%, #f3e8ff 100%);
-      background-attachment: fixed;
-      background-repeat: no-repeat;
-      background-size: cover;
+      background: white;
       min-height: 100vh;
       position: relative;
       overflow-x: hidden;
@@ -37,7 +34,7 @@
       border-radius: 2rem;
       border: 1.5px solid rgba(162, 59, 177, 0.13);
       padding: 3rem 2.5rem 2.5rem 2.5rem;
-      max-width: 480px;
+      max-width: 1000px;
       width: 100%;
       margin: 4rem auto 2rem auto;
       position: relative;
@@ -91,7 +88,9 @@
     }
 
     .glass-select, .glass-input, textarea {
-      background: #ffffff;
+      background: #fff !important;
+      position: relative;
+      z-index: 1;
       border: 2px solid #a23bb1;
       border-radius: 1rem;
       padding: 0.9rem 1.2rem;
@@ -179,16 +178,19 @@
 
     .photo-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
       margin-top: 12px;
       margin-bottom: 16px;
       width: 100%;
+      max-width: 100%;
     }
 
     .photo-upload {
       width: 100%;
-      aspect-ratio: 1;
+      aspect-ratio: 1/1.2;
+      max-width: 110px;
+      max-height: 140px;
       background: rgba(255,255,255,0.7);
       border: 2px solid #a23bb1;
       border-radius: 1rem;
@@ -269,7 +271,7 @@
 
     .section-title {
       font-weight: bold;
-      color: #2d1b4d;
+      color: #000;
       font-size: 1.1rem;
       margin-bottom: 0.7rem;
       margin-top: 1.2rem;
@@ -297,7 +299,7 @@
     }
 
     .back-link {
-      color: #a23bb1;
+      color: #000;
       text-decoration: underline;
       font-weight: 500;
       font-size: 1rem;
@@ -313,14 +315,20 @@
       color: #2d1b4d;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 1200px) {
       .glass-card {
-        padding: 2rem 1.5rem;
-        margin: 1rem;
-        width: calc(100% - 2rem);
+        max-width: 98vw;
       }
-      .main-title { font-size: 1.6rem; }
-      .subtitle { font-size: 1rem; }
+    }
+    @media (max-width: 900px) {
+      .flex.flex-wrap.gap-4.w-full.mb-4 {
+        flex-direction: column !important;
+      }
+      .photo-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    @media (max-width: 600px) {
       .photo-grid {
         grid-template-columns: repeat(2, 1fr);
       }
@@ -343,32 +351,39 @@
       Let's find you the perfect roommate!
     </div>
 
-    <div class="section-title">City</div>
-    <select id="city" class="glass-select">
-      <option disabled selected value="">Select city</option>
-      <option>Tel Aviv</option>
-      <option>Jerusalem</option>
-      <option>Haifa</option>
-    </select>
-
-    <div class="section-title">Address</div>
-    <input type="text" id="address" placeholder="Enter address" class="glass-input" />
-
-    <div class="section-title">Area</div>
-    <select id="area" class="glass-select">
-      <option disabled selected value="">Select area</option>
-      <option>Center</option>
-      <option>North</option>
-      <option>South</option>
-    </select>
-
-    <div class="section-title">Contract</div>
-    <select id="contract" class="glass-select">
-      <option disabled selected value="">Select contract type</option>
-      <option>Long term</option>
-      <option>Short term</option>
-      <option>Sublet</option>
-    </select>
+    <div class="flex flex-wrap gap-4 w-full mb-4" style="flex-direction: row;">
+      <div style="flex:1; min-width: 180px;">
+        <div class="section-title">City</div>
+        <select id="city" class="glass-select">
+          <option disabled selected value="">Select city</option>
+          <option>Tel Aviv</option>
+          <option>Jerusalem</option>
+          <option>Haifa</option>
+        </select>
+      </div>
+      <div style="flex:2; min-width: 220px;">
+        <div class="section-title">Address</div>
+        <input type="text" id="address" placeholder="Enter address" class="glass-input" />
+      </div>
+      <div style="flex:1; min-width: 180px;">
+        <div class="section-title">Area</div>
+        <select id="area" class="glass-select">
+          <option disabled selected value="">Select area</option>
+          <option>Center</option>
+          <option>North</option>
+          <option>South</option>
+        </select>
+      </div>
+      <div style="flex:1; min-width: 180px;">
+        <div class="section-title">Contract</div>
+        <select id="contract" class="glass-select">
+          <option disabled selected value="">Select contract type</option>
+          <option>Long term</option>
+          <option>Short term</option>
+          <option>Sublet</option>
+        </select>
+      </div>
+    </div>
 
     <div class="section-title">Features</div>
     <div class="flex flex-wrap justify-center gap-2">
@@ -390,14 +405,19 @@
       <button>5</button>
     </div>
 
-    <div class="section-title">Room Price</div>
-    <input type="text" id="roomPrice" placeholder="Enter price" class="glass-input" />
+    <div class="flex flex-wrap gap-4 w-full mb-4" style="flex-direction: row;">
+      <div style="flex:1; min-width: 220px;">
+        <div class="section-title">Room Price</div>
+        <input type="text" id="roomPrice" placeholder="Enter price" class="glass-input" />
+      </div>
+      <div style="flex:1; min-width: 220px;">
+        <div class="section-title" style="font-size:1.15rem;">Date of Entry</div>
+        <input type="date" id="dateOfEntry" class="glass-input" style="font-size:1.1rem;" />
+      </div>
+    </div>
 
-    <div class="section-title">Furniture Details</div>
-    <textarea placeholder="Describe the furniture..." class="glass-input"></textarea>
-
-    <div class="section-title" style="font-size:1.15rem;">Date of Entry</div>
-    <input type="date" id="dateOfEntry" class="glass-input" style="font-size:1.1rem;" />
+    <div class="section-title">Tell us about the Apartment</div>
+    <textarea placeholder="Describe the Apartment" class="glass-input"></textarea>
 
     <div class="section-title">Apartment Photos</div>
     <div class="photo-grid">

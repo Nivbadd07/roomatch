@@ -32,7 +32,7 @@
       border-radius: 2rem;
       border: 1.5px solid rgba(162, 59, 177, 0.13);
       padding: 3rem 2.5rem 2.5rem 2.5rem;
-      max-width: 480px;
+      max-width: 800px;
       width: 100%;
       margin: 4rem auto 2rem auto;
       position: relative;
@@ -169,27 +169,34 @@
       box-shadow: 0 0 0 3px #fde2f3, 0 0 20px #a23bb1;
     }
     .back-link {
-      color: #a23bb1;
+      color: #000 !important;
+      font-size: 1.1rem !important;
+      font-weight: bold !important;
       text-decoration: underline;
-      font-weight: 500;
-      font-size: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      margin-top: 1.5rem;
-      transition: color 0.2s;
-      z-index: 2;
     }
     .back-link:hover {
-      color: #2d1b4d;
+      color: #2d1b4d !important;
     }
     @media (max-width: 600px) {
       .glass-card {
-        padding: 2rem 0.5rem 2rem 0.5rem;
+        padding: 2rem 1rem 2rem 1rem;
         max-width: 98vw;
       }
       .main-title { font-size: 1.3rem; }
       .subtitle { font-size: 1rem; }
+    }
+    .clearer-label {
+      font-size: 1.08rem;
+      font-weight: 700;
+      text-shadow: 0 1px 3px rgba(160, 59, 177, 0.08), 0 0.5px 0px #fff;
+      letter-spacing: 0.01em;
+    }
+    #minPrice, #maxPrice {
+      background: #fff !important;
+      opacity: 1 !important;
+      box-shadow: none !important;
+      border: 2px solid #a23bb1 !important;
+      z-index: 1;
     }
   </style>
 </head>
@@ -209,52 +216,54 @@
     <div class="subtitle mb-6">
       Set your preferences to find your perfect match!
     </div>
-    <form class="flex flex-col space-y-4 w-full">
-      <div>
-        <label class="block text-gray-700 font-semibold mb-1">City</label>
-        <div style="position:relative;">
-          <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#a23bb1;font-size:1.1em;">
-            <i class="fa-solid fa-city"></i>
-          </span>
-          <select name="city" class="glass-select pl-10">
-            <option disabled selected value="">Select city</option>
-            <option>Tel Aviv</option>
-            <option>Jerusalem</option>
-            <option>Haifa</option>
-          </select>
+    <form class="flex flex-col space-y-4 w-full max-w-3xl">
+      <div class="flex flex-col md:flex-row gap-4 w-full">
+        <div class="flex-1">
+          <label class="block text-black font-bold mb-1 clearer-label">City</label>
+          <div style="position:relative;">
+            <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#a23bb1;font-size:1.1em;">
+              <i class="fa-solid fa-city"></i>
+            </span>
+            <select name="city" class="glass-select pl-10">
+              <option disabled selected value="">Select city</option>
+              <option>Tel Aviv</option>
+              <option>Jerusalem</option>
+              <option>Haifa</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex-1">
+          <label class="block text-black font-bold mb-1 clearer-label">Area</label>
+          <div style="position:relative;">
+            <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#a23bb1;font-size:1.1em;">
+              <i class="fa-solid fa-location-dot"></i>
+            </span>
+            <select name="area" class="glass-select pl-10">
+              <option disabled selected value="">Select area</option>
+              <option>Center</option>
+              <option>North</option>
+              <option>South</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex-1">
+          <label class="block text-black font-bold mb-1 clearer-label">Contract</label>
+          <div style="position:relative;">
+            <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#a23bb1;font-size:1.1em;">
+              <i class="fa-solid fa-file-signature"></i>
+            </span>
+            <select name="contract" class="glass-select pl-10">
+              <option disabled selected value="">Select contract type</option>
+              <option>Long term</option>
+              <option>Short term</option>
+              <option>Sublet</option>
+            </select>
+          </div>
         </div>
       </div>
       <div>
-        <label class="block text-gray-700 font-semibold mb-1">Area</label>
-        <div style="position:relative;">
-          <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#a23bb1;font-size:1.1em;">
-            <i class="fa-solid fa-location-dot"></i>
-          </span>
-          <select name="area" class="glass-select pl-10">
-            <option disabled selected value="">Select area</option>
-            <option>Center</option>
-            <option>North</option>
-            <option>South</option>
-          </select>
-        </div>
-      </div>
-      <div>
-        <label class="block text-gray-700 font-semibold mb-1">Contract</label>
-        <div style="position:relative;">
-          <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#a23bb1;font-size:1.1em;">
-            <i class="fa-solid fa-file-signature"></i>
-          </span>
-          <select name="contract" class="glass-select pl-10">
-            <option disabled selected value="">Select contract type</option>
-            <option>Long term</option>
-            <option>Short term</option>
-            <option>Sublet</option>
-          </select>
-        </div>
-      </div>
-      <div>
-        <label class="block text-gray-700 font-semibold mb-1">Features</label>
-        <div class="flex flex-wrap justify-center gap-2">
+        <label class="block text-black font-bold mb-1 clearer-label">Features</label>
+        <div class="flex flex-wrap justify-start gap-2">
           <button class="feature-btn" type="button">🏠 Balcony</button>
           <button class="feature-btn" type="button">🛗 Elevator</button>
           <button class="feature-btn" type="button">🛡 Mamad</button>
@@ -265,8 +274,8 @@
         </div>
       </div>
       <div>
-        <label class="block text-gray-700 font-semibold mb-1">Rooms</label>
-        <div class="flex flex-wrap justify-center gap-2">
+        <label class="block text-black font-bold mb-1 clearer-label">Rooms</label>
+        <div class="flex flex-wrap justify-start gap-2">
           <button class="room-btn" type="button"><i class="fa-solid fa-door-open"></i> 2</button>
           <button class="room-btn" type="button"><i class="fa-solid fa-door-open"></i> 2.5</button>
           <button class="room-btn" type="button"><i class="fa-solid fa-door-open"></i> 3</button>
@@ -275,7 +284,7 @@
         </div>
       </div>
       <div>
-        <label class="block text-gray-900 font-bold mb-2">Price Range</label>
+        <label class="block text-black font-bold mb-2 clearer-label">Price Range</label>
         <div class="flex gap-2">
           <input id="minPrice" type="text" placeholder="Min Price" class="glass-input w-1/2 text-center font-semibold" />
           <span class="flex items-center font-bold text-purple-900">–</span>
@@ -283,7 +292,7 @@
         </div>
       </div>
       <div>
-        <label class="block text-gray-700 font-semibold mb-1">Date of Entry</label>
+        <label class="block text-black font-bold mb-1 clearer-label">Date of Entry</label>
         <div style="position:relative;">
           <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#a23bb1;font-size:1.1em;">
             <i class="fa-solid fa-calendar-days"></i>
