@@ -34,7 +34,8 @@
         <a id="user-location" href="location.html" class="hover:underline cursor-pointer text-purple-800">Detecting location...</a>
       </div>
     </div>
-    <h1 class="text-2xl font-bold text-center text-purple-900 mb-8">Discover apartments</h1>
+    <h1 class="text-4xl font-bold text-center text-purple-900 mb-8">Discover apartments</h1>
+    <div id="subheadline" class="text-xl text-center text-purple-700 mb-8">Loading...</div>
     <div id="apartment-feed" class="grid grid-cols-3 gap-8 !w-full !px-0 container mx-auto px-4 lg:px-8"></div>
   </div>
 
@@ -112,12 +113,28 @@
 
     async function renderApartments() {
       const container = document.getElementById('apartment-feed');
+      const subheadline = document.getElementById('subheadline');
       container.innerHTML = '<div class="text-center text-gray-400 mt-10">Loading matches...</div>';
       const userId = await getUserId();
       if (!userId) {
         container.innerHTML = '<div class="text-center text-red-500 mt-10">User not logged in.</div>';
+        subheadline.innerHTML = 'Please log in to continue';
         return;
       }
+      
+      // Fetch user's full name
+      const { data: userData } = await supabaseClient
+        .from('users')
+        .select('full_name')
+        .eq('id', userId)
+        .single();
+      
+      if (userData && userData.full_name) {
+        subheadline.innerHTML = `Hey ${userData.full_name}, Let's Find you an Apartment`;
+      } else {
+        subheadline.innerHTML = "Let's Find you an Apartment";
+      }
+
       const res = await fetch(`https://roomatch-prod-1-109620478954.europe-west1.run.app/api/match/apartments/${userId}`);
       if (!res.ok) {
         container.innerHTML = '<div class="text-center text-red-500 mt-10">Failed to load matches.</div>';
