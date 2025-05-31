@@ -65,7 +65,7 @@
       </div>
     </div>
     <h1 class="text-2xl font-bold text-center text-purple-900 mb-8">Discover Roommates</h1>
-    <div id="roommate-feed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 !w-full !px-0"></div>
+    <div id="roommate-feed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 !w-full !px-0"></div>
   </div>
 
   <!-- Schedule Meeting Modal -->
@@ -170,12 +170,12 @@
         // Bio
         const bioHtml = roommate.bio ? `<div class='mt-2'><div class='text-sm font-semibold text-purple-900 mb-1'>Bio</div><div class='text-base text-gray-800'>${roommate.bio}</div></div>` : '';
         const card = document.createElement('div');
-        card.className = 'relative w-full min-h-[350px] flex flex-col rounded-3xl shadow-2xl overflow-hidden border-2 border-purple-300 bg-white bg-opacity-80';
+        card.className = 'relative w-full min-h-[400px] flex flex-col rounded-3xl shadow-2xl overflow-hidden border-2 border-purple-300 bg-white bg-opacity-80';
         card.innerHTML = `
           <div class="w-full h-40 bg-gray-100 flex items-center justify-center overflow-hidden rounded-t-3xl border-b-2 border-purple-200">
             <img src="${imgUrl}" alt="User photo" class="object-cover w-full h-full" loading="lazy" onerror="this.onerror=null;this.src='${placeholderUrl}';">
           </div>
-          <div class="flex-1 px-6 pt-6 pb-6">
+          <div class="flex-1 px-10 pt-8 pb-8">
             <div class="text-2xl font-bold text-purple-900 mb-2 flex items-center gap-2">
               ${mainHeader}
             </div>
