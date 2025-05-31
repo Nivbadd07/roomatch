@@ -154,6 +154,13 @@
 
     function renderApartmentDetails(apt) {
       document.getElementById('aptContent').innerHTML = `
+        <div class="header-img rounded-2xl overflow-hidden mb-4 relative">
+          <img src="${apt.mainImg}" alt="Apartment" class="w-full h-48 object-cover rounded-2xl" />
+          <div class="top-icons flex justify-end items-center absolute top-4 left-4 right-4 pointer-events-none">
+            <i class="fas fa-heart text-pink-400 pointer-events-auto"></i>
+          </div>
+          <div class="price-bubble absolute bottom-4 left-4 bg-purple-800 text-white px-4 py-2 rounded-full font-bold shadow">${apt.price}</div>
+        </div>
         <div class="location-title text-xl font-bold mb-2">${apt.title}</div>
         <div class="features flex gap-6 text-gray-700 mb-4">
           ${apt.features.map(f => `<div class='flex items-center gap-1'><i class='fas ${f.icon}'></i> ${f.label}</div>`).join('')}
