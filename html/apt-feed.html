@@ -130,7 +130,8 @@
         .single();
       
       if (userData && userData.full_name) {
-        subheadline.innerHTML = `Hey ${userData.full_name}, Let's Find you an Apartment`;
+        const firstName = userData.full_name.split(' ')[0];
+        subheadline.innerHTML = `Hey ${firstName}, Let's Find you an Apartment`;
       } else {
         subheadline.innerHTML = "Let's Find you an Apartment";
       }
