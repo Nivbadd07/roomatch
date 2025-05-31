@@ -6,6 +6,7 @@
   <title>Apartment Details</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <style>
     body {
       min-height: 100vh;
@@ -92,38 +93,64 @@
     <!-- Apartment Details Content End -->
   </div>
   <script>
-    // Example: fetch apartment data (replace with real API call in the future)
-    // In a real app, you would get the apartment ID from the URL (e.g., ?id=123)
-    // and fetch the data from your backend.
-    const apartment = {
-      title: 'Hamacabi 7 Tel Aviv',
-      price: '$1,200 / mo',
-      mainImg: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c',
-      features: [
-        { icon: 'fa-ruler-combined', label: '70㎡' },
-        { icon: 'fa-bath', label: '2 baths' },
-        { icon: 'fa-bed', label: '2 beds' }
-      ],
-      description: "Feel at home wherever you choose to live with Blueground. You'll love the sophisticated Midtown furnished one-bedroom apartment with its modern decor, fully equipped kitchen, and cheery living room with great balcony views.",
-      amenities: [
-        { icon: 'fa-wifi', label: 'WiFi' },
-        { icon: 'fa-snowflake', label: 'AC' },
-        { icon: 'fa-tv', label: 'TV' },
-        { icon: 'fa-dog', label: 'Pets' }
-      ],
-      photos: [
-        'https://images.unsplash.com/photo-1588854337221-c0c0a7a1f9ce',
-        'https://images.unsplash.com/photo-1600585154206-9324c1b168cd',
-        'https://images.unsplash.com/photo-1598928506311-c55ded93c1f3'
-      ],
-      roommate: {
-        name: 'David',
-        age: 25,
-        img: 'https://randomuser.me/api/portraits/men/75.jpg',
-        role: 'Software developer at Blueground',
-        about: 'Loves music, hiking, and good coffee.'
+    // Helper to get query param
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+
+    const SUPABASE_URL = 'https://vgkvkmpckneceqfggzes.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZna3ZrbXBja25lY2VxZmdnemVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1NDA0NjAsImV4cCI6MjA2MjExNjQ2MH0.1ZEMsUleNaBrePUuagdZAKL2gYA-9-vM9wrTIW8-tdU';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function fetchAndRenderApartment() {
+      const aptId = getQueryParam('id');
+      if (!aptId) {
+        window.location.href = 'apt-feed.html';
+        return;
       }
-    };
+      // Fetch apartment from Supabase
+      const { data: apartmentData, error } = await supabaseClient
+        .from('apartments')
+        .select('*')
+        .eq('id', aptId)
+        .single();
+      if (error || !apartmentData) {
+        document.getElementById('aptContent').innerHTML = '<div class="text-red-500">Apartment not found.</div>';
+        return;
+      }
+      // Format the apartment data for display
+      const apartment = {
+        title: apartmentData.address || 'Apartment Details',
+        price: `$${apartmentData.price_per_month || 'N/A'} / mo`,
+        mainImg: Array.isArray(apartmentData.image_urls) && apartmentData.image_urls.length > 0 
+          ? apartmentData.image_urls[0] 
+          : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c',
+        features: [
+          { icon: 'fa-ruler-combined', label: apartmentData.size || 'N/A' },
+          { icon: 'fa-bath', label: apartmentData.num_bathrooms ? `${apartmentData.num_bathrooms} baths` : 'N/A' },
+          { icon: 'fa-bed', label: apartmentData.num_rooms ? `${apartmentData.num_rooms} rooms` : 'N/A' }
+        ],
+        description: apartmentData.description || 'No description available.',
+        amenities: [
+          { icon: 'fa-wifi', label: 'WiFi' },
+          { icon: 'fa-snowflake', label: 'AC' },
+          { icon: 'fa-tv', label: 'TV' },
+          { icon: 'fa-dog', label: 'Pets' }
+        ],
+        photos: Array.isArray(apartmentData.image_urls) && apartmentData.image_urls.length > 0 
+          ? apartmentData.image_urls 
+          : [
+              'https://images.unsplash.com/photo-1588854337221-c0c0a7a1f9ce',
+              'https://images.unsplash.com/photo-1600585154206-9324c1b168cd',
+              'https://images.unsplash.com/photo-1598928506311-c55ded93c1f3'
+            ],
+        roommate: Array.isArray(apartmentData.roommate) && apartmentData.roommate.length > 0 ? apartmentData.roommate[0] : {
+          name: 'N/A', age: 'N/A', img: 'https://randomuser.me/api/portraits/men/75.jpg', role: '', about: ''
+        }
+      };
+      renderApartmentDetails(apartment);
+    }
 
     function renderApartmentDetails(apt) {
       document.getElementById('aptContent').innerHTML = `
@@ -155,8 +182,7 @@
       `;
     }
 
-    // On page load, render the details (replace with real fetch in the future)
-    renderApartmentDetails(apartment);
+    fetchAndRenderApartment();
 
     // --- Schedule Modal Logic ---
     const scheduleBtn = document.getElementById('scheduleBtn');
