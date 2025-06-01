@@ -14,11 +14,8 @@
       background-repeat: no-repeat;
       background-size: cover;
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      overflow-x: hidden;
       position: relative;
-      overflow: hidden;
       font-family: 'Rubik', sans-serif;
     }
 
@@ -53,23 +50,6 @@
     @keyframes fadeInUp {
       0% { opacity: 0; transform: translateY(40px); }
       100% { opacity: 1; transform: translateY(0); }
-    }
-
-    .border-gradient-anim {
-      pointer-events: none;
-      border-radius: 2rem;
-      background: #764C8A;
-      opacity: 0.5;
-      filter: blur(10px);
-      animation: borderAnim 6s linear infinite alternate;
-      position: absolute;
-      top: -8px; left: -8px; right: -8px; bottom: -8px;
-      z-index: 0;
-    }
-
-    @keyframes borderAnim {
-      0% { opacity: 0.5; filter: blur(10px); }
-      100% { opacity: 0.8; filter: blur(18px); }
     }
 
     .main-title {
@@ -338,17 +318,52 @@
         grid-template-columns: repeat(2, 1fr);
       }
     }
+
+    .centered-content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding-left: 24px;
+      padding-right: 24px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    @media (max-width: 600px) {
+      .centered-content {
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(2, auto);
+      gap: 0.7rem 1.2rem;
+      justify-items: center;
+      margin-bottom: 1.2rem;
+      width: 100%;
+      max-width: 700px;
+    }
+    @media (max-width: 700px) {
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .form-section {
+      margin-bottom: 2rem;
+      width: 100%;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col items-center relative font-sans">
   <svg class="svg-bg" width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
     <ellipse cx="200" cy="200" rx="180" ry="120" fill="#e0d9ff"/>
-    <ellipse cx="120" cy="120" rx="60" ry="40" fill="#fde2f3"/>
-    <ellipse cx="320" cy="280" rx="70" ry="50" fill="#a23bb1"/>
   </svg>
 
-  <div class="glass-card">
-    <div class="border-gradient-anim"></div>
+  <div class="centered-content">
     <div class="main-title">
       Upload Your Apartment <span style="font-size:1.2em;">🏠</span>
     </div>
@@ -391,7 +406,7 @@
     </div>
 
     <div class="section-title">Features</div>
-    <div class="flex flex-wrap justify-center gap-2">
+    <div class="features-grid">
       <button class="feature-btn">🏠 Balcony</button>
       <button class="feature-btn">🛗 Elevator</button>
       <button class="feature-btn">🛡 Mamad</button>
@@ -399,6 +414,7 @@
       <button class="feature-btn">🚗 Parking</button>
       <button class="feature-btn">📦 Storage</button>
       <button class="feature-btn">♿ Accessible</button>
+      <button class="feature-btn">🐾 Pets</button>
     </div>
 
     <div class="section-title">Number of Rooms</div>
