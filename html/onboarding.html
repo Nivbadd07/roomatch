@@ -19,7 +19,8 @@
       align-items: center;
       justify-content: center;
       position: relative;
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: auto;
       font-family: 'Rubik', sans-serif;
     }
     .onboard-bg {
@@ -365,6 +366,7 @@
       font-size: 1.5em;
     }
     @media (max-width: 900px) {
+      body { display: block; align-items: flex-start; justify-content: flex-start; min-height: 100vh; overflow-y: auto; }
       .onboard-card {
         max-width: 99vw;
         padding: 1.5rem 0.5rem 1.5rem 0.5rem;
@@ -409,7 +411,7 @@
     }
   </style>
 </head>
-<body>
+<body class="min-h-screen overflow-y-auto">
   <div class="onboard-bg"></div>
   <div class="onboard-container">
       <form id="onboardForm" autocomplete="off">
