@@ -118,39 +118,45 @@
       border: 2px solid #764C8A;
       background: #f3e8ff;
     }
-    .onboard-btn {
-      width: 100%;
-      background: #764C8A;
-      color: white;
+    .onboard-btn-shared, .onboard-btn, .back-btn {
+      box-sizing: border-box;
+      width: 220px;
+      min-width: 220px;
+      max-width: 220px;
+      min-height: 56px;
       padding: 1.3rem 0;
-      border: none;
       border-radius: 1.5rem;
       font-size: 1.5rem;
-      font-weight: bold;
+      font-family: inherit !important;
+      font-weight: 700 !important;
       text-align: center;
+      letter-spacing: 0.7px;
+      margin: 0 auto;
+      box-shadow: 0 4px 16px rgba(118,76,138,0.13);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
+    .onboard-btn {
+      background: #764C8A;
+      color: white;
+      border: none;
       cursor: pointer;
       margin-top: 2.2rem;
       margin-bottom: 0.5rem;
-      box-shadow: 0 4px 16px rgba(118,76,138,0.13);
       transition: background 0.2s, transform 0.2s;
-      letter-spacing: 0.7px;
     }
     .back-btn {
-      width: 100%;
       background: #e0d9ff;
       color: #764C8A;
-      padding: 1.3rem 0;
       border: none;
-      border-radius: 1.5rem;
-      font-size: 1.5rem;
-      font-weight: bold;
-      text-align: center;
       cursor: pointer;
       margin-top: 0.5rem;
       margin-bottom: 0.5rem;
-      box-shadow: 0 4px 16px rgba(118,76,138,0.13);
       transition: background 0.2s, transform 0.2s;
-      letter-spacing: 0.7px;
     }
     .back-btn:hover {
       background: #d4c9ff;
@@ -175,10 +181,10 @@
       z-index: 2;
     }
     .interests-grid {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
       gap: 1.1rem;
-      justify-content: center;
+      justify-items: center;
       margin-bottom: 2.2rem;
       z-index: 2;
     }
@@ -389,18 +395,24 @@
       width: 0%;
       transition: width 0.5s cubic-bezier(.4,0,.2,1);
     }
+    .onboard-btn-row {
+      display: flex;
+      justify-content: center;
+      gap: 1.2rem;
+      margin-top: 2.2rem;
+    }
   </style>
 </head>
 <body>
   <div class="onboard-bg"></div>
   <div class="onboard-container">
-    <div class="onboard-card">
       <form id="onboardForm" autocomplete="off">
         <div id="stepContent"></div>
         <div class="onboard-error" id="errorMsg"></div>
-        <button type="button" class="onboard-btn" id="nextBtn">Continue</button>
+        <div class="onboard-btn-row">
+          <button type="button" class="onboard-btn onboard-btn-shared" id="nextBtn">Continue</button>
+        </div>
       </form>
-    </div>
   </div>
   <!-- Progress bar at the bottom of the page -->
   <div class="onboard-progress-bar-container">
@@ -450,54 +462,51 @@
 
     // --- Onboarding Steps Data ---
     const steps = [
-      // Personal Info Steps
+      // Combined Personal Info Step
       {
-        title: "What's Your Name?",
-        subtitle: "Let's Get to Know Each Other",
+        title: "Let's Get Started!",
+        subtitle: "Please enter your name, ID, and email address",
         render: () => `
-          <input id='nameInput' class='onboard-input' type='text' placeholder='John Dope' maxlength='32' autocomplete='off' />
+          <input id='nameInput' class='onboard-input' type='text' maxlength='32' autocomplete='off' placeholder='Full Name' />
           <input id='idInput' class='onboard-input' type='text' placeholder='Please add ID (minimum 8 digits)' maxlength='20' autocomplete='off' />
           <div id='idError' class='text-red-500 text-sm mt-1'></div>
+          <input id='emailInput' class='onboard-input' type='email' placeholder='Email Address' maxlength='40' autocomplete='off' />
+          <div id='emailError' class='text-red-500 text-sm mt-1'></div>
         `,
         validate: () => {
           const name = document.getElementById('nameInput').value.trim();
           const id = document.getElementById('idInput').value.trim();
+          const email = document.getElementById('emailInput').value.trim();
           const idError = document.getElementById('idError');
-          
-          if (!name) return 'Please enter your name!';
-          if (!/^[A-Za-z ]+$/.test(name)) return 'Name must contain only English letters and spaces!';
-          
+          const emailError = document.getElementById('emailError');
+          let error = null;
+          idError.textContent = '';
+          emailError.textContent = '';
+          if (!name) error = 'Please enter your name!';
+          else if (!/^[A-Za-z ]+$/.test(name)) error = 'Name must contain only English letters and spaces!';
           if (!id) {
             idError.textContent = 'Please enter your ID!';
-            return 'Please enter your ID!';
-          }
-          if (!/^\d{8,}$/.test(id)) {
+            error = 'Please enter your ID!';
+          } else if (!/^\d{8,}$/.test(id)) {
             idError.textContent = 'ID must be at least 8 digits!';
-            return 'ID must be at least 8 digits!';
+            error = 'ID must be at least 8 digits!';
           }
-          
-          idError.textContent = '';
-          return null;
+          if (!email) {
+            emailError.textContent = 'Please enter your email!';
+            error = 'Please enter your email!';
+          } else if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email)) {
+            emailError.textContent = 'Please enter a valid email address!';
+            error = 'Please enter a valid email address!';
+          }
+          return error;
         },
         save: () => {
           const name = document.getElementById('nameInput').value.trim();
           const id = document.getElementById('idInput').value.trim();
+          const email = document.getElementById('emailInput').value.trim();
           localStorage.setItem('user_name', name);
           localStorage.setItem('user_id', id);
-        }
-      },
-      {
-        title: "Email Address",
-        subtitle: "We'll need your email to stay in touch",
-        render: () => `<input id='emailInput' class='onboard-input' type='email' placeholder='Email Address' maxlength='40' autocomplete='off' />`,
-        validate: () => {
-          const email = document.getElementById('emailInput').value.trim();
-          if (!email) return 'Please enter your email!';
-          if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email)) return 'Please enter a valid email address!';
-          return null;
-        },
-        save: () => {
-          localStorage.setItem('user_email', document.getElementById('emailInput').value.trim());
+          localStorage.setItem('user_email', email);
         }
       },
       {
@@ -978,9 +987,9 @@
       // Content
       let backBtn = '';
       if (currentStep === 0) {
-        backBtn = `<button type='button' id='backBtn' class='back-btn'>Back</button>`;
+        backBtn = `<button type='button' id='backBtn' class='back-btn onboard-btn-shared'>Back</button>`;
       } else if (currentStep > 0) {
-        backBtn = `<button type='button' id='backBtn' class='back-btn'>Back</button>`;
+        backBtn = `<button type='button' id='backBtn' class='back-btn onboard-btn-shared'>Back</button>`;
       }
       stepContent.innerHTML = `
         <div class='onboard-title' ${currentStep === 0 ? 'onclick="window.location.href=\'index.html\'"' : ''}>${steps[currentStep].title}</div>
@@ -989,7 +998,7 @@
       `;
       errorMsg.textContent = '';
       // Special step logic
-      if (currentStep === 4) { // Age
+      if (currentStep === 3) { // Age
         document.querySelectorAll('.age-option').forEach(opt => {
           opt.addEventListener('click', () => {
             document.querySelectorAll('.age-option').forEach(o => o.classList.remove('selected'));
@@ -1006,12 +1015,12 @@
           }
         }
       }
-      if (currentStep === 5) { // Interests
+      if (currentStep === 4) { // Interests
         document.querySelectorAll('.interest-btn').forEach(btn => {
           btn.addEventListener('click', () => btn.classList.toggle('selected'));
         });
       }
-      if (currentStep === 6) { // Roommate Quiz Yes/No
+      if (currentStep === 5) { // Roommate Quiz Yes/No
         window.quizAnswers = {};
         document.querySelectorAll('.quiz-yn-btn').forEach(btn => {
           btn.classList.remove('selected');
@@ -1027,7 +1036,7 @@
       if (currentStep === 7) {
         // Radios work natively
       }
-      if (currentStep === 8) { // Photo Upload
+      if (currentStep === 7) { // Photo Upload
         window.onboardPhotoDataUrl = window.onboardPhotoDataUrl || null;
         const photoInput = document.getElementById('photo-upload');
         const photoPreview = document.getElementById('photo-preview');
@@ -1055,23 +1064,28 @@
       } else {
         nextBtn.textContent = 'Continue';
       }
-      const oldBackBtn = document.getElementById('backBtn');
-      if (oldBackBtn) oldBackBtn.remove();
-      if (backBtn) {
-        nextBtn.insertAdjacentHTML('afterend', backBtn);
-        const backBtnEl = document.getElementById('backBtn');
-        if (backBtnEl) {
-          if (currentStep === 0) {
-            backBtnEl.onclick = function() {
-              window.location.href = 'index.html';
-            };
-          } else {
-            backBtnEl.onclick = function() {
-              if (currentStep > 0) {
-                currentStep--;
-                renderStep();
-              }
-            };
+      // Centered button row logic
+      const btnRow = document.querySelector('.onboard-btn-row');
+      if (btnRow) {
+        // Remove any existing back button
+        const oldBackBtn = document.getElementById('backBtn');
+        if (oldBackBtn) oldBackBtn.remove();
+        if (backBtn) {
+          btnRow.insertAdjacentHTML('beforeend', backBtn);
+          const backBtnEl = document.getElementById('backBtn');
+          if (backBtnEl) {
+            if (currentStep === 0) {
+              backBtnEl.onclick = function() {
+                window.location.href = 'index.html';
+              };
+            } else {
+              backBtnEl.onclick = function() {
+                if (currentStep > 0) {
+                  currentStep--;
+                  renderStep();
+                }
+              };
+            }
           }
         }
       }

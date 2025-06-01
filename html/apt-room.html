@@ -136,15 +136,15 @@
       transition: color 0.18s;
     }
     .modern-btn:hover, .modern-btn.roommates:hover {
-      background: #764C8A;
-      color: #fff;
+      background: #fff;
+      color: #764C8A;
       border-color: #764C8A;
-      box-shadow: 0 4px 24px 0 rgba(118, 76, 138, 0.3);
+      box-shadow: 0 4px 24px 0 rgba(118, 76, 138, 0.1);
       transform: translateY(-2px) scale(1.04);
     }
     .modern-btn:active, .modern-btn.roommates:active {
-      background: #764C8A;
-      color: #fff;
+      background: #fff;
+      color: #764C8A;
       border-color: #764C8A;
       box-shadow: 0 0 0 2px #764C8A;
       transform: scale(0.98);
@@ -189,30 +189,56 @@
       .main-title { font-size: 1.3rem; }
       .subtitle { font-size: 1rem; }
     }
+
+    .btn-img-placeholder {
+      display: inline-block;
+      width: 44px;
+      height: 44px;
+      background: transparent;
+      margin-left: 0.7em;
+      border-radius: 0.5em;
+      vertical-align: middle;
+    }
+
+    @media (max-width: 768px) {
+      .max-w-3xl .flex-row { flex-direction: column !important; }
+    }
   </style>
 </head>
 
-<body>
-
-  <!-- גל ברקע -->
+<body class="bg-white min-h-screen flex flex-col justify-start items-center w-full relative">
   <div class="wave1"></div>
-  <div class="glass-card border-gradient relative">
-    <div class="border-gradient-anim"></div>
-    <div class="main-title mb-1">
-      <span>What Are You Looking For Now?</span> <span style="font-size:1.5em;">🔍</span>
+  <section class="w-full min-h-[80vh] flex flex-col items-center justify-center py-8 px-4 relative z-10">
+    <div class="max-w-4xl w-full mx-auto flex flex-col items-center">
+      <div class="main-title mb-4 text-center flex flex-col items-center text-4xl md:text-5xl font-extrabold">
+        <span>What Are You Looking For Now?</span> <span style="font-size:2.5em;"></span>
+      </div>
+      <div class="subtitle mb-12 text-center text-2xl md:text-3xl">
+        You will be able to change it anytime at <b>Settings</b>
+      </div>
     </div>
-    <div class="subtitle mb-6">
-      You will be able to change it anytime at <b>Settings</b>
+    <div class="w-full max-w-4xl flex flex-col md:flex-row gap-16 justify-center items-stretch">
+      <a href="apt-pref.html" class="flex-1 w-full flex items-center justify-center">
+        <button class="modern-btn w-full flex flex-row items-center justify-between text-2xl md:text-3xl py-10 pl-6 pr-6 h-64">
+          <span class="flex items-center font-bold"><i class="fa-solid fa-building mr-4 text-3xl md:text-4xl"></i> Apartments</span>
+          <img src="https://storage.googleapis.com/roomatch-prod-static-site/157dbed3-fca0-4d77-a151-a45dd2124219.png" alt="Apartments" class="object-contain w-36 h-36 ml-6 rounded" />
+        </button>
+      </a>
+      <a href="upload-apt.html" class="flex-1 w-full flex items-center justify-center">
+        <button class="modern-btn roommates w-full flex flex-row items-center justify-between text-2xl md:text-3xl py-10 pl-6 pr-6 h-64">
+          <span class="flex items-center text-2xl md:text-3xl"><i class="fa-solid fa-user-group mr-4 text-3xl md:text-4xl"></i> Roommates</span>
+          <img src="https://storage.googleapis.com/roomatch-prod-static-site/%D7%94%D7%95%D7%A8%D7%93%D7%94%20(1).png" alt="Roommates" class="object-contain w-36 h-36 ml-6 rounded" />
+        </button>
+      </a>
     </div>
-    <a href="apt-pref.html" style="width:100%">
-      <button class="modern-btn"><i class="fa-solid fa-building"></i> Apartments</button>
-    </a>
-    <div class="divider">or</div>
-    <a href="upload-apt.html" style="width:100%">
-      <button class="modern-btn roommates"><i class="fa-solid fa-user-group"></i> Roommates</button>
-    </a>
-    <a href="onboarding.html" class="back-link"><span style="font-size:1.2em;">&#8592;</span> Back</a>
-  </div>
+    <a href="onboarding.html" class="block mx-auto mt-12 px-8 py-3 bg-purple-200 font-bold text-lg rounded-full text-center w-max" style="color:#101827;">Back</a>
+  </section>
+  <style>
+    .main-title, .subtitle { z-index: 2; }
+    @media (max-width: 768px) {
+      .max-w-3xl .flex-row { flex-direction: column !important; }
+    }
+  </style>
 
   <script>
     const SUPABASE_URL = 'https://vgkvkmpckneceqfggzes.supabase.co';
