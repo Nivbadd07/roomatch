@@ -44,7 +44,7 @@
   <div class="wave1"></div>
   <div class="content max-w-md w-full px-6 text-center">
     <div class="flex justify-between items-center mb-2">
-      <a href="apt-feed.html" class="text-purple-600 hover:text-purple-800 text-lg font-bold">← Back</a>
+      <a href="apt-feed.html" class="text-[#764C8A] hover:text-[#764C8A] text-lg font-bold">← Back</a>
     </div>
     <h1 class="text-2xl font-semibold text-gray-900 mb-2">
       What's Around You?
@@ -53,11 +53,11 @@
       Discover places and services near your current location
     </p>
     <div class="mb-4 flex gap-2 justify-center">
-      <input id="location-input" type="text" placeholder="Enter address or city..." class="w-2/3 border border-gray-300 px-4 py-2 rounded-full focus:outline-none focus:border-purple-700" />
-      <button id="search-btn" class="bg-purple-800 hover:bg-purple-900 text-white px-4 py-2 rounded-full font-semibold">Search</button>
-      <button id="geo-btn" class="bg-purple-200 hover:bg-purple-300 text-purple-900 px-4 py-2 rounded-full font-semibold" title="Use my location">📍</button>
+      <input id="location-input" type="text" placeholder="Enter address or city..." class="w-2/3 border border-gray-300 px-4 py-2 rounded-full focus:outline-none focus:border-[#764C8A]" />
+      <button id="search-btn" class="bg-[#764C8A] hover:bg-[#764C8A] text-white px-4 py-2 rounded-full font-semibold">Search</button>
+      <button id="geo-btn" class="bg-[#764C8A] hover:bg-[#764C8A] text-white px-4 py-2 rounded-full font-semibold" title="Use my location">📍</button>
     </div>
-    <div id="loading" class="hidden text-purple-700 font-semibold mt-6">Loading nearby places...</div>
+    <div id="loading" class="hidden text-[#764C8A] font-semibold mt-6">Loading nearby places...</div>
     <div id="places-list" class="mt-6 text-left"></div>
   </div>
   <script>
@@ -88,12 +88,12 @@
         list.innerHTML = `<div class="text-center text-gray-500">😕 No places found nearby. Try another location or search again.</div>`;
         return;
       }
-      list.innerHTML = `<div class="mb-2 text-purple-800 font-bold">Area: ${address}</div>` +
+      list.innerHTML = `<div class="mb-2 text-[#764C8A] font-bold">Area: ${address}</div>` +
         places.slice(0, 12).map(p => `
           <div class="bg-white rounded-xl shadow p-3 mb-2 flex flex-col">
-            <span class="font-semibold text-purple-900">${p.name || p.type}</span>
+            <span class="font-semibold text-[#764C8A]">${p.name || p.type}</span>
             <span class="text-xs text-gray-500">${p.type}</span>
-            <a href="https://www.openstreetmap.org/?mlat=${p.lat}&mlon=${p.lon}" target="_blank" class="text-xs text-purple-600 hover:underline">View on map</a>
+            <a href="https://www.openstreetmap.org/?mlat=${p.lat}&mlon=${p.lon}" target="_blank" class="text-xs text-[#764C8A] hover:underline">View on map</a>
           </div>
         `).join('');
     }

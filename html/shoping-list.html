@@ -11,20 +11,20 @@
   <div class="w-full max-w-md bg-white shadow-lg pb-32">
 
     <!-- Header -->
-    <div class="text-purple-800 p-6 rounded-b-3xl text-center">
+    <div class="text-[#764C8A] p-6 rounded-b-3xl text-center">
       <h2 class="text-lg font-semibold">Grocery Shopping List</h2>
     </div>
 
     <!-- Main Content -->
-    <div class="bg-purple-800 text-white text-center py-8 px-4 rounded-b-3xl">
+    <div class="bg-[#764C8A] text-white text-center py-8 px-4 rounded-b-3xl">
       <div class="mb-2">
-        <div class="w-12 h-12 bg-white text-purple-800 mx-auto rounded-full flex items-center justify-center">
-          <i class="fas fa-shopping-cart text-purple-800 text-xl"></i>
+        <div class="w-12 h-12 bg-white text-[#764C8A] mx-auto rounded-full flex items-center justify-center">
+          <i class="fas fa-shopping-cart text-[#764C8A] text-xl"></i>
         </div>
       </div>
       <p class="text-sm" id="completedCount">List 0/7 Completed</p>
       <div class="flex justify-center gap-4 mt-4">
-        <button id="delete-checked-btn" class="bg-white text-purple-800 py-2 px-4 rounded-full">Delete Checked</button>
+        <button id="delete-checked-btn" class="bg-white text-[#764C8A] py-2 px-4 rounded-full">Delete Checked</button>
       </div>
       <div class="flex justify-center gap-6 text-white text-2xl mt-6">
         <a href="bills.html"><i class="fas fa-money-bill text-white"></i></a>
@@ -39,7 +39,7 @@
 
     <!-- Add Item Button -->
     <div class="p-4">
-      <button onclick="openModal()" class="w-full bg-purple-800 hover:bg-purple-900 text-white py-2 rounded flex items-center justify-center gap-2">
+      <button onclick="openModal()" class="w-full bg-[#764C8A] hover:bg-[#764C8A] text-white py-2 rounded flex items-center justify-center gap-2">
         &#10010; Add new Item
       </button>
     </div>
@@ -51,8 +51,8 @@
       <button onclick="closeModal()" class="absolute top-2 right-2 text-xl text-gray-500 hover:text-gray-700">&times;</button>
       <h3 class="text-2xl font-extrabold uppercase tracking-wide mb-4">Add New Item</h3>
       <label class="block text-sm font-medium mb-1">Item name</label>
-      <input type="text" id="new-item-input" placeholder="–" class="w-full border rounded px-3 py-2 mb-4 outline-none focus:ring-2 focus:ring-purple-400" />
-      <button onclick="saveItem()" class="w-full bg-purple-800 hover:bg-purple-900 text-white py-2 rounded">Save</button>
+      <input type="text" id="new-item-input" placeholder="–" class="w-full border rounded px-3 py-2 mb-4 outline-none focus:ring-2 focus:ring-[#764C8A]" />
+      <button onclick="saveItem()" class="w-full bg-[#764C8A] hover:bg-[#764C8A] text-white py-2 rounded">Save</button>
     </div>
   </div>
 
@@ -80,7 +80,7 @@
       itemDiv.innerHTML = `
         <div class="flex items-center gap-2">
           <input type="checkbox" class="w-5 h-5" ${checked ? "checked" : ""}>
-          <label class="${checked ? 'line-through text-purple-800 font-semibold' : ''}">${name}</label>
+          <label class="${checked ? 'line-through text-[#764C8A] font-semibold' : ''}">${name}</label>
         </div>
       `;
 
@@ -88,9 +88,9 @@
       const label = itemDiv.querySelector('label');
       checkbox.addEventListener('change', () => {
         if (checkbox.checked) {
-          label.classList.add('line-through', 'text-purple-800', 'font-semibold');
+          label.classList.add('line-through', 'text-[#764C8A]', 'font-semibold');
         } else {
-          label.classList.remove('line-through', 'text-purple-800', 'font-semibold');
+          label.classList.remove('line-through', 'text-[#764C8A]', 'font-semibold');
         }
         updateCount();
       });
