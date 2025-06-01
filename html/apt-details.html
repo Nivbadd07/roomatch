@@ -9,25 +9,22 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <style>
-    body {
+    html, body {
+      height: 100%;
+      min-height: 100vh;
       background: #F2F4F5;
+      font-family: '101827', sans-serif;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+    body {
+      width: 100vw;
+      min-height: 100vh;
       background-attachment: fixed;
       background-repeat: no-repeat;
       background-size: cover;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow-x: hidden;
       overflow-y: auto;
-      font-family: '101827', sans-serif;
-    }
-    body::before {
-      display: none;
-    }
-    body::after {
-      display: none;
     }
     .apt-card {
       position: relative;
@@ -39,10 +36,11 @@
       box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
       border: 1px solid #e5e7eb;
       padding: 2.5rem 2rem;
-      margin: 2rem 0;
+      margin: 2rem auto;
       display: flex;
       flex-direction: column;
       align-items: center;
+      min-height: 0;
     }
     .close-btn {
       position: absolute;
@@ -63,32 +61,38 @@
     .accent { color: #764C8A; }
     .bg-accent { background: #764C8A; }
     .border-accent { border-color: #764C8A; }
+    @media (max-width: 600px) {
+      .apt-card { padding: 1rem 0.5rem; }
+    }
   </style>
 </head>
 <body>
-  <div class="apt-card">
-    <a href="apt-feed.html" class="close-btn" title="Back to feed">
-      <i class="fas fa-times text-gray-700 text-xl"></i>
-    </a>
-    <!-- Apartment Details Content Start -->
-    <div class="w-full">
-      <div id="aptImages"></div>
-      <div class="content" id="aptContent"></div>
-      <button id="scheduleBtn" class="chat-btn w-full bg-accent hover:bg-purple-900 text-white py-3 rounded-xl text-lg font-semibold shadow mb-2">SCHEDULE WITH</button>
-      <div id="scheduleModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-2xl p-6 shadow-lg w-80 relative">
-          <button id="closeModal" class="absolute top-2 right-2 text-gray-400 hover:text-purple-700 text-xl">&times;</button>
-          <div class="font-bold text-lg mb-2">Schedule a meeting</div>
-          <label class="block mb-2 text-sm font-medium">Pick a date and time:</label>
-          <input id="meetingDateTime" type="datetime-local" class="w-full border border-purple-200 rounded-lg px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-purple-300" />
-          <button id="addToGoogleCal" class="w-full bg-accent hover:bg-purple-900 text-white py-2 rounded-lg font-semibold">Add to Google Calendar</button>
+  <main style="min-height:100vh;width:100vw;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;">
+    <div class="apt-card w-full">
+      <a href="apt-feed.html" class="close-btn" title="Back to feed">
+        <i class="fas fa-times text-gray-700 text-xl"></i>
+      </a>
+      <!-- Apartment Details Content Start -->
+      <div class="w-full">
+        <div id="aptImages"></div>
+        <div id="loading" class="text-center text-gray-400 py-8 text-lg">Loading apartment details...</div>
+        <div class="content" id="aptContent" style="display:none;"></div>
+        <button id="scheduleBtn" class="chat-btn w-full bg-accent hover:bg-purple-900 text-white py-3 rounded-xl text-lg font-semibold shadow mb-2">SCHEDULE WITH</button>
+        <div id="scheduleModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 hidden">
+          <div class="bg-white rounded-2xl p-6 shadow-lg w-80 relative">
+            <button id="closeModal" class="absolute top-2 right-2 text-gray-400 hover:text-purple-700 text-xl">&times;</button>
+            <div class="font-bold text-lg mb-2">Schedule a meeting</div>
+            <label class="block mb-2 text-sm font-medium">Pick a date and time:</label>
+            <input id="meetingDateTime" type="datetime-local" class="w-full border border-purple-200 rounded-lg px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-purple-300" />
+            <button id="addToGoogleCal" class="w-full bg-accent hover:bg-purple-900 text-white py-2 rounded-lg font-semibold">Add to Google Calendar</button>
+          </div>
         </div>
+        <!-- Future: Google Maps location here -->
+        <div id="map" style="width:100%;height:220px;margin-top:2rem;display:none;"></div>
       </div>
-      <!-- Future: Google Maps location here -->
-      <div id="map" style="width:100%;height:220px;margin-top:2rem;display:none;"></div>
+      <!-- Apartment Details Content End -->
     </div>
-    <!-- Apartment Details Content End -->
-  </div>
+  </main>
   <script>
     function getQueryParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
@@ -103,13 +107,15 @@
         window.location.href = 'apt-feed.html';
         return;
       }
+      document.getElementById('loading').style.display = '';
+      document.getElementById('aptContent').style.display = 'none';
       const { data: apartmentData, error } = await supabaseClient
         .from('apartments')
         .select('*')
         .eq('id', aptId)
         .single();
       if (error || !apartmentData) {
-        document.getElementById('aptContent').innerHTML = '<div class="text-red-500">Apartment not found.</div>';
+        document.getElementById('loading').innerHTML = '<div class="text-red-500">Apartment not found.</div>';
         return;
       }
       // Images
@@ -169,6 +175,8 @@
         <div class="description text-sm mb-6">${roommate.about || ''}</div>
         ` : ''}
       `;
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('aptContent').style.display = '';
     }
     fetchAndRenderApartment();
     // --- Schedule Modal Logic ---
