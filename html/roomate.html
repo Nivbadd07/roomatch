@@ -56,7 +56,7 @@
 
   <!-- Main container -->
   <div class="pt-6 pb-36 w-full" style="position:relative;z-index:10;">
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex justify-between items-center mb-6 w-full px-8">
       <div class="flex items-center gap-2 text-sm text-purple-800">
         <i class="fas fa-map-marker-alt" style="font-size: 1.6em;"></i>
         <a id="user-location" href="location.html" class="hover:underline cursor-pointer text-purple-800">Detecting location...</a>
@@ -203,25 +203,36 @@
         // Gender, age, interests
         const genderAge = [roommate.gender, roommate.age ? roommate.age + ' yrs' : null].filter(Boolean).join(' | ');
         const genderAgeHtml = genderAge ? `<div class='text-sm font-semibold text-purple-900 mb-2'>${genderAge}</div>` : '';
-        const interestsHtml = (roommate.interests || []).map(i => `<span class='px-3 py-1 bg-pink-100 text-pink-800 rounded-full text-base font-medium mr-2 mb-2 inline-block'>${i}</span>`).join(' ');
+        const interestsHtml = (roommate.interests || []).map(i => `<span class='px-3 py-1' style='background:#fde2f3;color:#764C8A;border-radius:1rem;'>${i}</span>`).join(' ');
         // Bio
-        const bioHtml = roommate.bio ? `<div class='mt-2'><div class='text-sm font-semibold text-purple-900 mb-1'>Bio</div><div class='text-base text-gray-800'>${roommate.bio}</div></div>` : '';
+        const bioHtml = roommate.bio ? `<div class='mt-2'><div class='text-sm font-semibold' style='color:#764C8A;'>Bio</div><div class='text-base text-gray-800'>${roommate.bio}</div></div>` : '';
+        // Calculate match percent (handle 0-1 or 0-100)
+        let matchPercent = score;
+        if (matchPercent <= 1) matchPercent = Math.round(matchPercent * 100);
+        else matchPercent = Math.round(matchPercent);
+        const matchHtml = `<div style='position:absolute;top:18px;right:18px;z-index:2;'><span style='background:#fde2f3;color:#764C8A;font-weight:700;padding:0.5em 1em;border-radius:1.2em;font-size:1.1em;'>${matchPercent}% Match</span></div>`;
         const card = document.createElement('div');
-        card.className = 'relative w-full min-h-[400px] flex flex-col rounded-3xl shadow-2xl overflow-hidden border-2 border-purple-300 bg-white bg-opacity-80';
+        card.className = 'relative w-full min-h-[400px] flex flex-col rounded-3xl shadow-2xl overflow-hidden border-2';
+        card.style.borderColor = '#764C8A';
+        card.style.background = 'white';
         card.innerHTML = `
-          <div class="w-full h-96 bg-gray-100 flex items-center justify-center overflow-hidden rounded-t-3xl border-b-2 border-purple-200">
+          ${matchHtml}
+          <div class="w-full h-96 bg-gray-100 flex items-center justify-center overflow-hidden rounded-t-3xl border-b-2" style="border-color:#764C8A;">
             <img src="${imgUrl}" alt="User photo" class="object-cover w-full h-full" loading="lazy" onerror="this.onerror=null;this.src='${placeholderUrl}';">
           </div>
           <div class="flex-1 px-10 pt-8 pb-8">
-            <div class="text-2xl font-bold text-purple-900 mb-2 flex items-center gap-2">
+            <div class="text-2xl font-bold" style="color:#764C8A; margin-bottom:0.5em; display:flex;align-items:center;gap:0.5em;">
               ${mainHeader}
             </div>
             ${genderAgeHtml}
             <div class="flex flex-wrap gap-2 mb-3">${interestsHtml}</div>
             ${bioHtml}
-            <button class="mt-4 w-full bg-[#764C8A] hover:bg-[#5e3c6e] text-white py-3 rounded-xl text-lg font-semibold shadow schedule-tour-btn" data-roommate="${idx}">
+            <button class="mt-4 w-full" style="background:#764C8A;color:white;" onmouseover="this.style.background='#5e3c6e'" onmouseout="this.style.background='#764C8A'">
               <i class="fa-solid fa-calendar-check mr-1"></i> Schedule Meeting
             </button>
+            <a href="chat-amit.html" class="mt-2 w-full flex justify-center items-center border" style="border-color:#764C8A;color:#764C8A;background:#fde2f3;hover:bg-purple-50;py-3;border-radius:1em;font-size:1.1em;font-weight:600;margin-top:0.5rem;">
+              <i class="fa-regular fa-comment-dots mr-2"></i> Chat
+            </a>
           </div>
         `;
         container.appendChild(card);
