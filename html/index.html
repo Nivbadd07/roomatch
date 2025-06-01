@@ -18,16 +18,26 @@
       align-items: center;
       justify-content: center;
       position: relative;
-      overflow: hidden;
+      overflow-x: hidden;
       font-family: 'Rubik', sans-serif;
     }
-
+    @media (max-width: 768px) {
+      body {
+        align-items: flex-start;
+        justify-content: flex-start;
+        min-height: 100vh;
+        display: block;
+        overflow-y: auto;
+      }
+      .w-1\/2.md\:flex {
+        display: none !important;
+      }
+    }
     .glass-card {
       background: white;
       box-shadow: 0 8px 32px rgba(31, 38, 135, 0.18);
       border: 1.5px solid rgba(162, 59, 177, 0.13);
     }
-
     .border-gradient-anim {
       pointer-events: none;
       border-radius: 1.25rem;
@@ -36,17 +46,14 @@
       filter: blur(8px);
       animation: borderAnim 6s linear infinite alternate;
     }
-
     @keyframes borderAnim {
       0% { opacity: 0.5; filter: blur(8px); }
       100% { opacity: 0.8; filter: blur(16px); }
     }
-
     .content {
       position: relative;
       z-index: 10;
     }
-
     .error-message {
       color: #dc2626;
       font-size: 0.875rem;
@@ -56,10 +63,15 @@
   </style>
 </head>
 
-<body class="min-h-screen flex items-stretch bg-gray-100">
+<body class="min-h-screen flex items-stretch bg-gray-100 overflow-x-hidden">
   <!-- Left: Login Card (no box) -->
   <div class="w-full md:w-1/2 flex items-center justify-center">
     <div class="w-full max-w-md px-8 py-12">
+      <!-- RooMatch Logo/Title -->
+      <div class="flex items-center justify-center mb-6">
+        <img src="https://storage.googleapis.com/roomatch-prod-static-site/logo.png" alt="RooMatch Logo" class="w-10 h-10 mr-2" onerror="this.style.display='none'"/>
+        <span class="text-4xl font-extrabold text-purple-700 tracking-tight">RooMatch</span>
+      </div>
       <!-- Title -->
       <h1 class="text-3xl font-bold text-gray-900 mb-2">Welcome back</h1>
       <p class="text-gray-500 mb-8">Welcome back! Please enter your details.</p>
@@ -89,19 +101,34 @@
             <input type="checkbox" class="form-checkbox rounded border-gray-300 text-purple-600" id="rememberMe" />
             <span class="text-gray-700">Remember for 30 days</span>
           </label>
-          <a href="#" class="text-purple-700 hover:underline font-medium">Forgot password</a>
+          <a href="#" id="forgotPasswordLink" class="text-purple-700 hover:underline font-medium">Forgot password</a>
         </div>
         <!-- Error Message -->
         <div id="errorMessage" class="error-message hidden"></div>
         <!-- Sign in Button -->
         <button type="submit"
-          class="w-full text-white py-3 rounded-lg text-base font-semibold transition" style="background-color: #764C8A;">Sign in</button>
+          class="w-full text-white py-3 rounded-lg text-base font-semibold transition flex items-center justify-center gap-2" style="background-color: #764C8A;">
+          <span id="signInBtnText">Sign in</span>
+          <svg id="signInSpinner" class="hidden animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+        </button>
         <!-- Google Sign in -->
-        <button type="button" class="w-full flex items-center justify-center gap-2 border border-gray-300 bg-white py-3 rounded-lg font-semibold text-gray-800 hover:bg-gray-50 transition">
+        <button type="button" id="googleSignInBtn" class="w-full flex items-center justify-center gap-2 border border-gray-300 bg-white py-3 rounded-lg font-semibold text-gray-800 hover:bg-gray-50 transition">
           <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="w-5 h-5" />
           Sign in with Google
         </button>
       </form>
+      <!-- Forgot Password Modal -->
+      <div id="forgotModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-sm relative">
+          <button id="closeForgotModal" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700">&times;</button>
+          <h2 class="text-xl font-bold mb-4 text-purple-700">Reset Password</h2>
+          <p class="mb-4 text-gray-600">Enter your email to receive a password reset link.</p>
+          <input type="email" id="forgotEmail" class="w-full border border-gray-300 rounded-lg px-4 py-2 mb-2 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter your email" required />
+          <div id="forgotError" class="error-message hidden"></div>
+          <button id="sendResetBtn" class="w-full bg-purple-700 text-white py-2 rounded-lg font-semibold mt-2">Send Reset Link</button>
+          <div id="forgotSuccess" class="text-green-600 text-sm mt-2 hidden"></div>
+        </div>
+      </div>
       <!-- Sign up link -->
       <div class="mt-8 text-center text-sm text-gray-500">
         Don't have an account? 
@@ -130,6 +157,16 @@
     const passwordError = document.getElementById('passwordError');
     const errorMessage = document.getElementById('errorMessage');
     const submitButton = loginForm.querySelector('button[type="submit"]');
+    const signInBtnText = document.getElementById('signInBtnText');
+    const signInSpinner = document.getElementById('signInSpinner');
+    const googleSignInBtn = document.getElementById('googleSignInBtn');
+    const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+    const forgotModal = document.getElementById('forgotModal');
+    const closeForgotModal = document.getElementById('closeForgotModal');
+    const forgotEmail = document.getElementById('forgotEmail');
+    const sendResetBtn = document.getElementById('sendResetBtn');
+    const forgotError = document.getElementById('forgotError');
+    const forgotSuccess = document.getElementById('forgotSuccess');
 
     // Client-side validation
     function validateEmail(email) {
@@ -157,67 +194,130 @@
       hideError(errorMessage);
     }
 
+    // Show/hide spinner
+    function setLoading(isLoading) {
+      if (isLoading) {
+        signInBtnText.classList.add('hidden');
+        signInSpinner.classList.remove('hidden');
+      } else {
+        signInBtnText.classList.remove('hidden');
+        signInSpinner.classList.add('hidden');
+      }
+    }
+
+    // Google Sign-In
+    googleSignInBtn.addEventListener('click', async function() {
+      setLoading(true);
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: window.location.origin + '/html/redirect.html'
+          }
+        });
+        if (error) throw error;
+        // The user will be redirected by Supabase
+      } catch (error) {
+        setLoading(false);
+        showError(errorMessage, 'Google sign-in failed. Please try again.');
+      }
+    });
+
+    // Forgot Password Modal Logic
+    forgotPasswordLink.addEventListener('click', function(e) {
+      e.preventDefault();
+      forgotModal.classList.remove('hidden');
+      forgotEmail.value = '';
+      hideError(forgotError);
+      forgotSuccess.classList.add('hidden');
+      forgotSuccess.textContent = '';
+    });
+    closeForgotModal.addEventListener('click', function() {
+      forgotModal.classList.add('hidden');
+    });
+    sendResetBtn.addEventListener('click', async function() {
+      hideError(forgotError);
+      forgotSuccess.classList.add('hidden');
+      forgotSuccess.textContent = '';
+      const email = forgotEmail.value.trim();
+      if (!validateEmail(email)) {
+        showError(forgotError, 'Please enter a valid email address');
+        return;
+      }
+      sendResetBtn.disabled = true;
+      sendResetBtn.textContent = 'Sending...';
+      try {
+        const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + '/html/reset-password.html'
+        });
+        if (error) throw error;
+        forgotSuccess.textContent = 'Password reset email sent! Check your inbox.';
+        forgotSuccess.classList.remove('hidden');
+      } catch (error) {
+        showError(forgotError, 'Failed to send reset email. Please try again.');
+      } finally {
+        sendResetBtn.disabled = false;
+        sendResetBtn.textContent = 'Send Reset Link';
+      }
+    });
+    // Close modal on outside click
+    window.addEventListener('click', function(e) {
+      if (e.target === forgotModal) {
+        forgotModal.classList.add('hidden');
+      }
+    });
+
     // Form submission handler
     loginForm.addEventListener('submit', async function(e) {
       e.preventDefault();
       clearErrors();
-      
+      setLoading(true);
+      submitButton.disabled = true;
       const email = emailInput.value.trim();
       const password = passwordInput.value.trim();
       let hasError = false;
-
       // Client-side validation
       if (!validateEmail(email)) {
         showError(emailError, 'Please enter a valid email address');
         hasError = true;
       }
-
       if (!validatePassword(password)) {
         showError(passwordError, 'Password must be at least 6 characters long');
         hasError = true;
       }
-
-      if (hasError) return;
-
-      // Disable button and show loading state
-      submitButton.disabled = true;
-      submitButton.textContent = 'Logging in...';
-
+      if (hasError) {
+        setLoading(false);
+        submitButton.disabled = false;
+        return;
+      }
       try {
         // Attempt to sign in with Supabase
         const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
           email,
           password
         });
-
         if (authError) {
           throw authError;
         }
-
         if (!authData.user) {
           throw new Error('No user data returned');
         }
-
         // Get user profile from users table
         const { data: userProfile, error: userError } = await supabaseClient
           .from('users')
           .select('id, user_type')
           .eq('auth_id', authData.user.id)
           .single();
-
         if (userError) {
           throw userError;
         }
-
         if (!userProfile) {
           throw new Error('User profile not found');
         }
-
         // Store user data
         localStorage.setItem('user_id', userProfile.id);
         localStorage.setItem('user_type', userProfile.user_type);
         localStorage.setItem('auth_token', authData.session.access_token);
-
         // Redirect based on user type
         switch (userProfile.user_type) {
           case 'Looking for Apt':
@@ -229,14 +329,12 @@
           default:
             throw new Error('Invalid user type');
         }
-
       } catch (error) {
         console.error('Login error:', error);
-        
         // Handle specific error cases
-        if (error.message.includes('Invalid login credentials')) {
+        if (error.message && error.message.includes('Invalid login credentials')) {
           showError(errorMessage, 'Invalid email or password');
-        } else if (error.message.includes('Email not confirmed')) {
+        } else if (error.message && error.message.includes('Email not confirmed')) {
           showError(errorMessage, 'Please verify your email address');
         } else if (error.message === 'User profile not found') {
           showError(errorMessage, 'User profile not found. Please contact support.');
@@ -246,9 +344,8 @@
           showError(errorMessage, 'An error occurred during login. Please try again.');
         }
       } finally {
-        // Reset button state
+        setLoading(false);
         submitButton.disabled = false;
-        submitButton.textContent = 'Log In';
       }
     });
   </script>
