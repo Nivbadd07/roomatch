@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ROOMATCH - Settings</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;900&display=swap">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { background: #F2F4F5; min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Rubik', sans-serif; }
+    .settings-card { background: white; border-radius: 1.5rem; box-shadow: 0 8px 32px rgba(31, 38, 135, 0.18); padding: 2.5rem 2rem; max-width: 420px; width: 100%; }
+    .settings-title { font-size: 2.2rem; font-weight: 900; color: #764C8A; text-align: center; margin-bottom: 1.2rem; }
+    .settings-label { color: #764C8A; font-weight: 600; margin-bottom: 0.2rem; }
+    .settings-value { color: #2d1b4d; font-size: 1.1rem; margin-bottom: 1.1rem; }
+    .settings-avatar { width: 110px; height: 110px; border-radius: 1rem; object-fit: cover; margin: 0 auto 1.2rem auto; box-shadow: 0 2px 12px #e0d9ff; }
+    .settings-interests span { display: inline-block; background: #e0d9ff; color: #764C8A; border-radius: 1rem; padding: 0.4rem 1.1rem; margin: 0.2rem 0.3rem 0.2rem 0; font-size: 1.1rem; }
+    .settings-btn { width: 100%; background: #764C8A; color: white; border: none; border-radius: 1rem; padding: 1rem 0; font-size: 1.2rem; font-weight: 700; margin-top: 1.5rem; cursor: pointer; transition: background 0.2s; }
+    .settings-btn:hover { background: #5e3c6e; }
+    .settings-back { color: #764C8A; font-weight: 600; cursor: pointer; margin-bottom: 1.5rem; display: inline-block; }
+    @media (max-width: 600px) { .settings-card { padding: 1.2rem 0.5rem; } }
+  </style>
+</head>
+<body>
+  <div class="settings-card">
+    <div class="flex items-center justify-center mb-4">
+      <img src="https://storage.googleapis.com/roomatch-prod-static-site/logo.png" alt="RooMatch Logo" class="w-10 h-10 mr-2" onerror="this.style.display='none'"/>
+      <span class="text-3xl font-extrabold text-purple-700 tracking-tight">RooMatch</span>
+    </div>
+    <div class="settings-title">User Settings</div>
+    <div class="settings-back" onclick="window.history.back()">&larr; Back</div>
+    <div class="flex flex-col items-center">
+      <img id="userAvatar" class="settings-avatar" src="" alt="Profile" style="display:none;"/>
+    </div>
+    <div class="settings-label">Name</div>
+    <div class="settings-value" id="userName">Loading...</div>
+    <div class="settings-label">Email</div>
+    <div class="settings-value" id="userEmail">Loading...</div>
+    <div class="settings-label">Age</div>
+    <div class="settings-value" id="userAge">Loading...</div>
+    <div class="settings-label">Gender</div>
+    <div class="settings-value" id="userGender">Loading...</div>
+    <div class="settings-label">Bio</div>
+    <div class="settings-value" id="userBio">Loading...</div>
+    <div class="settings-label">Interests</div>
+    <div class="settings-value settings-interests" id="userInterests">Loading...</div>
+    <button class="settings-btn" id="logoutBtn">Log Out</button>
+  </div>
+  <script>
+    const supabaseClient = window.supabase.createClient(
+      'https://vgkvkmpckneceqfggzes.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZna3ZrbXBja25lY2VxZmdnemVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1NDA0NjAsImV4cCI6MjA2MjExNjQ2MH0.1ZEMsUleNaBrePUuagdZAKL2gYA-9-vM9wrTIW8-tdU'
+    );
+    async function loadUserInfo() {
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (!user) {
+        document.getElementById('userName').textContent = 'Not logged in';
+        document.getElementById('userEmail').textContent = '-';
+        document.getElementById('userAge').textContent = '-';
+        document.getElementById('userGender').textContent = '-';
+        document.getElementById('userBio').textContent = '-';
+        document.getElementById('userInterests').textContent = '-';
+        return;
+      }
+      // Fetch user profile from users table
+      const { data: userProfile } = await supabaseClient
+        .from('users')
+        .select('*')
+        .eq('auth_id', user.id)
+        .single();
+      if (!userProfile) {
+        document.getElementById('userName').textContent = 'Not found';
+        return;
+      }
+      document.getElementById('userName').textContent = userProfile.full_name || '-';
+      document.getElementById('userEmail').textContent = userProfile.email || '-';
+      document.getElementById('userAge').textContent = userProfile.age || '-';
+      document.getElementById('userGender').textContent = userProfile.gender || '-';
+      document.getElementById('userBio').textContent = userProfile.bio || '-';
+      if (userProfile.profile_image_url) {
+        const avatar = document.getElementById('userAvatar');
+        avatar.src = userProfile.profile_image_url;
+        avatar.style.display = 'block';
+      }
+      if (userProfile.interests && Array.isArray(userProfile.interests)) {
+        document.getElementById('userInterests').innerHTML = userProfile.interests.map(i => `<span>${i}</span>`).join('');
+      } else {
+        document.getElementById('userInterests').textContent = '-';
+      }
+    }
+    loadUserInfo();
+    document.getElementById('logoutBtn').onclick = async function() {
+      await supabaseClient.auth.signOut();
+      window.location.href = 'index.html';
+    };
+  </script>
+</body>
+</html> 

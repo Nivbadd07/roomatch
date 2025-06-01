@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RooMatch - Redirecting...</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: #F2F4F5; min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Rubik', sans-serif; }
+    .spinner { border: 4px solid #e5e7eb; border-top: 4px solid #764C8A; border-radius: 50%; width: 48px; height: 48px; animation: spin 1s linear infinite; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body class="overflow-y-auto">
+  <div class="flex flex-col items-center justify-center w-full max-w-md p-8 bg-white rounded-xl shadow-lg">
+    <div class="flex items-center mb-4">
+      <img src="https://storage.googleapis.com/roomatch-prod-static-site/logo.png" alt="RooMatch Logo" class="w-10 h-10 mr-2" onerror="this.style.display='none'"/>
+      <span class="text-3xl font-extrabold text-purple-700 tracking-tight">RooMatch</span>
+    </div>
+    <div class="spinner mb-4"></div>
+    <div id="statusMsg" class="text-gray-700 text-center">Signing you in, please wait...</div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const supabaseClient = window.supabase.createClient(
+      'https://vgkvkmpckneceqfggzes.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZna3ZrbXBja25lY2VxZmdnemVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1NDA0NjAsImV4cCI6MjA2MjExNjQ2MH0.1ZEMsUleNaBrePUuagdZAKL2gYA-9-vM9wrTIW8-tdU'
+    );
+    const statusMsg = document.getElementById('statusMsg');
+    async function handleRedirect() {
+      try {
+        const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+        if (sessionError || !session || !session.user) throw new Error('Not authenticated');
+        // Get user profile
+        const { data: userProfile, error: userError } = await supabaseClient
+          .from('users')
+          .select('id, user_type')
+          .eq('auth_id', session.user.id)
+          .single();
+        if (userProfile) {
+          // Store user data
+          localStorage.setItem('user_id', userProfile.id);
+          localStorage.setItem('user_type', userProfile.user_type);
+          localStorage.setItem('auth_token', session.access_token);
+          // Redirect based on user type
+          switch (userProfile.user_type) {
+            case 'Looking for Apt':
+              window.location.href = 'apt-feed.html';
+              break;
+            case 'Looking for Roomate':
+              window.location.href = 'roomate.html';
+              break;
+            default:
+              throw new Error('Invalid user type');
+          }
+        } else {
+          // User does not exist in your table, redirect to onboarding
+          window.location.href = 'onboarding.html';
+        }
+      } catch (error) {
+        statusMsg.textContent = 'There was a problem signing you in. Please try again or contact support.';
+      }
+    }
+    handleRedirect();
+  </script>
+</body>
+</html> 
