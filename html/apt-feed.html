@@ -308,6 +308,7 @@
       const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startStr}/${endStr}&details=${details}&location=${location}`;
       window.open(url, '_blank');
       scheduleModal.classList.add('hidden');
+      // TODO: Send email notification here (future implementation)
     });
 
     // Add logout handler

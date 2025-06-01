@@ -203,11 +203,15 @@
         const interestsHtml = (roommate.interests || []).map(i => `<span class='px-3 py-1' style='background:#fde2f3;color:#764C8A;border-radius:1rem;'>${i}</span>`).join(' ');
         // Bio
         const bioHtml = roommate.bio ? `<div class='mt-2'><div class='text-sm font-semibold' style='color:#764C8A;'>Bio</div><div class='text-base text-gray-800'>${roommate.bio}</div></div>` : '';
-        // Calculate match percent (handle 0-1 or 0-100, fallback to 0 if undefined or NaN)
+        // Calculate match percent (robust: handle undefined, null, NaN, string, etc.)
         let matchPercent = 0;
-        if (typeof score === 'number' && !isNaN(score)) {
-          if (score <= 1) matchPercent = Math.round(score * 100);
-          else matchPercent = Math.round(score);
+        if (typeof score === 'number' && isFinite(score)) {
+          if (score <= 1 && score >= 0) matchPercent = Math.round(score * 100);
+          else if (score > 1) matchPercent = Math.round(score);
+        } else if (typeof score === 'string' && !isNaN(Number(score))) {
+          const numScore = Number(score);
+          if (numScore <= 1 && numScore >= 0) matchPercent = Math.round(numScore * 100);
+          else if (numScore > 1) matchPercent = Math.round(numScore);
         }
         const matchHtml = `<div style='position:absolute;top:18px;right:18px;z-index:2;'><span style='background:#fde2f3;color:#764C8A;font-weight:700;padding:0.5em 1em;border-radius:1.2em;font-size:1.1em;'>${matchPercent}% Match</span></div>`;
         const card = document.createElement('div');
@@ -277,7 +281,6 @@
       }
       const startStr = toGCalFormat(start);
       const endStr = toGCalFormat(end);
-      
       // Enhanced meeting details
       const title = encodeURIComponent(`Roommate Meeting: ${roommate.full_name || 'Potential Roommate'}`);
       const details = encodeURIComponent(
@@ -287,10 +290,10 @@
         `Interests: ${(roommate.interests || []).join(', ') || 'N/A'}\n` +
         `Bio: ${roommate.bio || 'N/A'}`
       );
-      
       const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startStr}/${endStr}&details=${details}`;
       window.open(url, '_blank');
       scheduleModal.classList.add('hidden');
+      // TODO: Send email notification here (future implementation)
     });
 
     // Geolocation for location at the top
