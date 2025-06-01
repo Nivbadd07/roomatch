@@ -118,6 +118,7 @@
         document.getElementById('loading').innerHTML = '<div class="text-red-500">Apartment not found.</div>';
         return;
       }
+      // QA: Apartment data loaded
       // Images
       const images = Array.isArray(apartmentData.image_urls) ? apartmentData.image_urls : [];
       let imagesHtml = '';
@@ -145,7 +146,34 @@
       if (Array.isArray(apartmentData.roommate) && apartmentData.roommate.length > 0) {
         roommate = apartmentData.roommate[0];
       }
+      // Fetch uploader (user) by roommate_id
+      let uploader = null;
+      if (apartmentData.roommate_id) {
+        const { data: userData, error: userError } = await supabaseClient
+          .from('users')
+          .select('full_name, age, gender, profile_image_url, bio, email')
+          .eq('id', apartmentData.roommate_id)
+          .single();
+        if (!userError && userData) {
+          uploader = userData;
+        }
+      }
       // Render
+      let uploaderHtml = '';
+      if (uploader) {
+        uploaderHtml = `
+        <div class="section-title font-bold mb-1">Listed by</div>
+        <div class="flex items-center gap-4 mb-4">
+          <img src="${uploader.profile_image_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" alt="Uploader" class="w-14 h-14 rounded-full object-cover border-2 border-purple-200" />
+          <div>
+            <div class="font-bold accent text-lg">${uploader.full_name || ''}${uploader.age ? ', ' + uploader.age : ''}</div>
+            <div class="text-xs text-gray-600">${uploader.gender || ''}</div>
+            <div class="text-xs text-gray-600">${uploader.email || ''}</div>
+            <div class="text-sm text-gray-800">${uploader.bio || ''}</div>
+          </div>
+        </div>
+        `;
+      }
       document.getElementById('aptContent').innerHTML = `
         <div class="location-title text-xl font-bold mb-2 accent">${apartmentData.address || 'Apartment Details'}</div>
         <div class="features flex gap-6 text-gray-700 mb-4">
@@ -174,6 +202,7 @@
         </div>
         <div class="description text-sm mb-6">${roommate.about || ''}</div>
         ` : ''}
+        ${uploaderHtml}
       `;
       document.getElementById('loading').style.display = 'none';
       document.getElementById('aptContent').style.display = '';
