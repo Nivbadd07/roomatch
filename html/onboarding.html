@@ -360,18 +360,52 @@
       .onboard-title { font-size: 2rem; }
       .onboard-subtitle { font-size: 1.1rem; }
     }
+    .onboard-progress-bar-container {
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      width: 100vw;
+      z-index: 100;
+      background: transparent;
+      padding: 0 0 18px 0;
+      pointer-events: none;
+    }
+    .onboard-progress-bar-bg {
+      width: 98vw;
+      max-width: 900px;
+      margin: 0 auto;
+      height: 24px;
+      background: rgba(118, 76, 138, 0.10);
+      border-radius: 16px;
+      box-shadow: 0 2px 18px #e0d9ff;
+      overflow: hidden;
+      position: relative;
+    }
+    .onboard-progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #764C8A 0%, #e0d9ff 100%);
+      border-radius: 16px;
+      box-shadow: 0 0 16px #764C8A55;
+      width: 0%;
+      transition: width 0.5s cubic-bezier(.4,0,.2,1);
+    }
   </style>
 </head>
 <body>
   <div class="onboard-bg"></div>
   <div class="onboard-container">
     <div class="onboard-card">
-      <div class="onboard-stepper" id="stepIndicator"></div>
       <form id="onboardForm" autocomplete="off">
         <div id="stepContent"></div>
         <div class="onboard-error" id="errorMsg"></div>
         <button type="button" class="onboard-btn" id="nextBtn">Continue</button>
       </form>
+    </div>
+  </div>
+  <!-- Progress bar at the bottom of the page -->
+  <div class="onboard-progress-bar-container">
+    <div class="onboard-progress-bar-bg">
+      <div class="onboard-progress-bar-fill" id="onboardProgressBar"></div>
     </div>
   </div>
   <script>
@@ -933,15 +967,13 @@
     const stepContent = document.getElementById('stepContent');
     const errorMsg = document.getElementById('errorMsg');
     const nextBtn = document.getElementById('nextBtn');
-    const stepIndicator = document.getElementById('stepIndicator');
 
     function renderStep() {
-      // Step dots
-      stepIndicator.innerHTML = '';
-      for (let i = 0; i < steps.length; i++) {
-        const dot = document.createElement('div');
-        dot.className = 'onboard-step-dot' + (i === currentStep ? ' active' : '');
-        stepIndicator.appendChild(dot);
+      // Update progress bar
+      const progressBar = document.getElementById('onboardProgressBar');
+      if (progressBar) {
+        const percent = ((currentStep + 1) / steps.length) * 100;
+        progressBar.style.width = percent + '%';
       }
       // Content
       let backBtn = '';
