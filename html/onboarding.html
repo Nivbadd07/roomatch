@@ -123,27 +123,30 @@
       border: 2px solid #764C8A;
       background: #f3e8ff;
     }
-    .onboard-btn-shared, .onboard-btn, .back-btn {
-      box-sizing: border-box;
-      width: 220px;
-      min-width: 220px;
-      max-width: 220px;
-      min-height: 56px;
-      padding: 1.3rem 0;
-      border-radius: 1.5rem;
-      font-size: 1.5rem;
-      font-family: inherit !important;
+    .onboard-btn,
+    .back-btn {
+      width: 220px !important;
+      min-width: 220px !important;
+      max-width: 220px !important;
+      height: 70px !important;
+      min-height: 70px !important;
+      box-sizing: border-box !important;
+      padding: 1.3rem 0 !important;
+      font-size: 1.5rem !important;
       font-weight: 700 !important;
-      text-align: center;
-      letter-spacing: 0.7px;
-      margin: 0 auto;
-      box-shadow: 0 4px 16px rgba(118,76,138,0.13);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      appearance: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
+      font-family: inherit !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      border-radius: 1.5rem !important;
+      text-align: center !important;
+      letter-spacing: 0.7px !important;
+      margin: 0 auto !important;
+      box-shadow: 0 4px 16px rgba(118,76,138,0.13) !important;
+      appearance: none !important;
+      -webkit-appearance: none !important;
+      -moz-appearance: none !important;
+      border: none !important;
     }
     .onboard-btn {
       background: #764C8A;
@@ -155,17 +158,9 @@
       transition: background 0.2s, transform 0.2s;
     }
     .back-btn {
-      background: #e0d9ff;
-      color: #764C8A;
-      border: none;
-      cursor: pointer;
-      margin-top: 0.5rem;
-      margin-bottom: 0.5rem;
-      transition: background 0.2s, transform 0.2s;
-    }
-    .back-btn:hover {
-      background: #d4c9ff;
-      transform: translateY(-2px);
+      background: #e0d9ff !important;
+      color: #764C8A !important;
+      transform: none !important;
     }
     .onboard-btn:disabled {
       background: #e0d9ff;
@@ -992,9 +987,9 @@
       // Content
       let backBtn = '';
       if (currentStep === 0) {
-        backBtn = `<button type='button' id='backBtn' class='back-btn onboard-btn-shared'>Back</button>`;
+        backBtn = `<button type='button' id='backBtn' class='onboard-btn onboard-btn-shared back-btn'>Back</button>`;
       } else if (currentStep > 0) {
-        backBtn = `<button type='button' id='backBtn' class='back-btn onboard-btn-shared'>Back</button>`;
+        backBtn = `<button type='button' id='backBtn' class='onboard-btn onboard-btn-shared back-btn'>Back</button>`;
       }
       stepContent.innerHTML = `
         <div class='onboard-title' ${currentStep === 0 ? 'onclick="window.location.href=\'index.html\'"' : ''}>${steps[currentStep].title}</div>
@@ -1076,7 +1071,7 @@
         const oldBackBtn = document.getElementById('backBtn');
         if (oldBackBtn) oldBackBtn.remove();
         if (backBtn) {
-          btnRow.insertAdjacentHTML('beforeend', backBtn);
+          btnRow.insertAdjacentHTML('afterbegin', backBtn);
           const backBtnEl = document.getElementById('backBtn');
           if (backBtnEl) {
             if (currentStep === 0) {
