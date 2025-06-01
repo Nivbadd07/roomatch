@@ -30,15 +30,14 @@
     }
 
     .glass-card {
-      background: rgba(255,255,255,0.85);
-      backdrop-filter: blur(14px);
+      background: white;
       box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
       border-radius: 2rem;
       border: 1.5px solid rgba(118, 76, 138, 0.13);
       padding: 3rem 2.5rem 2.5rem 2.5rem;
-      max-width: 1000px;
+      max-width: 800px;
       width: 100%;
-      margin: 4rem auto 2rem auto;
+      margin: 8rem auto 2rem auto;
       position: relative;
       z-index: 2;
       display: flex;
@@ -47,9 +46,21 @@
       animation: fadeInUp 0.8s cubic-bezier(.4,1.7,.6,.97);
     }
 
-    @keyframes fadeInUp {
-      0% { opacity: 0; transform: translateY(40px); }
-      100% { opacity: 1; transform: translateY(0); }
+    .border-gradient-anim {
+      pointer-events: none;
+      border-radius: 2rem;
+      background: #764C8A;
+      opacity: 0.5;
+      filter: blur(10px);
+      animation: borderAnim 6s linear infinite alternate;
+      position: absolute;
+      top: -8px; left: -8px; right: -8px; bottom: -8px;
+      z-index: 0;
+    }
+
+    @keyframes borderAnim {
+      0% { opacity: 0.5; filter: blur(10px); }
+      100% { opacity: 0.8; filter: blur(18px); }
     }
 
     .main-title {
@@ -73,9 +84,7 @@
     }
 
     .glass-select, .glass-input, textarea {
-      background: #fff !important;
-      position: relative;
-      z-index: 1;
+      background: #ffffff;
       border: 2px solid #764C8A;
       border-radius: 1rem;
       padding: 0.9rem 1.2rem;
@@ -255,9 +264,11 @@
     }
 
     .section-title {
-      font-weight: bold;
+      font-size: 1.08rem;
+      font-weight: 700;
+      text-shadow: 0 1px 3px rgba(118, 76, 138, 0.08), 0 0.5px 0px #fff;
+      letter-spacing: 0.01em;
       color: #000;
-      font-size: 1.1rem;
       margin-bottom: 0.7rem;
       margin-top: 1.2rem;
       text-align: left;
@@ -284,20 +295,26 @@
     }
 
     .back-link {
-      color: #000;
+      color: #000 !important;
+      font-size: 1.1rem !important;
+      font-weight: bold !important;
       text-decoration: underline;
-      font-weight: 500;
-      font-size: 1rem;
+      margin-top: 1.5rem;
       display: flex;
       align-items: center;
       gap: 0.4rem;
-      margin-top: 1.5rem;
-      transition: color 0.2s;
       z-index: 2;
     }
 
     .back-link:hover {
-      color: #2d1b4d;
+      color: #2d1b4d !important;
+    }
+
+    .clearer-label {
+      font-size: 1.08rem;
+      font-weight: 700;
+      text-shadow: 0 1px 3px rgba(118, 76, 138, 0.08), 0 0.5px 0px #fff;
+      letter-spacing: 0.01em;
     }
 
     @media (max-width: 1200px) {
@@ -364,11 +381,13 @@
   </svg>
 
   <div class="centered-content">
-    <div class="main-title">
-      Upload Your Apartment <span style="font-size:1.2em;">🏠</span>
-    </div>
-    <div class="subtitle">
-      Let's find you the perfect roommate!
+    <div class="flex flex-col items-start w-full">
+      <div class="main-title">
+        Upload Your Apartment <span style="font-size:1.2em;"></span>
+      </div>
+      <div class="subtitle">
+        Let's find you the perfect roommate!
+      </div>
     </div>
 
     <div class="flex flex-wrap gap-4 w-full mb-4" style="flex-direction: row;">
@@ -478,9 +497,7 @@
       <i class="fas fa-check"></i> Upload Apartment
     </button>
 
-    <a href="apt-room.html" class="back-link">
-      <span style="font-size:1.2em;">←</span> Back
-    </a>
+    <a href="apt-room.html" class="block mx-auto mt-12 px-8 py-3 bg-purple-200 font-bold text-lg rounded-full text-center w-max" style="color:#101827;">Back</a>
   </div>
 
   <div id="successPopup" class="popup">
