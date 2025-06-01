@@ -110,18 +110,24 @@
       width: 100%;
       padding: 1.3rem;
       margin-bottom: 1.7rem;
-      border: 2px solid #e0d9ff;
+      border: none;
       border-radius: 1.3rem;
       font-size: 1.3rem;
       background: #f8f6fc;
       color: #541257;
-      transition: border 0.2s;
+      transition: all 0.2s;
       outline: none;
       box-shadow: 0 2px 8px rgba(162,59,177,0.06);
+      font-family: 'Rubik', sans-serif;
+    }
+    .onboard-input::placeholder, .onboard-select::placeholder {
+      font-family: 'Rubik', sans-serif;
+      color: #764C8A;
+      opacity: 0.7;
     }
     .onboard-input:focus, .onboard-select:focus {
-      border: 2px solid #764C8A;
       background: #f3e8ff;
+      box-shadow: 0 4px 12px rgba(162,59,177,0.12);
     }
     .onboard-btn,
     .back-btn {
@@ -389,7 +395,7 @@
     }
     .onboard-progress-bar-fill {
       height: 100%;
-      background: linear-gradient(90deg, #764C8A 0%, #e0d9ff 100%);
+      background: #764C8A;
       border-radius: 16px;
       box-shadow: 0 0 16px #764C8A55;
       width: 0%;

@@ -85,7 +85,7 @@
 
     .glass-select, .glass-input, textarea {
       background: #ffffff;
-      border: 2px solid #764C8A;
+      border: none;
       border-radius: 1rem;
       padding: 0.9rem 1.2rem;
       font-size: 1rem;
@@ -94,13 +94,12 @@
       width: 100%;
       box-shadow: 0 4px 12px rgba(118, 76, 138, 0.25);
       outline: none;
-      transition: border 0.2s, box-shadow 0.2s;
+      transition: all 0.2s;
     }
 
     .glass-select:focus, .glass-input:focus, textarea:focus {
-      border: 2px solid #764C8A;
-      box-shadow: 0 0 0 3px rgba(118, 76, 138, 0.2), 0 4px 12px rgba(118, 76, 138, 0.3);
       background: white;
+      box-shadow: 0 4px 16px rgba(118, 76, 138, 0.35);
     }
 
     .glass-select::placeholder, .glass-input::placeholder, textarea::placeholder {
