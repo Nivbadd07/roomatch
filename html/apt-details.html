@@ -19,7 +19,8 @@
       align-items: center;
       justify-content: center;
       position: relative;
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: auto;
       font-family: '101827', sans-serif;
     }
     body::before {
@@ -59,6 +60,9 @@
     .close-btn:hover {
       background: #f3e8ff;
     }
+    .accent { color: #764C8A; }
+    .bg-accent { background: #764C8A; }
+    .border-accent { border-color: #764C8A; }
   </style>
 </head>
 <body>
@@ -68,53 +72,37 @@
     </a>
     <!-- Apartment Details Content Start -->
     <div class="w-full">
-      <!-- תמונה ראשית -->
-      <div class="header-img rounded-2xl overflow-hidden mb-4 relative">
-        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c" alt="Apartment" class="w-full h-48 object-cover rounded-2xl" />
-        <div class="top-icons flex justify-end items-center absolute top-4 left-4 right-4 pointer-events-none">
-          <i class="fas fa-heart text-pink-400 pointer-events-auto"></i>
-        </div>
-        <div class="price-bubble absolute bottom-4 left-4 bg-purple-800 text-white px-4 py-2 rounded-full font-bold shadow">$1,200 / mo</div>
-      </div>
-
-      <div class="content" id="aptContent">
-        <!-- Dynamic apartment details will be rendered here by JS -->
-      </div>
-
-      <!-- כפתור מתוזמן -->
-      <button id="scheduleBtn" class="chat-btn w-full bg-purple-800 hover:bg-purple-900 text-white py-3 rounded-xl text-lg font-semibold shadow mb-2">SCHEDULE WITH</button>
-      
-      <!-- Schedule Modal -->
+      <div id="aptImages"></div>
+      <div class="content" id="aptContent"></div>
+      <button id="scheduleBtn" class="chat-btn w-full bg-accent hover:bg-purple-900 text-white py-3 rounded-xl text-lg font-semibold shadow mb-2">SCHEDULE WITH</button>
       <div id="scheduleModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-2xl p-6 shadow-lg w-80 relative">
           <button id="closeModal" class="absolute top-2 right-2 text-gray-400 hover:text-purple-700 text-xl">&times;</button>
           <div class="font-bold text-lg mb-2">Schedule a meeting</div>
           <label class="block mb-2 text-sm font-medium">Pick a date and time:</label>
           <input id="meetingDateTime" type="datetime-local" class="w-full border border-purple-200 rounded-lg px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-purple-300" />
-          <button id="addToGoogleCal" class="w-full bg-purple-800 hover:bg-purple-900 text-white py-2 rounded-lg font-semibold">Add to Google Calendar</button>
+          <button id="addToGoogleCal" class="w-full bg-accent hover:bg-purple-900 text-white py-2 rounded-lg font-semibold">Add to Google Calendar</button>
         </div>
       </div>
+      <!-- Future: Google Maps location here -->
+      <div id="map" style="width:100%;height:220px;margin-top:2rem;display:none;"></div>
     </div>
     <!-- Apartment Details Content End -->
   </div>
   <script>
-    // Helper to get query param
     function getQueryParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(param);
     }
-
     const SUPABASE_URL = 'https://vgkvkmpckneceqfggzes.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZna3ZrbXBja25lY2VxZmdnemVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1NDA0NjAsImV4cCI6MjA2MjExNjQ2MH0.1ZEMsUleNaBrePUuagdZAKL2gYA-9-vM9wrTIW8-tdU';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     async function fetchAndRenderApartment() {
       const aptId = getQueryParam('id');
       if (!aptId) {
         window.location.href = 'apt-feed.html';
         return;
       }
-      // Fetch apartment from Supabase
       const { data: apartmentData, error } = await supabaseClient
         .from('apartments')
         .select('*')
@@ -124,81 +112,71 @@
         document.getElementById('aptContent').innerHTML = '<div class="text-red-500">Apartment not found.</div>';
         return;
       }
-      // Format the apartment data for display
-      const apartment = {
-        title: apartmentData.address || 'Apartment Details',
-        price: `$${apartmentData.price_per_month || 'N/A'} / mo`,
-        mainImg: Array.isArray(apartmentData.image_urls) && apartmentData.image_urls.length > 0 
-          ? apartmentData.image_urls[0] 
-          : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c',
-        features: [
-          { icon: 'fa-ruler-combined', label: apartmentData.size || 'N/A' },
-          { icon: 'fa-bath', label: apartmentData.num_bathrooms ? `${apartmentData.num_bathrooms} baths` : 'N/A' },
-          { icon: 'fa-bed', label: apartmentData.num_rooms ? `${apartmentData.num_rooms} rooms` : 'N/A' }
-        ],
-        description: apartmentData.description || 'No description available.',
-        amenities: [
-          { icon: 'fa-wifi', label: 'WiFi' },
-          { icon: 'fa-snowflake', label: 'AC' },
-          { icon: 'fa-tv', label: 'TV' },
-          { icon: 'fa-dog', label: 'Pets' }
-        ],
-        photos: Array.isArray(apartmentData.image_urls) && apartmentData.image_urls.length > 0 
-          ? apartmentData.image_urls 
-          : [],
-        roommate: Array.isArray(apartmentData.roommate) && apartmentData.roommate.length > 0 ? apartmentData.roommate[0] : {
-          name: 'N/A', age: 'N/A', img: 'https://randomuser.me/api/portraits/men/75.jpg', role: '', about: ''
-        }
-      };
-      renderApartmentDetails(apartment);
-    }
-
-    function renderApartmentDetails(apt) {
-      document.getElementById('aptContent').innerHTML = `
-        <div class="header-img rounded-2xl overflow-hidden mb-4 relative">
-          <img src="${apt.mainImg}" alt="Apartment" class="w-full h-48 object-cover rounded-2xl" />
-          <div class="top-icons flex justify-end items-center absolute top-4 left-4 right-4 pointer-events-none">
-            <i class="fas fa-heart text-pink-400 pointer-events-auto"></i>
+      // Images
+      const images = Array.isArray(apartmentData.image_urls) ? apartmentData.image_urls : [];
+      let imagesHtml = '';
+      if (images.length > 0) {
+        imagesHtml = images.map((img, i) => `
+          <div class="header-img rounded-2xl overflow-hidden mb-4 relative">
+            <img src="${img}" alt="Apartment" class="w-full h-48 object-cover rounded-2xl" />
+            <div class="price-bubble absolute bottom-4 left-4 bg-accent text-white px-4 py-2 rounded-full font-bold shadow">${apartmentData.price_per_month ? '$' + apartmentData.price_per_month + ' / mo' : ''}</div>
           </div>
-          <div class="price-bubble absolute bottom-4 left-4 bg-purple-800 text-white px-4 py-2 rounded-full font-bold shadow">${apt.price}</div>
-        </div>
-        <div class="location-title text-xl font-bold mb-2">${apt.title}</div>
+        `).join('');
+      }
+      document.getElementById('aptImages').innerHTML = imagesHtml;
+      // Features
+      const features = [];
+      if (apartmentData.size) features.push({ icon: 'fa-ruler-combined', label: apartmentData.size });
+      if (apartmentData.num_bathrooms) features.push({ icon: 'fa-bath', label: apartmentData.num_bathrooms + ' baths' });
+      if (apartmentData.num_rooms) features.push({ icon: 'fa-bed', label: apartmentData.num_rooms + ' rooms' });
+      // Amenities
+      let amenities = [];
+      if (Array.isArray(apartmentData.amenities)) {
+        amenities = apartmentData.amenities.map(a => ({ icon: a.icon || 'fa-check', label: a.label || a }));
+      }
+      // Roommate
+      let roommate = null;
+      if (Array.isArray(apartmentData.roommate) && apartmentData.roommate.length > 0) {
+        roommate = apartmentData.roommate[0];
+      }
+      // Render
+      document.getElementById('aptContent').innerHTML = `
+        <div class="location-title text-xl font-bold mb-2 accent">${apartmentData.address || 'Apartment Details'}</div>
         <div class="features flex gap-6 text-gray-700 mb-4">
-          ${apt.features.map(f => `<div class='flex items-center gap-1'><i class='fas ${f.icon}'></i> ${f.label}</div>`).join('')}
+          ${features.map(f => `<div class='flex items-center gap-1'><i class='fas ${f.icon}'></i> ${f.label}</div>`).join('')}
         </div>
         <div class="section-title font-bold mb-1">Room description</div>
-        <div class="description text-sm mb-4">${apt.description}</div>
+        <div class="description text-sm mb-4">${apartmentData.description || 'No description available.'}</div>
+        ${amenities.length > 0 ? `
         <div class="section-title font-bold mb-1">Amenities</div>
-        <div class="see-all text-purple-600 text-right text-xs mb-1 cursor-pointer">See all</div>
         <div class="amenities flex gap-8 justify-start mb-6">
-          ${apt.amenities.map(a => `<div class='flex flex-col items-center text-purple-800'><i class='fas ${a.icon} fa-2x mb-1'></i><span class='text-xs'>${a.label}</span></div>`).join('')}
-        </div>
+          ${amenities.map(a => `<div class='flex flex-col items-center accent'><i class='fas ${a.icon} fa-2x mb-1'></i><span class='text-xs'>${a.label}</span></div>`).join('')}
+        </div>` : ''}
+        ${images.length > 1 ? `
         <div class="section-title font-bold mb-1">More photos</div>
-        <div class="see-all text-purple-600 text-right text-xs mb-1 cursor-pointer">See all</div>
         <div class="photos flex gap-3 mb-6">
-          ${apt.photos.map(p => `<img src='${p}' alt='photo' class='w-20 h-20 rounded-lg object-cover'/>`).join('')}
-        </div>
+          ${images.slice(1).map(p => `<img src='${p}' alt='photo' class='w-20 h-20 rounded-lg object-cover'/>`).join('')}
+        </div>` : ''}
+        ${roommate ? `
         <div class="section-title font-bold mb-1">About roommate</div>
         <div class="bg-purple-50 border border-purple-200 rounded-xl flex items-center gap-4 p-4 mb-4">
-          <img src="${apt.roommate.img}" alt="${apt.roommate.name}" class="w-14 h-14 rounded-full object-cover border-2 border-purple-200" />
+          <img src="${roommate.img || 'https://randomuser.me/api/portraits/men/75.jpg'}" alt="${roommate.name || ''}" class="w-14 h-14 rounded-full object-cover border-2 border-purple-200" />
           <div class="roommate-info">
-            <div class="name font-bold text-purple-900 text-lg">${apt.roommate.name}, ${apt.roommate.age}</div>
-            <div class="role text-xs text-gray-600">${apt.roommate.role}</div>
+            <div class="name font-bold accent text-lg">${roommate.name || ''}${roommate.age ? ', ' + roommate.age : ''}</div>
+            <div class="role text-xs text-gray-600">${roommate.role || ''}</div>
           </div>
         </div>
-        <div class="description text-sm mb-6">${apt.roommate.about}</div>
+        <div class="description text-sm mb-6">${roommate.about || ''}</div>
+        ` : ''}
       `;
     }
-
     fetchAndRenderApartment();
-
     // --- Schedule Modal Logic ---
     const scheduleBtn = document.getElementById('scheduleBtn');
     const scheduleModal = document.getElementById('scheduleModal');
     const closeModal = document.getElementById('closeModal');
     const addToGoogleCal = document.getElementById('addToGoogleCal');
     const meetingDateTime = document.getElementById('meetingDateTime');
-
     scheduleBtn.addEventListener('click', () => {
       scheduleModal.classList.remove('hidden');
     });
@@ -208,7 +186,6 @@
     scheduleModal.addEventListener('click', (e) => {
       if (e.target === scheduleModal) scheduleModal.classList.add('hidden');
     });
-
     addToGoogleCal.addEventListener('click', () => {
       const dt = meetingDateTime.value;
       if (!dt) {
@@ -221,11 +198,13 @@
       function toGCalFormat(date) {
         return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
       }
+      // Use address as location
+      const aptAddress = document.querySelector('.location-title')?.textContent || '';
+      const title = encodeURIComponent(`Meeting at ${aptAddress}`);
+      const details = encodeURIComponent(`Apartment: ${aptAddress}`);
+      const location = encodeURIComponent(aptAddress);
       const startStr = toGCalFormat(start);
       const endStr = toGCalFormat(end);
-      const title = encodeURIComponent(`Meet with ${apartment.roommate.name} at ${apartment.title}`);
-      const details = encodeURIComponent(`Apartment: ${apartment.title}\nRoommate: ${apartment.roommate.name}, ${apartment.roommate.role}\n${apartment.roommate.about}`);
-      const location = encodeURIComponent(apartment.title);
       const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startStr}/${endStr}&details=${details}&location=${location}`;
       window.open(url, '_blank');
       scheduleModal.classList.add('hidden');
