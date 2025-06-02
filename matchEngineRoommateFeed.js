@@ -51,7 +51,7 @@ export async function calculateRoommateFeedMatches(userId) {
       const randomUsers = await User.findAll({
         where: { user_type: "Looking for Apt" },
         order: sequelize.random(),
-        limit: 6
+        limit: 9
       });
       return randomUsers.map(user => ({
         roommate: {
@@ -178,7 +178,7 @@ export async function calculateRoommateFeedMatches(userId) {
     results.sort((a, b) => b.match_score - a.match_score);
     console.log("Results before fallback:", results.length);
     
-    while (results.length < 6) {
+    while (results.length < 9) {
       // Add random users (score 0) if not enough
       const unused = potentialRoommates.filter(user => 
         !results.some(r => r.roommate.id === user.id) && user.id !== userId
@@ -203,16 +203,16 @@ export async function calculateRoommateFeedMatches(userId) {
       console.log("Added fallback roommate:", rand.id);
     }
 
-    console.log("Final results:", results.slice(0, 6).map(r => ({ id: r.roommate.id, score: r.match_score })));
-    return results.slice(0, 6);
+    console.log("Final results:", results.slice(0, 9).map(r => ({ id: r.roommate.id, score: r.match_score })));
+    return results.slice(0, 9);
   } catch (err) {
     console.log("Error in roommate match engine:", err);
-    // Fallback: return 6 random users looking for apartments
+    // Fallback: return 9 random users looking for apartments
     try {
       const randomUsers = await User.findAll({
         where: { user_type: "Looking for Apt" },
         order: sequelize.random(),
-        limit: 6
+        limit: 9
       });
       return randomUsers.map(user => ({
         roommate: {
