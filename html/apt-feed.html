@@ -181,28 +181,34 @@
         card.innerHTML = `
           ${matchHtml}
           <img src="${imgUrl}" alt="Apartment photo" class="w-full aspect-[4/3] object-cover rounded-t-3xl border-b-2" style="border-color:#764C8A;" loading="lazy" onerror="this.onerror=null;this.src='${placeholderUrl}';">
-          <div class="px-10 pt-8 pb-8">
-            <div class="text-2xl font-bold" style="color:#764C8A; margin-bottom:0.5em; display:flex;align-items:center;gap:0.5em;">
-              ${apartment.price_per_month ? '$' + apartment.price_per_month : ''} <span class="font-normal text-gray-500 text-xl">/ mo</span>
+          <div class="px-10 pt-8 pb-8 flex flex-col h-full">
+            <div class="flex-1 flex flex-col">
+              <div class="text-2xl font-bold" style="color:#764C8A; margin-bottom:0.5em; display:flex;align-items:center;gap:0.5em;">
+                ${apartment.price_per_month ? '$' + apartment.price_per_month : ''} <span class="font-normal text-gray-500 text-xl">/ mo</span>
+              </div>
+              <div class="text-lg text-gray-700 mb-1">
+                <strong>${apartment.city ? `<a href='location.html' class='text-purple-800 hover:underline cursor-pointer'>${apartment.city}</a>` : ''}</strong>
+                ${apartment.area ? ', ' + apartment.area : ''}
+              </div>
+              ${address}
+              <div class="flex flex-wrap gap-3 mb-3">
+                ${featuresHtml}
+              </div>
+              <div class="text-base text-gray-600 mb-2">
+                ${apartment.contract_type ? '<i class=\'fas fa-file-signature\'></i> ' + apartment.contract_type + ' | ' : ''}
+                ${apartment.num_rooms ? '<i class=\'fas fa-door-open\'></i> ' + apartment.num_rooms + ' rooms | ' : ''}
+                ${entryDate ? '<i class=\'fas fa-calendar-alt\'></i> Entry: ' + entryDate : ''}
+              </div>
+              ${apartment.description ? `<div class='text-base text-gray-700 mb-3'>${apartment.description}</div>` : ''}
             </div>
-            <div class="text-lg text-gray-700 mb-1">
-              <strong>${apartment.city ? `<a href='location.html' class='text-purple-800 hover:underline cursor-pointer'>${apartment.city}</a>` : ''}</strong>
-              ${apartment.area ? ', ' + apartment.area : ''}
+            <div class="mt-auto flex flex-col gap-2">
+              <button class="w-full bg-[#764C8A] hover:bg-[#5e3c6e] text-white py-3 rounded-xl text-lg font-semibold shadow schedule-tour-btn" data-apt="${idx}" type="button">
+                <i class=\"fa-solid fa-calendar-check mr-1\"></i> Schedule Tour
+              </button>
+              <a href="chat-amit.html?return=" + encodeURIComponent(window.location.pathname) + "" class="w-full flex justify-center items-center border" style="border-color:#764C8A;color:#764C8A;background:#fde2f3;hover:bg-purple-50;py-3;border-radius:1em;font-size:1.1em;font-weight:600;">
+                <i class="fa-regular fa-comment-dots mr-2"></i> Chat
+              </a>
             </div>
-            ${address}
-            <div class="flex flex-wrap gap-3 mb-3">
-              ${featuresHtml}
-            </div>
-            <div class="text-base text-gray-600 mb-2">
-              ${apartment.contract_type ? '<i class=\'fas fa-file-signature\'></i> ' + apartment.contract_type + ' | ' : ''}
-              ${apartment.num_rooms ? '<i class=\'fas fa-door-open\'></i> ' + apartment.num_rooms + ' rooms | ' : ''}
-              ${entryDate ? '<i class=\'fas fa-calendar-alt\'></i> Entry: ' + entryDate : ''}
-            </div>
-            ${apartment.description ? `<div class='text-base text-gray-700 mb-3'>${apartment.description}</div>` : ''}
-            <button class="mt-2 w-full bg-[#764C8A] hover:bg-[#5e3c6e] text-white py-3 rounded-xl text-lg font-semibold shadow schedule-tour-btn" data-apt="${idx}" type="button">\n<i class=\"fa-solid fa-calendar-check mr-1\"></i> Schedule Tour\n</button>
-            <a href="chat-amit.html?return=" + encodeURIComponent(window.location.pathname) + "" class="mt-2 w-full flex justify-center items-center border" style="border-color:#764C8A;color:#764C8A;background:#fde2f3;hover:bg-purple-50;py-3;border-radius:1em;font-size:1.1em;font-weight:600;margin-top:0.5rem;">
-              <i class="fa-regular fa-comment-dots mr-2"></i> Chat
-            </a>
           </div>
         `;
         card.addEventListener('click', function(e) {
