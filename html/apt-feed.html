@@ -175,13 +175,13 @@
         }
         const matchHtml = `<div style='position:absolute;top:18px;right:18px;z-index:2;'><span style='background:#fde2f3;color:#764C8A;font-weight:700;padding:0.5em 1em;border-radius:1.2em;font-size:1.1em;'>${matchPercent}% Match</span></div>`;
         const card = document.createElement('div');
-        card.className = 'relative w-full min-h-[400px] rounded-3xl shadow-2xl overflow-hidden border-2 cursor-pointer';
+        card.className = 'relative w-full min-h-[400px] h-full flex flex-col rounded-3xl shadow-2xl overflow-hidden border-2 cursor-pointer';
         card.style.borderColor = '#764C8A';
         card.style.background = 'white';
         card.innerHTML = `
           ${matchHtml}
           <img src="${imgUrl}" alt="Apartment photo" class="w-full aspect-[4/3] object-cover rounded-t-3xl border-b-2" style="border-color:#764C8A;" loading="lazy" onerror="this.onerror=null;this.src='${placeholderUrl}';">
-          <div class="px-10 pt-8 pb-8 flex flex-col h-full">
+          <div class="px-10 pt-8 pb-8 flex flex-col flex-1 h-full">
             <div class="flex-1 flex flex-col">
               <div class="text-2xl font-bold" style="color:#764C8A; margin-bottom:0.5em; display:flex;align-items:center;gap:0.5em;">
                 ${apartment.price_per_month ? '$' + apartment.price_per_month : ''} <span class="font-normal text-gray-500 text-xl">/ mo</span>
