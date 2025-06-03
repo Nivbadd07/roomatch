@@ -344,6 +344,25 @@
       window.location.href = 'index.html';
     }
 
+    // Initialize modal handlers
+    document.addEventListener('DOMContentLoaded', function() {
+      const confirmModal = document.getElementById('confirmModal');
+      const confirmOk = document.getElementById('confirmOk');
+      const confirmCancel = document.getElementById('confirmCancel');
+
+      // Handle cancellation
+      confirmCancel.addEventListener('click', () => {
+        confirmModal.classList.add('hidden');
+      });
+
+      // Close modal when clicking outside
+      confirmModal.addEventListener('click', (e) => {
+        if (e.target === confirmModal) {
+          confirmModal.classList.add('hidden');
+        }
+      });
+    });
+
     async function handleFeedToggle(event) {
       event.preventDefault();
       const userId = await getUserId();
@@ -354,10 +373,10 @@
 
       // Show confirmation modal
       const confirmModal = document.getElementById('confirmModal');
-      confirmModal.classList.remove('hidden');
+      const confirmOk = document.getElementById('confirmOk');
 
-      // Handle confirmation
-      document.getElementById('confirmOk').onclick = async () => {
+      // Set up the confirmation handler
+      confirmOk.onclick = async () => {
         try {
           // Update user_type in the database
           const { error } = await supabaseClient
@@ -375,17 +394,8 @@
         }
       };
 
-      // Handle cancellation
-      document.getElementById('confirmCancel').onclick = () => {
-        confirmModal.classList.add('hidden');
-      };
-
-      // Close modal when clicking outside
-      confirmModal.onclick = (e) => {
-        if (e.target === confirmModal) {
-          confirmModal.classList.add('hidden');
-        }
-      };
+      // Show the modal
+      confirmModal.classList.remove('hidden');
     }
   </script>
 
