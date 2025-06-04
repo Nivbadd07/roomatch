@@ -58,7 +58,7 @@ export async function calculateApartmentFeedMatches(userId) {
         }
         if (!Array.isArray(apt.image_urls)) apt.image_urls = [];
       });
-      return randomApts.map(apt => ({ apartment: apt, score: 0 }));
+      return randomApts.map(apt => ({ apartment: apt, match_score: 50 }));
     }
 
     for (const apt of apartments) {
@@ -130,22 +130,22 @@ export async function calculateApartmentFeedMatches(userId) {
 
       // 5. Combine scores (60% apartment, 40% roommate)
       const finalScore = Math.round((apartmentMatch * 0.6 + roommateScore * 0.4) * 100);
-      results.push({ apartment: apt, score: finalScore });
+      results.push({ apartment: apt, match_score: finalScore });
       console.log("Pushed apartment:", apt.id, "score:", finalScore);
     }
 
     // Sort by score descending, take top 4, fill with randoms if needed
-    results.sort((a, b) => b.score - a.score);
+    results.sort((a, b) => b.match_score - a.match_score);
     console.log("Results before fallback:", results.length);
     while (results.length < 6) {
       // Add random apartments (score 0) if not enough
       const unused = apartments.filter(apt => !results.some(r => r.apartment.id === apt.id));
       if (unused.length === 0) break;
       const rand = unused[Math.floor(Math.random() * unused.length)];
-      results.push({ apartment: rand, score: 0 });
+      results.push({ apartment: rand, match_score: 50 }); // Default 50% for random matches
       console.log("Added fallback apartment:", rand.id);
     }
-    console.log("Final results:", results.slice(0, 6).map(r => ({ id: r.apartment.id, score: r.score })));
+    console.log("Final results:", results.slice(0, 6).map(r => ({ id: r.apartment.id, score: r.match_score })));
     return results.slice(0, 6);
   } catch (err) {
     console.log("Error in match engine:", err);
@@ -153,7 +153,7 @@ export async function calculateApartmentFeedMatches(userId) {
     try {
       const randomApts = await Apartment.findAll({ order: sequelize.random(), limit: 6 });
       console.log("Catch fallback random apartments:", randomApts.map(a => a.id));
-      return randomApts.map(apt => ({ apartment: apt, score: 0 }));
+      return randomApts.map(apt => ({ apartment: apt, match_score: 50 })); // Default 50% for random matches
     } catch (fallbackErr) {
       console.log("Error in fallback:", fallbackErr);
       return [];
