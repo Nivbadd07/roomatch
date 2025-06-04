@@ -365,7 +365,9 @@
 
     async function handleResetUserType(event) {
       event.preventDefault();
+      console.log("Reset button clicked");
       const userId = await getUserId();
+      console.log("User ID:", userId);
       if (!userId) {
         alert('Please log in to continue');
         return;
@@ -375,9 +377,11 @@
         .update({ user_type: null })
         .eq('id', userId);
       if (error) {
+        console.error("Supabase error:", error);
         alert('Failed to reset user type. Please try again.');
         return;
       }
+      console.log("User type reset, redirecting...");
       window.location.href = 'apt-room.html';
     }
   </script>
