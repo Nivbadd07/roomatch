@@ -24,6 +24,28 @@ const APARTMENT_WEIGHTS = {
   preferred_date_of_entry: 5
 };
 
+function boolMatch(a, b, weight, tolerateNeutral = false) {
+  if (a === b) return weight;                           // perfect match
+  if (tolerateNeutral && (a === null || b === null))    // one side "doesn't care"
+    return weight * 0.5;
+  return 0;
+}
+
+function numericDiffScore(a, b, maxDiff, weight) {
+  const diff = Math.abs(a - b);
+  if (diff <= maxDiff)       return weight;      // full credit
+  if (diff === maxDiff + 1)  return weight * 0.5;// partial credit
+  return 0;
+}
+
+function linearWindowScore(value, min, max, weight) {
+  if (value < min || value > max) return 0;
+  const mid   = (min + max) / 2;
+  const range = (max - min) / 2;
+  const decay = Math.abs(value - mid) / range;   // 0 at center, 1 at edges
+  return weight * (1 - decay);
+}
+
 export async function calculateRoommateFeedMatches(userId) {
   try {
     // 1. Fetch the current user's preferences and apartment
@@ -80,17 +102,31 @@ export async function calculateRoommateFeedMatches(userId) {
       const roommatePref = potentialRoommate.preferences;
 
       if (roommatePref) {
-        for (const key of Object.keys(ROOMMATE_WEIGHTS)) {
-          roommateMax += ROOMMATE_WEIGHTS[key];
-          if (key === 'cleanliness_importance') {
-            if (
-              typeof userPref.cleanliness_importance === 'number' &&
-              typeof roommatePref.cleanliness_importance === 'number' &&
-              Math.abs(userPref.cleanliness_importance - roommatePref.cleanliness_importance) <= 1
-            ) roommateScore += ROOMMATE_WEIGHTS[key];
-          } else if (userPref[key] && roommatePref[key] && userPref[key] === roommatePref[key]) {
-            roommateScore += ROOMMATE_WEIGHTS[key];
-          }
+        // Cleanliness importance (numeric ± 1 full, ± 2 half)
+        roommateMax   += ROOMMATE_WEIGHTS.cleanliness_importance;
+        roommateScore += numericDiffScore(
+          userPref.cleanliness_importance,
+          roommatePref.cleanliness_importance,
+          1,
+          ROOMMATE_WEIGHTS.cleanliness_importance
+        );
+
+        // Boolean prefs with optional tolerance
+        const BOOLS = [
+          ['works_from_home', false],
+          ['shares_cleaning', false],
+          ['has_or_wants_pet', false],
+          ['smokes', false],
+          ['ok_with_smoker',  true]
+        ];
+        for (const [key, tolerate] of BOOLS) {
+          roommateMax   += ROOMMATE_WEIGHTS[key];
+          roommateScore += boolMatch(
+            userPref[key],
+            roommatePref[key],
+            ROOMMATE_WEIGHTS[key],
+            tolerate
+          );
         }
       }
       const roommateMatch = roommateMax > 0 ? (roommateScore / roommateMax) : 0;
@@ -140,25 +176,31 @@ export async function calculateRoommateFeedMatches(userId) {
         if (
           typeof aptPref.preferred_price_min === 'number' &&
           typeof aptPref.preferred_price_max === 'number' &&
-          typeof userApt.price_per_month === 'number' &&
-          userApt.price_per_month >= aptPref.preferred_price_min &&
-          userApt.price_per_month <= aptPref.preferred_price_max
+          typeof userApt.price_per_month === 'number'
         ) {
-          aptScore += APARTMENT_WEIGHTS.preferred_price;
+          aptScore += linearWindowScore(
+            userApt.price_per_month,
+            aptPref.preferred_price_min,
+            aptPref.preferred_price_max,
+            APARTMENT_WEIGHTS.preferred_price
+          );
         }
 
         // Date of entry match
         aptMax += APARTMENT_WEIGHTS.preferred_date_of_entry;
-        if (aptPref.preferred_date_of_entry && userApt.date_of_entry && 
-            new Date(userApt.date_of_entry) <= new Date(aptPref.preferred_date_of_entry)) {
-          aptScore += APARTMENT_WEIGHTS.preferred_date_of_entry;
+        if (aptPref.preferred_date_of_entry && userApt.date_of_entry) {
+          const diffDays = (new Date(userApt.date_of_entry) -
+                          new Date(aptPref.preferred_date_of_entry)) / 864e5;
+          if (diffDays <= 0)        aptScore += APARTMENT_WEIGHTS.preferred_date_of_entry;
+          else if (diffDays <= 30)  aptScore += APARTMENT_WEIGHTS.preferred_date_of_entry * 0.5;
         }
       }
 
       const apartmentMatch = aptMax > 0 ? (aptScore / aptMax) : 0;
 
-      // 5. Combine scores (50% roommate preferences, 50% apartment preferences)
-      const finalScore = Math.round((roommateMatch * 0.5 + apartmentMatch * 0.5) * 100);
+      // 5. Combine scores (70% roommate preferences, 30% apartment preferences)
+      const raw = roommateMatch * 0.7 + apartmentMatch * 0.3;  // 0-1
+      const finalScore = Math.round(40 + 60 * raw);            // 40-100
       results.push({
         roommate: {
           id: potentialRoommate.id,
