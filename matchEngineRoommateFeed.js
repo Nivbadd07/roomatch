@@ -15,11 +15,11 @@ const ROOMMATE_WEIGHTS = {
 
 // Weights for apartment preferences matching
 const APARTMENT_WEIGHTS = {
-  preferred_city: 25,          // Higher weight for city
+  preferred_city: 30,          // Higher weight for city
   preferred_area: 10,
-  preferred_contract_type: 20, // Higher weight for contract type
-  preferred_features: 20,      // Higher weight for features
-  preferred_num_rooms: 10,
+  preferred_contract_type: 15, // Higher weight for contract type
+  preferred_features: 25,      // Higher weight for features
+  preferred_num_rooms: 5,
   preferred_price: 10,
   preferred_date_of_entry: 5
 };
@@ -166,6 +166,9 @@ export async function calculateRoommateFeedMatches(userId) {
           email: potentialRoommate.email,
           profile_image_url: potentialRoommate.profile_image_url,
           age: potentialRoommate.age,
+          gender: potentialRoommate.gender,
+          interests: potentialRoommate.interests,
+          bio: potentialRoommate.bio,
           preferences: roommatePref,
           apartmentPreferences: aptPref
         },
