@@ -358,26 +358,37 @@
       });
     });
 
-    async function handleResetUserType(event) {
+    function handleResetUserType(event) {
       event.preventDefault();
-      console.log("Reset button clicked");
-      const userId = await getUserId();
-      console.log("User ID:", userId);
-      if (!userId) {
-        alert('Please log in to continue');
-        return;
-      }
-      const { error } = await supabaseClient
-        .from('users')
-        .update({ user_type: null })
-        .eq('id', userId);
-      if (error) {
-        console.error("Supabase error:", error);
-        alert('Failed to reset user type. Please try again.');
-        return;
-      }
-      console.log("User type reset, redirecting...");
-      window.location.href = 'apt-room.html';
+      // Show the confirmation modal
+      const confirmModal = document.getElementById('confirmModal');
+      const confirmOk = document.getElementById('confirmOk');
+      const confirmCancel = document.getElementById('confirmCancel');
+
+      confirmModal.classList.remove('hidden');
+
+      // Remove any previous handlers to avoid stacking
+      confirmOk.onclick = async () => {
+        confirmModal.classList.add('hidden');
+        const userId = await getUserId();
+        if (!userId) {
+          alert('Please log in to continue');
+          return;
+        }
+        const { error } = await supabaseClient
+          .from('users')
+          .update({ user_type: null })
+          .eq('id', userId);
+        if (error) {
+          alert('Failed to reset user type. Please try again.');
+          return;
+        }
+        window.location.href = 'apt-room.html';
+      };
+
+      confirmCancel.onclick = () => {
+        confirmModal.classList.add('hidden');
+      };
     }
   </script>
 
