@@ -214,7 +214,12 @@
       <!-- Left Column -->
       <div class="left-column">
         <div id="aptImages" class="section"></div>
-        <button id="scheduleBtn" class="chat-btn w-full bg-accent hover:bg-purple-900 text-white py-3 rounded-xl text-lg font-semibold shadow">SCHEDULE WITH</button>
+        <div class="flex gap-4">
+          <button id="scheduleBtn" class="chat-btn w-full bg-accent hover:bg-purple-900 text-white py-3 rounded-xl text-lg font-semibold shadow">SCHEDULE WITH</button>
+          <button id="mapsBtn" class="chat-btn bg-white hover:bg-gray-100 rounded-xl shadow flex items-center justify-center px-4 py-3" style="height:auto;">
+            <img src="https://storage.googleapis.com/roomatch-prod-static-site/2222222.png" alt="Google Maps" class="w-8 h-8 object-contain" />
+          </button>
+        </div>
       </div>
       
       <!-- Right Column -->
@@ -387,6 +392,17 @@
       const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startStr}/${endStr}&details=${details}&location=${location}`;
       window.open(url, '_blank');
       scheduleModal.classList.add('hidden');
+    });
+
+    // Google Maps button click handler
+    document.getElementById('mapsBtn').addEventListener('click', () => {
+      const aptAddress = document.querySelector('.location-title')?.textContent || '';
+      if (!aptAddress) {
+        alert('No address available for this apartment.');
+        return;
+      }
+      const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(aptAddress)}`;
+      window.open(mapsUrl, '_blank');
     });
   </script>
 </body>
