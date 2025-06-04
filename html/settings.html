@@ -8,86 +8,391 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body { background: #F2F4F5; min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Rubik', sans-serif; }
-    .settings-card { background: white; border-radius: 1.5rem; box-shadow: 0 8px 32px rgba(31, 38, 135, 0.18); padding: 2.5rem 2rem; max-width: 420px; width: 100%; }
-    .settings-title { font-size: 2.2rem; font-weight: 900; color: #764C8A; text-align: center; margin-bottom: 1.2rem; }
-    .settings-label { color: #764C8A; font-weight: 600; margin-bottom: 0.2rem; }
-    .settings-value { color: #2d1b4d; font-size: 1.1rem; margin-bottom: 1.1rem; }
-    .settings-avatar { width: 110px; height: 110px; border-radius: 1rem; object-fit: cover; margin: 0 auto 1.2rem auto; box-shadow: 0 2px 12px #e0d9ff; }
-    .settings-interests span { display: inline-block; background: #e0d9ff; color: #764C8A; border-radius: 1rem; padding: 0.4rem 1.1rem; margin: 0.2rem 0.3rem 0.2rem 0; font-size: 1.1rem; }
-    .settings-btn { width: 100%; background: #764C8A; color: white; border: none; border-radius: 1rem; padding: 1rem 0; font-size: 1.2rem; font-weight: 700; margin-top: 1.5rem; cursor: pointer; transition: background 0.2s; }
-    .settings-btn:hover { background: #5e3c6e; }
-    .settings-back { color: #764C8A; font-weight: 600; cursor: pointer; margin-bottom: 1.5rem; display: inline-block; }
-    @media (max-width: 600px) { .settings-card { padding: 1.2rem 0.5rem; } }
+    body { 
+      background: #F2F4F5; 
+      min-height: 100vh; 
+      font-family: 'Rubik', sans-serif;
+      padding: 2rem;
+    }
+    .settings-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .settings-card { 
+      background: white; 
+      border-radius: 1.5rem; 
+      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.18); 
+      padding: 2.5rem; 
+      width: 100%;
+    }
+    .settings-title { 
+      font-size: 2.2rem; 
+      font-weight: 900; 
+      color: #764C8A; 
+      text-align: center; 
+      margin-bottom: 1.2rem; 
+    }
+    .settings-section {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 1.5rem 0;
+    }
+    .settings-section:last-child {
+      border-bottom: none;
+    }
+    .settings-label { 
+      color: #764C8A; 
+      font-weight: 600; 
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .settings-value { 
+      color: #2d1b4d; 
+      font-size: 1.1rem; 
+      margin-bottom: 1.1rem;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      background: #f9fafb;
+    }
+    .settings-value.editing {
+      background: white;
+      border: 1px solid #e5e7eb;
+    }
+    .settings-avatar { 
+      width: 150px; 
+      height: 150px; 
+      border-radius: 1rem; 
+      object-fit: cover; 
+      margin: 0 auto 1.2rem auto; 
+      box-shadow: 0 2px 12px #e0d9ff;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .settings-avatar:hover {
+      transform: scale(1.05);
+    }
+    .settings-interests span { 
+      display: inline-block; 
+      background: #e0d9ff; 
+      color: #764C8A; 
+      border-radius: 1rem; 
+      padding: 0.4rem 1.1rem; 
+      margin: 0.2rem 0.3rem 0.2rem 0; 
+      font-size: 1.1rem;
+    }
+    .settings-btn { 
+      background: #764C8A; 
+      color: white; 
+      border: none; 
+      border-radius: 1rem; 
+      padding: 0.75rem 1.5rem; 
+      font-size: 1rem; 
+      font-weight: 600; 
+      cursor: pointer; 
+      transition: all 0.2s;
+    }
+    .settings-btn:hover { 
+      background: #5e3c6e;
+      transform: translateY(-1px);
+    }
+    .settings-btn.secondary {
+      background: #e5e7eb;
+      color: #4b5563;
+    }
+    .settings-btn.secondary:hover {
+      background: #d1d5db;
+    }
+    .settings-back { 
+      color: #764C8A; 
+      font-weight: 600; 
+      cursor: pointer; 
+      margin-bottom: 1.5rem; 
+      display: inline-block;
+      transition: color 0.2s;
+    }
+    .settings-back:hover {
+      color: #5e3c6e;
+    }
+    .edit-icon {
+      cursor: pointer;
+      color: #764C8A;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    .edit-icon:hover {
+      opacity: 1;
+    }
+    .save-cancel-buttons {
+      display: none;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .save-cancel-buttons.visible {
+      display: flex;
+    }
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+      .settings-card {
+        padding: 1.5rem;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="settings-card">
-    <div class="flex items-center justify-center mb-4">
-      <img src="https://storage.googleapis.com/roomatch-prod-static-site/logo.png" alt="RooMatch Logo" class="w-10 h-10 mr-2" onerror="this.style.display='none'"/>
-      <span class="text-3xl font-extrabold text-purple-700 tracking-tight">RooMatch</span>
+  <div class="settings-container">
+    <div class="settings-card">
+      <div class="flex items-center justify-center mb-4">
+        <img src="https://storage.googleapis.com/roomatch-prod-static-site/logo.png" alt="RooMatch Logo" class="w-10 h-10 mr-2" onerror="this.style.display='none'"/>
+        <span class="text-3xl font-extrabold text-purple-700 tracking-tight">RooMatch</span>
+      </div>
+      <div class="settings-title">User Settings</div>
+      <div class="settings-back" onclick="window.history.back()">&larr; Back</div>
+      
+      <div class="flex flex-col items-center mb-8">
+        <img id="userAvatar" class="settings-avatar" src="" alt="Profile" style="display:none;" onclick="document.getElementById('avatarInput').click()"/>
+        <input type="file" id="avatarInput" accept="image/*" style="display: none" onchange="handleAvatarChange(event)"/>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-label">
+          Name
+          <span class="edit-icon" onclick="toggleEdit('name')">✏️</span>
+        </div>
+        <div class="settings-value" id="nameValue">Loading...</div>
+        <div class="save-cancel-buttons" id="nameButtons">
+          <button class="settings-btn" onclick="saveEdit('name')">Save</button>
+          <button class="settings-btn secondary" onclick="cancelEdit('name')">Cancel</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-label">
+          Email
+          <span class="edit-icon" onclick="toggleEdit('email')">✏️</span>
+        </div>
+        <div class="settings-value" id="emailValue">Loading...</div>
+        <div class="save-cancel-buttons" id="emailButtons">
+          <button class="settings-btn" onclick="saveEdit('email')">Save</button>
+          <button class="settings-btn secondary" onclick="cancelEdit('email')">Cancel</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-label">
+          Age
+          <span class="edit-icon" onclick="toggleEdit('age')">✏️</span>
+        </div>
+        <div class="settings-value" id="ageValue">Loading...</div>
+        <div class="save-cancel-buttons" id="ageButtons">
+          <button class="settings-btn" onclick="saveEdit('age')">Save</button>
+          <button class="settings-btn secondary" onclick="cancelEdit('age')">Cancel</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-label">
+          Gender
+          <span class="edit-icon" onclick="toggleEdit('gender')">✏️</span>
+        </div>
+        <div class="settings-value" id="genderValue">Loading...</div>
+        <div class="save-cancel-buttons" id="genderButtons">
+          <button class="settings-btn" onclick="saveEdit('gender')">Save</button>
+          <button class="settings-btn secondary" onclick="cancelEdit('gender')">Cancel</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-label">
+          Bio
+          <span class="edit-icon" onclick="toggleEdit('bio')">✏️</span>
+        </div>
+        <div class="settings-value" id="bioValue">Loading...</div>
+        <div class="save-cancel-buttons" id="bioButtons">
+          <button class="settings-btn" onclick="saveEdit('bio')">Save</button>
+          <button class="settings-btn secondary" onclick="cancelEdit('bio')">Cancel</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-label">
+          Interests
+          <span class="edit-icon" onclick="toggleEdit('interests')">✏️</span>
+        </div>
+        <div class="settings-value" id="interestsValue">Loading...</div>
+        <div class="save-cancel-buttons" id="interestsButtons">
+          <button class="settings-btn" onclick="saveEdit('interests')">Save</button>
+          <button class="settings-btn secondary" onclick="cancelEdit('interests')">Cancel</button>
+        </div>
+      </div>
+
+      <button class="settings-btn w-full mt-8" id="logoutBtn">Log Out</button>
     </div>
-    <div class="settings-title">User Settings</div>
-    <div class="settings-back" onclick="window.history.back()">&larr; Back</div>
-    <div class="flex flex-col items-center">
-      <img id="userAvatar" class="settings-avatar" src="" alt="Profile" style="display:none;"/>
-    </div>
-    <div class="settings-label">Name</div>
-    <div class="settings-value" id="userName">Loading...</div>
-    <div class="settings-label">Email</div>
-    <div class="settings-value" id="userEmail">Loading...</div>
-    <div class="settings-label">Age</div>
-    <div class="settings-value" id="userAge">Loading...</div>
-    <div class="settings-label">Gender</div>
-    <div class="settings-value" id="userGender">Loading...</div>
-    <div class="settings-label">Bio</div>
-    <div class="settings-value" id="userBio">Loading...</div>
-    <div class="settings-label">Interests</div>
-    <div class="settings-value settings-interests" id="userInterests">Loading...</div>
-    <button class="settings-btn" id="logoutBtn">Log Out</button>
   </div>
+
   <script>
     const supabaseClient = window.supabase.createClient(
       'https://vgkvkmpckneceqfggzes.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZna3ZrbXBja25lY2VxZmdnemVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1NDA0NjAsImV4cCI6MjA2MjExNjQ2MH0.1ZEMsUleNaBrePUuagdZAKL2gYA-9-vM9wrTIW8-tdU'
     );
+
+    let currentUser = null;
+    let originalValues = {};
+
     async function loadUserInfo() {
       const { data: { user } } = await supabaseClient.auth.getUser();
       if (!user) {
-        document.getElementById('userName').textContent = 'Not logged in';
-        document.getElementById('userEmail').textContent = '-';
-        document.getElementById('userAge').textContent = '-';
-        document.getElementById('userGender').textContent = '-';
-        document.getElementById('userBio').textContent = '-';
-        document.getElementById('userInterests').textContent = '-';
+        window.location.href = 'index.html';
         return;
       }
-      // Fetch user profile from users table
+      currentUser = user;
+
       const { data: userProfile } = await supabaseClient
         .from('users')
         .select('*')
         .eq('auth_id', user.id)
         .single();
+
       if (!userProfile) {
-        document.getElementById('userName').textContent = 'Not found';
+        alert('User profile not found');
         return;
       }
-      document.getElementById('userName').textContent = userProfile.full_name || '-';
-      document.getElementById('userEmail').textContent = userProfile.email || '-';
-      document.getElementById('userAge').textContent = userProfile.age || '-';
-      document.getElementById('userGender').textContent = userProfile.gender || '-';
-      document.getElementById('userBio').textContent = userProfile.bio || '-';
+
+      // Store original values
+      originalValues = {
+        name: userProfile.full_name || '',
+        email: userProfile.email || '',
+        age: userProfile.age || '',
+        gender: userProfile.gender || '',
+        bio: userProfile.bio || '',
+        interests: userProfile.interests || []
+      };
+
+      // Update UI
+      updateField('name', originalValues.name);
+      updateField('email', originalValues.email);
+      updateField('age', originalValues.age);
+      updateField('gender', originalValues.gender);
+      updateField('bio', originalValues.bio);
+      updateField('interests', originalValues.interests);
+
       if (userProfile.profile_image_url) {
         const avatar = document.getElementById('userAvatar');
         avatar.src = userProfile.profile_image_url;
         avatar.style.display = 'block';
       }
-      if (userProfile.interests && Array.isArray(userProfile.interests)) {
-        document.getElementById('userInterests').innerHTML = userProfile.interests.map(i => `<span>${i}</span>`).join('');
+    }
+
+    function updateField(field, value) {
+      const element = document.getElementById(`${field}Value`);
+      if (field === 'interests') {
+        let interestsArr = [];
+        if (Array.isArray(value)) {
+          interestsArr = value;
+        } else if (typeof value === 'string') {
+          interestsArr = value.split(/[, ]+/).filter(Boolean);
+        }
+        element.innerHTML = interestsArr.map(i => `<span style="display:inline-block;background:#e0d9ff;color:#764C8A;border-radius:1rem;padding:0.4rem 1.1rem;margin:0.2rem 0.3rem 0.2rem 0;font-size:1.1rem;">${i}</span>`).join('');
       } else {
-        document.getElementById('userInterests').textContent = '-';
+        element.textContent = value || '-';
       }
     }
+
+    function toggleEdit(field) {
+      const valueElement = document.getElementById(`${field}Value`);
+      const buttonsElement = document.getElementById(`${field}Buttons`);
+      // Create input element
+      const input = document.createElement('input');
+      input.type = field === 'age' ? 'number' : 'text';
+      input.value = field === 'interests' && Array.isArray(originalValues[field]) ? originalValues[field].join(', ') : originalValues[field] || '';
+      input.className = 'settings-value editing w-full';
+      if (field === 'bio') {
+        input.type = 'textarea';
+        input.rows = 3;
+      }
+      if (field === 'interests') {
+        input.placeholder = 'Enter interests separated by commas';
+      }
+      // Replace value with input
+      valueElement.innerHTML = '';
+      valueElement.appendChild(input);
+      valueElement.classList.add('editing');
+      buttonsElement.classList.add('visible');
+    }
+
+    async function saveEdit(field) {
+      const valueElement = document.getElementById(`${field}Value`);
+      const input = valueElement.querySelector('input');
+      let newValue;
+      if (field === 'interests') {
+        newValue = input.value.split(/[, ]+/).map(i => i.trim()).filter(i => i);
+      } else {
+        newValue = input.value;
+      }
+      try {
+        const updateData = {};
+        updateData[field === 'name' ? 'full_name' : field] = newValue;
+        const { error } = await supabaseClient
+          .from('users')
+          .update(updateData)
+          .eq('auth_id', currentUser.id);
+        if (error) throw error;
+        originalValues[field] = newValue;
+        updateField(field, newValue);
+        valueElement.classList.remove('editing');
+        document.getElementById(`${field}Buttons`).classList.remove('visible');
+      } catch (error) {
+        alert('Failed to save changes: ' + error.message);
+      }
+    }
+
+    function cancelEdit(field) {
+      const valueElement = document.getElementById(`${field}Value`);
+      valueElement.classList.remove('editing');
+      document.getElementById(`${field}Buttons`).classList.remove('visible');
+      updateField(field, originalValues[field]);
+    }
+
+    async function handleAvatarChange(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${currentUser.id}-${Math.random()}.${fileExt}`;
+        const filePath = `avatars/${fileName}`;
+
+        // Upload image
+        const { error: uploadError } = await supabaseClient.storage
+          .from('avatars')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data: { publicUrl } } = supabaseClient.storage
+          .from('avatars')
+          .getPublicUrl(filePath);
+
+        // Update user profile
+        const { error: updateError } = await supabaseClient
+          .from('users')
+          .update({ profile_image_url: publicUrl })
+          .eq('auth_id', currentUser.id);
+
+        if (updateError) throw updateError;
+
+        // Update UI
+        const avatar = document.getElementById('userAvatar');
+        avatar.src = publicUrl;
+        avatar.style.display = 'block';
+      } catch (error) {
+        alert('Failed to upload avatar: ' + error.message);
+      }
+    }
+
     loadUserInfo();
     document.getElementById('logoutBtn').onclick = async function() {
       await supabaseClient.auth.signOut();
