@@ -84,18 +84,6 @@
     </div>
   </div>
 
-  <!-- Add Confirmation Modal -->
-  <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-2xl p-6 shadow-lg w-80 relative">
-      <div class="font-bold text-lg mb-4 text-center">Confirm Switch</div>
-      <div class="text-gray-600 mb-6 text-center">Are you sure you want to start looking for Apartments?</div>
-      <div class="flex gap-3">
-        <button id="confirmCancel" class="flex-1 border border-purple-200 text-purple-800 py-2 rounded-lg font-semibold hover:bg-purple-50">Cancel</button>
-        <button id="confirmOk" class="flex-1 bg-purple-800 hover:bg-purple-900 text-white py-2 rounded-lg font-semibold">OK</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Bottom Nav -->
   <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-md z-50">
     <div class="w-full px-8 py-4 flex justify-between items-center text-center" style="height: 80px;">
@@ -117,7 +105,7 @@
             <path d="M8 14H20" stroke="white" stroke-width="2" stroke-linecap="round" />
           </svg>
         </a>
-        <a href="#" onclick="handleFeedToggle(event)">
+        <a href="#" onclick="handleResetUserType(event)">
           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#E48DCE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M17 21v-2a4 4 0 0 0-3-3.87"></path>
             <path d="M7 21v-2a4 4 0 0 1 3-3.87"></path>
@@ -224,7 +212,7 @@
         }
         const matchHtml = `<div style='position:absolute;top:18px;right:18px;z-index:2;'><span style='background:#fde2f3;color:#764C8A;font-weight:700;padding:0.5em 1em;border-radius:1.2em;font-size:1.1em;'>${matchPercent}% Match</span></div>`;
         const card = document.createElement('div');
-        card.className = 'relative w-full min-h-[400px] h-full flex flex-col rounded-3xl shadow-2xl overflow-hidden border-2';
+        card.className = 'relative w-full min-h-[400px] flex flex-col rounded-3xl shadow-2xl overflow-hidden border-2';
         card.style.borderColor = '#764C8A';
         card.style.background = 'white';
         card.innerHTML = `
@@ -232,23 +220,19 @@
           <div class="w-full h-96 bg-gray-100 flex items-center justify-center overflow-hidden rounded-t-3xl border-b-2" style="border-color:#764C8A;">
             <img src="${imgUrl}" alt="User photo" class="object-cover w-full h-full" loading="lazy" onerror="this.onerror=null;this.src='${placeholderUrl}';">
           </div>
-          <div class="px-10 pt-8 pb-8 flex flex-col flex-1 h-full">
-            <div class="flex-1 flex flex-col">
-              <div class="text-2xl font-bold" style="color:#764C8A; margin-bottom:0.5em; display:flex;align-items:center;gap:0.5em;">
-                ${mainHeader}
-              </div>
-              ${genderAgeHtml}
-              <div class="flex flex-wrap gap-2 mb-3">${interestsHtml}</div>
-              ${bioHtml}
+          <div class="flex-1 px-10 pt-8 pb-8">
+            <div class="text-2xl font-bold" style="color:#764C8A; margin-bottom:0.5em; display:flex;align-items:center;gap:0.5em;">
+              ${mainHeader}
             </div>
-            <div class="mt-auto flex flex-col gap-2">
-              <button class="w-full bg-[#764C8A] hover:bg-[#5e3c6e] text-white py-3 rounded-xl text-lg font-semibold shadow schedule-tour-btn" data-roommate="${idx}">
-                <i class="fa-solid fa-calendar-check mr-1"></i> Schedule Meeting
-              </button>
-              <a href="chat-amit.html?return=" + encodeURIComponent(window.location.pathname) + "" class="w-full flex justify-center items-center border" style="border-color:#764C8A;color:#764C8A;background:#fde2f3;hover:bg-purple-50;py-3;border-radius:1em;font-size:1.1em;font-weight:600;">
-                <i class="fa-regular fa-comment-dots mr-2"></i> Chat
-              </a>
-            </div>
+            ${genderAgeHtml}
+            <div class="flex flex-wrap gap-2 mb-3">${interestsHtml}</div>
+            ${bioHtml}
+            <button class="mt-4 w-full bg-[#764C8A] hover:bg-[#5e3c6e] text-white py-3 rounded-xl text-lg font-semibold shadow schedule-tour-btn" data-roommate="${idx}">
+              <i class="fa-solid fa-calendar-check mr-1"></i> Schedule Meeting
+            </button>
+            <a href="chat-amit.html?return=" + encodeURIComponent(window.location.pathname) + "" class="mt-2 w-full flex justify-center items-center border" style="border-color:#764C8A;color:#764C8A;background:#fde2f3;hover:bg-purple-50;py-3;border-radius:1em;font-size:1.1em;font-weight:600;margin-top:0.5rem;">
+              <i class="fa-regular fa-comment-dots mr-2"></i> Chat
+            </a>
           </div>
         `;
         container.appendChild(card);
@@ -344,25 +328,7 @@
       window.location.href = 'index.html';
     }
 
-    // Initialize modal handlers
-    document.addEventListener('DOMContentLoaded', function() {
-      const confirmModal = document.getElementById('confirmModal');
-      const confirmOk = document.getElementById('confirmOk');
-      const confirmCancel = document.getElementById('confirmCancel');
-
-      // Handle cancellation
-      confirmCancel.addEventListener('click', () => {
-        confirmModal.classList.add('hidden');
-      });
-
-      // Close modal when clicking outside
-      confirmModal.addEventListener('click', (e) => {
-        if (e.target === confirmModal) {
-          confirmModal.classList.add('hidden');
-        }
-      });
-    });
-
+    // Add or update the handleResetUserType function near the other modal logic
     function handleResetUserType(event) {
       event.preventDefault();
       // Show the confirmation modal
@@ -394,16 +360,6 @@
       confirmCancel.onclick = () => {
         confirmModal.classList.add('hidden');
       };
-    }
-
-    async function handleFeedToggle(event) {
-      event.preventDefault();
-      const userId = await getUserId();
-      if (!userId) {
-        alert('Please log in to continue');
-        return;
-      }
-      window.location.href = 'apt-feed.html';
     }
   </script>
 
