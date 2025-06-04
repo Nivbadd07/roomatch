@@ -160,8 +160,9 @@
         return;
       }
       container.innerHTML = '';
-      window._aptResults = results; // Store globally for modal use
-      results.forEach((match, idx) => {
+      window._aptResults = results;
+      // Show up to 9 apartments
+      results.slice(0, 9).forEach((match, idx) => {
         const apartment = match.apartment;
         const score = match.match_score;
         const placeholderUrl = "https://dummyimage.com/600x400/cccccc/ffffff&text=No+Image";
