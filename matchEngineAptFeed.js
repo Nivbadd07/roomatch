@@ -208,13 +208,13 @@ export async function calculateApartmentFeedMatches(userId) {
       console.log("Added fallback apartment:", rand.id);
     }
     
-    console.log("Final results:", results.slice(0, 6).map(r => ({ id: r.apartment.id, score: r.match_score })));
-    return results.slice(0, 6);
+    console.log("Final results:", results.slice(0, 9).map(r => ({ id: r.apartment.id, score: r.match_score })));
+    return results.slice(0, 9);
   } catch (err) {
     console.log("Error in match engine:", err);
     // Fallback: return 6 random apartments even on error
     try {
-      const randomApts = await Apartment.findAll({ order: sequelize.random(), limit: 6 });
+      const randomApts = await Apartment.findAll({ order: sequelize.random(), limit: 9 });
       console.log("Catch fallback random apartments:", randomApts.map(a => a.id));
       return randomApts.map(apt => ({ apartment: apt, match_score: 50 })); // Default middle score
     } catch (fallbackErr) {
