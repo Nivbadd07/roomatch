@@ -69,7 +69,7 @@
     <div class="w-full max-w-md px-8 py-12">
       <!-- RooMatch Logo/Title -->
       <div class="flex items-center justify-center mb-6">
-        <img src="https://storage.googleapis.com/roomatch-prod-static-site/logo.png" alt="RooMatch Logo" class="w-10 h-10 mr-2" onerror="this.style.display='none'"/>
+        <img src="https://storage.googleapis.com/roomatch-prod-static-site/logo.png" alt="RooMatch Logo" class="w-10 h-10 mr-2" onerror="this.src='https://via.placeholder.com/40?text=RM'"/>
         <span class="text-4xl font-extrabold" style="color:#764C8A;">RooMatch</span>
       </div>
       <!-- Title -->
@@ -82,7 +82,7 @@
           <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
           <input type="email" id="email" name="email" placeholder="Enter your email"
             class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50 placeholder-gray-400" 
-            pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+            pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
             required />
           <div id="emailError" class="error-message hidden"></div>
         </div>
@@ -308,26 +308,47 @@
           .select('id, user_type')
           .eq('auth_id', authData.user.id)
           .single();
+        
+        console.log('Auth Data:', authData);
+        console.log('User Profile:', userProfile);
+        
         if (userError) {
+          console.error('User profile fetch error:', userError);
           throw userError;
         }
         if (!userProfile) {
+          console.error('No user profile found for auth_id:', authData.user.id);
           throw new Error('User profile not found');
         }
+        if (!userProfile.user_type) {
+          console.error('User type is missing in profile:', userProfile);
+          throw new Error('User type is missing in profile');
+        }
+
         // Store user data
         localStorage.setItem('user_id', userProfile.id);
         localStorage.setItem('user_type', userProfile.user_type);
         localStorage.setItem('auth_token', authData.session.access_token);
+
         // Redirect based on user type
-        switch (userProfile.user_type) {
-          case 'Looking for Apt':
-            window.location.href = 'apt-feed.html';
-            break;
-          case 'Looking for Roomate':
-            window.location.href = 'roomate.html';
-            break;
-          default:
-            throw new Error('Invalid user type');
+        const userType = userProfile.user_type?.toLowerCase().trim();
+        console.log('Processed user type:', userType);
+        
+        if (!userType) {
+          console.error('User type is empty after processing');
+          showError(errorMessage, 'User type is missing. Please contact support.');
+          return;
+        }
+
+        if (userType.includes('apt') || userType.includes('apartment')) {
+          console.log('Redirecting to apt-feed.html');
+          window.location.href = 'apt-feed.html';
+        } else if (userType.includes('room') || userType.includes('roommate')) {
+          console.log('Redirecting to roomate.html');
+          window.location.href = 'roomate.html';
+        } else {
+          console.error('Unexpected user type:', userProfile.user_type);
+          showError(errorMessage, `Unable to determine user type: "${userProfile.user_type}". Please contact support.`);
         }
       } catch (error) {
         console.error('Login error:', error);
