@@ -84,7 +84,7 @@
             <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1v-6H9v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" />
           </svg>
         </a>
-        <a href="#" onclick="handleFeedToggle(event)">
+        <a href="#" onclick="handleResetUserType(event)">
           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#E48DCE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M17 21v-2a4 4 0 0 0-3-3.87"></path>
             <path d="M7 21v-2a4 4 0 0 1 3-3.87"></path>
@@ -358,39 +358,22 @@
       });
     });
 
-    async function handleFeedToggle(event) {
+    async function handleResetUserType(event) {
       event.preventDefault();
       const userId = await getUserId();
       if (!userId) {
         alert('Please log in to continue');
         return;
       }
-
-      // Show confirmation modal
-      const confirmModal = document.getElementById('confirmModal');
-      const confirmOk = document.getElementById('confirmOk');
-
-      // Set up the confirmation handler
-      confirmOk.onclick = async () => {
-        try {
-          // Update user_type in the database
-          const { error } = await supabaseClient
-            .from('users')
-            .update({ user_type: 'Looking for Roommate' })
-            .eq('id', userId);
-
-          if (error) throw error;
-
-          // Redirect to roommate page
-          window.location.href = 'roomate.html';
-        } catch (error) {
-          console.error('Error updating user type:', error);
-          alert('Failed to update preferences. Please try again.');
-        }
-      };
-
-      // Show the modal
-      confirmModal.classList.remove('hidden');
+      const { error } = await supabaseClient
+        .from('users')
+        .update({ user_type: null })
+        .eq('id', userId);
+      if (error) {
+        alert('Failed to reset user type. Please try again.');
+        return;
+      }
+      window.location.href = 'apt-room.html';
     }
   </script>
 
