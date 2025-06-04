@@ -4,6 +4,7 @@ import { Op } from 'sequelize';
 import { Apartment, UserApartmentPref, UserPreference, sequelize, User } from './models.js';
 import { calculateApartmentMatchScore, calculateRoommateMatchScore } from './matchEngineAptFeed.js';
 import { calculateApartmentFeedMatches } from './matchEngineAptFeed.js';
+import { calculateRoommateFeedMatches } from './matchEngineRoommateFeed.js';
 
 const router = express.Router();
 
@@ -40,89 +41,18 @@ router.get('/api/match/apartments/:user_id', async (req, res) => {
 // GET /api/match/roommates/:user_id
 router.get('/api/match/roommates/:user_id', async (req, res, next) => {
   try {
-    const userId = BigInt(req.params.user_id); // Convert to BigInt
+    const userId = BigInt(req.params.user_id);
     console.log('[match/roommates] userId =', userId);
 
-    // Get user's apartment
-    const userApt = await Apartment.findOne({ 
-      where: { 
-        roommate_id: { 
-          [Op.contains]: [userId] 
-        } 
-      } 
-    });
-    console.log('[match/roommates] userApt =', !!userApt);
+    const matches = await calculateRoommateFeedMatches(userId);
+    console.log('[match/roommates] Matches found:', matches.length);
+    console.log('[match/roommates] First match score:', matches[0]?.match_score);
+    console.log('[match/roommates] All matches with scores:', matches.map(m => ({ id: m.roommate.id, score: m.match_score })));
 
-    if (!userApt) {
-      console.log('[match/roommates] Fallback → returning random users');
-      // Return 3 random users looking for Apt if no apartment found
-      const randomUsers = await User.findAll({
-        where: {
-          user_type: 'Looking for Apt',
-          id: { [Op.ne]: userId }
-        },
-        order: sequelize.random(),
-        limit: 3,
-        include: [
-          { model: UserPreference, as: 'preferences' },
-          { model: UserApartmentPref, as: 'apartmentPreferences' }
-        ]
-      });
-      return res.json({ results: randomUsers.map(roommate => ({ roommate, match_score: null })) });
-    }
-
-    // Get user's preferences
-    const userPrefs = await UserPreference.findOne({ where: { user_id: userId } });
-    console.log('[match/roommates] userPrefs =', !!userPrefs);
-
-    // Find all users looking for an apartment (except the current user)
-    const potentialRoommates = await User.findAll({
-      where: {
-        user_type: 'Looking for Apt',
-        id: { [Op.ne]: userId }
-      },
-      include: [
-        { model: UserPreference, as: 'preferences' },
-        { model: UserApartmentPref, as: 'apartmentPreferences' }
-      ]
-    });
-    console.log('[match/roommates] potentialRoommates count =', potentialRoommates.length);
-
-    let scoredMatches = [];
-    for (const roommate of potentialRoommates) {
-      const roommatePrefs = roommate.apartmentPreferences;
-      if (roommatePrefs) {
-        const score = calculateRoommateMatchScore(userApt, userPrefs, roommate, roommatePrefs);
-        scoredMatches.push({ roommate, match_score: score });
-      }
-    }
-    console.log('[match/roommates] scoredMatches count =', scoredMatches.length);
-
-    scoredMatches.sort((a, b) => b.match_score - a.match_score);
-    
-    // If no matches, return 3 random users looking for Apt
-    if (scoredMatches.length === 0) {
-      console.log('[match/roommates] No scored matches → returning random users');
-      const randomUsers = await User.findAll({
-        where: {
-          user_type: 'Looking for Apt',
-          id: { [Op.ne]: userId }
-        },
-        order: sequelize.random(),
-        limit: 3,
-        include: [
-          { model: UserPreference, as: 'preferences' },
-          { model: UserApartmentPref, as: 'apartmentPreferences' }
-        ]
-      });
-      return res.json({ results: randomUsers.map(roommate => ({ roommate, match_score: null })) });
-    }
-
-    console.log('[match/roommates] Success → returning top matches');
-    res.json({ results: scoredMatches.slice(0, 5) });
+    res.json({ results: matches });
   } catch (err) {
     console.error('[match/roommates] Caught error:', err);
-    next(err);  // bubble to global handler
+    next(err);
   }
 });
 
