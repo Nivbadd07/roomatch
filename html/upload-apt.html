@@ -699,6 +699,58 @@
     dateInput.min = today;
   </script>
 
+  <!-- Google Places Autocomplete for Address -->
+  <script>
+  let autocomplete;
+  let currentCity = '';
+
+  function initAutocomplete() {
+    const addressInput = document.getElementById('address');
+    autocomplete = new google.maps.places.Autocomplete(addressInput, {
+      types: ['address'],
+      componentRestrictions: { country: 'il' }
+    });
+    setCityRestriction();
+  }
+
+  function setCityRestriction() {
+    const city = document.getElementById('city').value;
+    currentCity = city;
+    if (autocomplete) {
+      autocomplete.setOptions({
+        componentRestrictions: { country: 'il' },
+        bounds: getCityBounds(city),
+        strictBounds: true
+      });
+    }
+  }
+
+  function getCityBounds(city) {
+    // Predefined bounds for supported cities (approximate)
+    const cityBounds = {
+      'Tel Aviv': { north: 32.140, south: 32.020, east: 34.830, west: 34.750 },
+      'Jerusalem': { north: 31.830, south: 31.720, east: 35.270, west: 35.170 },
+      'Haifa': { north: 32.850, south: 32.780, east: 35.040, west: 34.950 }
+    };
+    if (cityBounds[city]) {
+      const b = cityBounds[city];
+      return new google.maps.LatLngBounds(
+        new google.maps.LatLng(b.south, b.west),
+        new google.maps.LatLng(b.north, b.east)
+      );
+    }
+    return null;
+  }
+
+  document.getElementById('city').addEventListener('change', function() {
+    setCityRestriction();
+    document.getElementById('address').value = '';
+  });
+
+  window.initAutocomplete = initAutocomplete;
+  </script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyARPZjToIl4hsAmXbmxSRo4dTUgPjHPs3Q&libraries=places&callback=initAutocomplete" async defer></script>
+
 </body>
 </html>
 
