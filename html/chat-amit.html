@@ -138,7 +138,7 @@
 <body>
   <div class="chat-container">
     <div class="chat-header">
-      <a href="roomate.html" class="back-btn" title="Back to Roommates"><i class="fas fa-arrow-left"></i></a>
+      <a href="#" id="back-btn" class="back-btn" title="Back"><i class="fas fa-arrow-left"></i></a>
       <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Amit" />
       <span class="name">Amit, 25</span>
     </div>
@@ -175,6 +175,16 @@
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }, 1200);
     };
+    document.getElementById('back-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      const params = new URLSearchParams(window.location.search);
+      const ret = params.get('return');
+      if (ret) {
+        window.location.href = ret;
+      } else {
+        window.location.href = 'roomate.html';
+      }
+    });
   </script>
 </body>
 </html> 
